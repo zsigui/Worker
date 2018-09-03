@@ -49,12 +49,16 @@ public final class OkConfig {
 
     // 相关Wiki地址：https://github.com/okcoin-okex/API-docs-OKEx.com
 
-    public static String API_KEY = "8a4d0dbb-8f1d-4c25-a238-ef41d6e75ba8";
-    public static String SECRET_KEY = "074AD4B323E4ECB5190C63648643FA0D";
+//    public static String API_KEY = "8a4d0dbb-8f1d-4c25-a238-ef41d6e75ba8";
+//    public static String SECRET_KEY = "074AD4B323E4ECB5190C63648643FA0D";
+    public static String API_KEY = "7a082e8e-cf90-4450-82fd-3063009ae88b";
+    public static String SECRET_KEY = "FD63F9C95FAA082F761797C7B25890E7";
     /**
      * 请求的REST地址
      */
-    private static String REST_HOST = "https://www.okex.com";
+//    private static String REST_HOST = "https://www.okex.com";
+    private static String REST_HOST = "https://www.okb.com";
+
 
     private static String totalUrl(String path) {
         return REST_HOST + path;
