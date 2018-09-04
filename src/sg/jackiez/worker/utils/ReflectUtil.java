@@ -3,6 +3,7 @@ package sg.jackiez.worker.utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 /**
  * 反射工具类
@@ -88,6 +89,31 @@ public final class ReflectUtil {
             field.set(instance, val);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             SLogUtil.e(TAG, e);
+        }
+    }
+
+    public static void setFieldByType(Field f, Object instance, String val)
+            throws IllegalAccessException {
+        f.setAccessible(true);
+        Type type = f.getType();
+        if (type == int.class || type == Integer.class) {
+            f.setInt(instance, Integer.parseInt(val));
+        } else if (type == double.class || type == Double.class) {
+            f.setDouble(instance, Double.parseDouble(val));
+        } else if (type == float.class || type == Float.class) {
+            f.setFloat(instance, Float.parseFloat(val));
+        } else if (type == boolean.class || type == Boolean.class) {
+            f.setBoolean(instance, Boolean.parseBoolean(val));
+        } else if (type == char.class) {
+            f.setChar(instance, val.charAt(0));
+        } else if (type == long.class || type == Long.class) {
+            f.setLong(instance, Long.parseLong(val));
+        } else if (type == byte.class || type == Byte.class) {
+            f.setLong(instance, Byte.parseByte(val));
+        } else if (type == short.class || type == Short.class) {
+            f.setLong(instance, Short.parseShort(val));
+        } else {
+            f.set(instance, val);
         }
     }
 }

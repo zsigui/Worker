@@ -1,12 +1,10 @@
 package sg.jackiez.worker.utils;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,7 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.Base64;
 
 import sg.jackiez.worker.utils.chiper.MD5;
@@ -696,45 +693,5 @@ public class FileUtil {
      */
     public static boolean canReadAndWrite(File file, boolean isFile) {
         return file.exists() && (isFile ? file.isFile() : file.isDirectory()) && file.canRead() && file.canWrite();
-    }
-
-    /**
-     * 读取自定义格式文件，类CSV <br />
-     * 每一行一条记录，每行记录用逗号(,)进行分割
-     * #开头表示表示注释 <br />
-     * *开头作为标题[title]，多行时第一行生效
-     * @return 如果读取成功，返回形如[{"id", "name"}, {"1", "Jackie"}, {"2", "Jame"}]，第一行表示标题，无则为null
-     * ，另外，无文件或者错误返回null
-     */
-    public static ArrayList<String[]> readCustomFile(File file) {
-        if (file == null || !file.exists() || !file.isFile()) {
-            return null;
-        }
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(file));
-            String line;
-            ArrayList<String[]> data = new ArrayList<>();
-            data.add(null);
-            while ((line = br.readLine()) != null) {
-                if (CommonUtil.isEmpty(line) || line.startsWith("#")) {
-                    continue;
-                }
-
-                if (line.startsWith("*") && data.get(0) != null) {
-                    // 标题
-                    data.set(0, line.substring(1).split(","));
-                } else {
-                    data.add(line.split(","));
-                }
-            }
-            return data;
-
-        } catch (Exception e) {
-            SLogUtil.e(TAG, e);
-        } finally {
-            closeIO(br);
-        }
-        return null;
     }
 }

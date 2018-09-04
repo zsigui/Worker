@@ -9,6 +9,8 @@ public class Main {
     public static void main(String[] args) {
         // write your code here
 
+//        OKHelper helper = new OKHelper();
+
         StockRestApi stockRestApi = new StockRestApi();
 //        SLogUtil.i(HttpManager.get().doGet("https://www.okex.com/api/v1/tickers.do", null));
         SLogUtil.i(stockRestApi.userInfo());
@@ -17,10 +19,6 @@ public class Main {
         AccountRestApi accountRestApi = new AccountRestApi();
         SLogUtil.i(accountRestApi.walletInfo());
 
-//        Object obj = new ErrorItem();
-//        Field[] fields = obj.getClass().getDeclaredFields();
-//        for (Field f : fields) {
-//            SLogUtil.e(f.getName() + ", " + f.getAnnotatedType());
-//        }
     }
+
 }
