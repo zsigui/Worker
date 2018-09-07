@@ -14,7 +14,20 @@ public class OKHelper {
 
     private HashMap<Integer, ErrorItem> mSpotErrMap = null;
 
-    public OKHelper() {
+    private static OKHelper sInstance;
+
+    public static OKHelper get() {
+        if (sInstance == null) {
+            synchronized (OKHelper.class) {
+                if (sInstance == null) {
+                    sInstance = new OKHelper();
+                }
+            }
+        }
+        return sInstance;
+    }
+
+    private OKHelper() {
         init();
     }
 

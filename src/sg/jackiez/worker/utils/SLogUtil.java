@@ -28,24 +28,24 @@ public final class SLogUtil {
         sDebugLevel = debugLevel;
     }
 
-    public static void v(String msg) {
-        log(Level.VERBOSE, DEFAULT_TAG, msg);
+    public static void v(Object msg) {
+        log(Level.VERBOSE, DEFAULT_TAG, msg == null ? "null" : msg.toString());
     }
 
-    public static void d(String msg) {
-        log(Level.DEBUG, DEFAULT_TAG, msg);
+    public static void d(Object msg) {
+        log(Level.DEBUG, DEFAULT_TAG, msg == null ? "null" : msg.toString());
     }
 
-    public static void i(String msg) {
-        log(Level.INFO, DEFAULT_TAG, msg);
+    public static void i(Object msg) {
+        log(Level.INFO, DEFAULT_TAG, msg == null ? "null" : msg.toString());
     }
 
-    public static void w(String msg) {
-        log(Level.WARN, DEFAULT_TAG, msg);
+    public static void w(Object msg) {
+        log(Level.WARN, DEFAULT_TAG, msg == null ? "null" : msg.toString());
     }
 
-    public static void e(String msg) {
-        log(Level.ERROR, DEFAULT_TAG, msg);
+    public static void e(Object msg) {
+        log(Level.ERROR, DEFAULT_TAG, msg == null ? "null" : msg.toString());
     }
 
     public static void v(Throwable t) {
