@@ -56,12 +56,9 @@ public class JsonUtil {
             SLogUtil.d(TAG, "to parse data：" + json);
             JsonNode tree = sObjectMapper.readTree(json);
             JsonNode resultNode = tree.get("result");
-            if (resultNode instanceof NullNode) {
-                // 数据异常
-                return null;
-            }
 
-            if (resultNode.asBoolean()) {
+            if (resultNode != null && !(resultNode instanceof NullNode)
+                    && resultNode.asBoolean()) {
                 return jsonToObj(tree.get(key).toString(), type);
             }
 
