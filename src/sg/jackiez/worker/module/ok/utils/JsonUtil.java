@@ -1,12 +1,16 @@
 package sg.jackiez.worker.module.ok.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 
 import java.io.IOException;
+import java.util.TimeZone;
 
 import sg.jackiez.worker.module.ok.OKHelper;
+import sg.jackiez.worker.module.ok.model.ErrorItem;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.common.CommonUtil;
 
@@ -18,6 +22,10 @@ public class JsonUtil {
     private static final String TAG = "JsonUtil";
 
     private static ObjectMapper sObjectMapper = new ObjectMapper();
+    static {
+        sObjectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        sObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
 
     /*============================== 特殊处理 Start ======================================*/
 
@@ -29,17 +37,18 @@ public class JsonUtil {
         try {
             SLogUtil.d(TAG, "to parse data：" + json);
             JsonNode tree = sObjectMapper.readTree(json);
-            JsonNode resultNode = tree.get("result");
-            if (resultNode instanceof NullNode) {
-                // 数据异常
-                return null;
-            }
+            JsonNode errorCode = tree.get("error_code");
 
-            if (resultNode.asBoolean()) {
+            if (errorCode == null || (errorCode instanceof NullNode)) {
                 return jsonToObj(json, type);
             }
 
-            SLogUtil.d(TAG, OKHelper.get().findErrorItem(tree.get("error_code").intValue()).toString());
+            ErrorItem item = OKHelper.get().findErrorItem(errorCode.intValue());
+            if (item != null) {
+                SLogUtil.d(TAG, item);
+            } else {
+                SLogUtil.d(TAG, "no available code : " + errorCode.intValue());
+            }
             return null;
         } catch (Exception e) {
             SLogUtil.v(TAG, e);
@@ -47,7 +56,7 @@ public class JsonUtil {
         return null;
     }
 
-    public static <S> Object jsonToSuccessData(String json, String key, Class<S> type) {
+    public static <T> T jsonToSuccessData(String json, String key, Class<T> type) {
         if (CommonUtil.isEmpty(json)) {
             SLogUtil.v(TAG, "json is null or empty.");
             return null;
@@ -55,14 +64,18 @@ public class JsonUtil {
         try {
             SLogUtil.d(TAG, "to parse data：" + json);
             JsonNode tree = sObjectMapper.readTree(json);
-            JsonNode resultNode = tree.get("result");
+            JsonNode errorCode = tree.get("error_code");
 
-            if (resultNode != null && !(resultNode instanceof NullNode)
-                    && resultNode.asBoolean()) {
+            if (errorCode == null || (errorCode instanceof NullNode)) {
                 return jsonToObj(tree.get(key).toString(), type);
             }
 
-            SLogUtil.d(TAG, OKHelper.get().findErrorItem(tree.get("error_code").intValue()).toString());
+            ErrorItem item = OKHelper.get().findErrorItem(errorCode.intValue());
+            if (item != null) {
+                SLogUtil.d(TAG, item);
+            } else {
+                SLogUtil.d(TAG, "no available code : " + errorCode.intValue());
+            }
             return null;
         } catch (Exception e) {
             SLogUtil.v(TAG, e);
@@ -92,6 +105,14 @@ public class JsonUtil {
         try {
             return sObjectMapper.readValue(json, type);
         } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static String objToJson(Object obj) {
+        try {
+            return sObjectMapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
             return null;
         }
     }

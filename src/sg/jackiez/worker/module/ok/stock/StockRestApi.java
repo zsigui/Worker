@@ -17,6 +17,7 @@ import static sg.jackiez.worker.module.ok.OkConfig.KEY_PAGE_LENGTH;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_PRICE;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_SIGN;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_SINCE;
+import static sg.jackiez.worker.module.ok.OkConfig.KEY_SIZE;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_STATUS;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_SYMBOL;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_TYPE;
@@ -81,11 +82,13 @@ public class StockRestApi implements IStockRestApi {
     public String batchTrade(String symbol, String type, String ordersData) {
         Map<String, String> params = CollectionUtil.getExtraMap(
                 KEY_API_KEY, OkConfig.API_KEY,
-                KEY_SYMBOL, symbol,
-                KEY_ORDERS_DATA, ordersData
+                KEY_SYMBOL, symbol
         );
         if (!CommonUtil.isEmpty(type)) {
             params.put(KEY_TYPE, type);
+        }
+        if (!CommonUtil.isEmpty(ordersData)) {
+            params.put(KEY_ORDERS_DATA, ordersData);
         }
         String sign = HttpUtil.createOkSignByParam(params, OkConfig.SECRET_KEY);
         params.put(KEY_SIGN, sign);
@@ -146,6 +149,21 @@ public class StockRestApi implements IStockRestApi {
         params.put(KEY_SIGN, sign);
 
         return mHttpManager.doPost(OkConfig.Spot.ORDER_HISTORY_URL, params);
+    }
+
+    @Override
+    public String kLine(String symbol, String type, String size, String since) {
+        Map<String, String> params = CollectionUtil.getExtraMap(
+                KEY_SYMBOL, symbol,
+                KEY_TYPE, type
+        );
+        if (!CommonUtil.isEmpty(size)) {
+            params.put(KEY_SIZE, size);
+        }
+        if (!CommonUtil.isEmpty(since)) {
+            params.put(KEY_SINCE, since);
+        }
+        return mHttpManager.doGet(OkConfig.Spot.KLINE_URL, params);
     }
 
 }

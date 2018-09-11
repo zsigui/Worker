@@ -29,4 +29,15 @@ public class PairInfo {
 	 * 计价货币精度
 	 */
 	public double quote_increment;
+
+	@Override
+	public String toString() {
+		return "PairInfo{" +
+				"product_id=" + product_id +
+				", symbol='" + symbol + '\'' +
+				", base_min_size=" + base_min_size +
+				", base_increment=" + base_increment +
+				", quote_increment=" + quote_increment +
+				'}';
+	}
 }

@@ -49,4 +49,16 @@ public class OKTypeConfig {
 	 */
 	public static final int ORDER_TYPE_FINISHED = 1;
 
+	public static final String KLINE_TYPE_1_MIN = "1min";
+	public static final String KLINE_TYPE_3_MIN = "3min";
+	public static final String KLINE_TYPE_5_MIN = "5min";
+	public static final String KLINE_TYPE_15_MIN = "15min";
+	public static final String KLINE_TYPE_30_MIN = "30min";
+	public static final String KLINE_TYPE_1_DAY = "1day";
+	public static final String KLINE_TYPE_1_WEEK = "1week";
+	public static final String KLINE_TYPE_1_HOUR = "1hour";
+	public static final String KLINE_TYPE_2_HOUR = "2hour";
+	public static final String KLINE_TYPE_4_HOUR = "4hour";
+	public static final String KLINE_TYPE_6_HOUR = "6hour";
+	public static final String KLINE_TYPE_12_HOUR = "12hour";
 }

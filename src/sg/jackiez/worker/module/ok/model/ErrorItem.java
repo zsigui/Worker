@@ -1,6 +1,8 @@
 package sg.jackiez.worker.module.ok.model;
 
-public class ErrorItem {
+import sg.jackiez.worker.module.ok.model.base.BaseM;
+
+public class ErrorItem extends BaseM {
 
     public int code;
     public String msg;
@@ -15,10 +17,5 @@ public class ErrorItem {
             return true;
         }
         return super.equals(obj);
-    }
-
-    @Override
-    public String toString() {
-        return "{\"code\":" + code + ", \"msg\"=\"" + msg + "\"}";
     }
 }

@@ -167,6 +167,7 @@ public class HttpManager {
     private byte[] doRequest(String method, String urlStr, byte[] outputData,
                              String contentType, Map<String, String> headers, ProxyInfo proxy) {
         HttpURLConnection connection = null;
+        long startTime = System.currentTimeMillis();
         try {
             SLogUtil.d(TAG, String.format("doRequest: method = %s, url = %s", method, urlStr));
             URL url = new URL(urlStr);
@@ -177,24 +178,27 @@ public class HttpManager {
 
             InputStream in = null;
             try {
-                in = connection.getInputStream();
-                if (isGzipStream(connection)) {
-                    in = new GZIPInputStream(in);
+                int code = connection.getResponseCode();
+                if (code >= 200 && code < 300) {
+                    SLogUtil.d(TAG, "doRequest success!");
+                    in = connection.getInputStream();
+                    if (isGzipStream(connection)) {
+                        in = new GZIPInputStream(in);
+                    }
+                    return IOUtil.readBytes(in);
                 }
+
+                // 失败，打印下错误日志
+                printConnRespCode(connection);
+                return IOUtil.readBytes(connection.getErrorStream());
             } catch (Exception e) {
                 SLogUtil.e(TAG, e);
                 IOUtil.closeIO(in);
             }
 
-            int code = connection.getResponseCode();
-            if (code >= 200 && code < 300) {
-                SLogUtil.d(TAG, "doRequest success!");
-                return IOUtil.readBytes(in);
-            }
-
             // 失败，打印下错误日志
-            SLogUtil.d(TAG, String.format("code: %d, message: %s", connection.getResponseCode(),
-                    connection.getResponseMessage()));
+            printConnRespCode(connection);
+
 
         } catch (Exception e) {
             SLogUtil.e(TAG, e);
@@ -202,9 +206,16 @@ public class HttpManager {
             if (connection != null) {
                 connection.disconnect();
             }
+            SLogUtil.v(TAG, String.format("doRequest : url = %s, method = %s, spend time = %d ms", urlStr,
+                    method, (System.currentTimeMillis() - startTime)));
         }
 
         return null;
+    }
+
+    private void printConnRespCode(HttpURLConnection connection) throws IOException {
+        SLogUtil.d(TAG, String.format("code: %d, message: %s", connection.getResponseCode(),
+                connection.getResponseMessage()));
     }
 
 

@@ -17,6 +17,7 @@ public final class OkConfig {
     public static final String KEY_PAGE_LENGTH = "page_length";
     public static final String KEY_FROM = "from";
     public static final String KEY_TO = "to";
+    public static final String KEY_SIZE = "size";
 
     // 相关文件位置
     /**
@@ -139,6 +140,10 @@ public final class OkConfig {
          */
         String ORDER_HISTORY_URL = totalUrl("/api/v1/order_history.do");
 
+        /**
+         * 获取OKEx币币K线数据(每个周期数据条数2000左右)
+         */
+        String KLINE_URL = totalUrl("/api/v1/kline.do");
     }
 
     /**

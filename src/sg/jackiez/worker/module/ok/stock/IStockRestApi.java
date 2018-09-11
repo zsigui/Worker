@@ -93,4 +93,23 @@ public interface IStockRestApi {
     String orderHistory(@NonNull String symbol, @NonNull String status,
                          @NonNull String currentPage, @NonNull String pageLength);
 
+
+    /**
+     * 获取OKEx币币K线数据(每个周期数据条数2000左右)
+     * @param symbol 币对如ltc_btc
+     * @param type 1min/3min/5min/15min/30min/1day/1week/1hour/2hour/4hour/6hour/12hour
+     * @param size 非必须，指定获取数据条数
+     * @param since 时间戳，返回该时间戳以后数据 ms
+     * @return
+     *           [
+     * 	            1417536000000,	时间戳
+     * 	            2370.16,	开
+     * 	            2380,		高
+     * 	            2352,		低
+     * 	            2367.37,	收
+     * 	            17259.83	交易量
+     *            ]
+     */
+    String kLine(@NonNull String symbol, @NonNull String type,
+                 String size, String since);
 }

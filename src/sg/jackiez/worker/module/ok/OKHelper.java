@@ -4,15 +4,20 @@ import java.util.HashMap;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.model.ErrorItem;
+import sg.jackiez.worker.module.ok.model.PairInfo;
 import sg.jackiez.worker.utils.FileUtil;
 import sg.jackiez.worker.utils.ModelUtil;
+import sg.jackiez.worker.utils.SLogUtil;
 
 /**
  * 进行OK交易的特殊处理帮助类
  */
 public class OKHelper {
 
-    private HashMap<Integer, ErrorItem> mSpotErrMap = null;
+    private static final String TAG = "OKHelper";
+
+    private HashMap<Integer, ErrorItem> mSpotErrMap;
+    private HashMap<String, PairInfo> mPairMap;
 
     private static OKHelper sInstance;
 
@@ -42,6 +47,16 @@ public class OKHelper {
                 }
             }
         }
+        if (mPairMap == null) {
+            List<PairInfo> items = ModelUtil.readModelFromCustomFile(FileUtil.getFileBaseCurrentWork(OkConfig.FILE_PAIRS_INCREMENT),
+                    PairInfo.class);
+            if (items != null) {
+                mPairMap = new HashMap<>(items.size());
+                for (PairInfo item : items) {
+                    mPairMap.put(item.symbol, item);
+                }
+            }
+        }
     }
 
     public ErrorItem findErrorItem(int code) {
@@ -49,5 +64,17 @@ public class OKHelper {
             return null;
         }
         return mSpotErrMap.get(code);
+    }
+
+    public PairInfo findPairInfo(String symbol) {
+        if (mPairMap == null) {
+            return null;
+        }
+        return mPairMap.get(symbol);
+    }
+
+    public void print() {
+        SLogUtil.v(TAG, mPairMap);
+        SLogUtil.v(TAG, mSpotErrMap);
     }
 }

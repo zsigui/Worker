@@ -68,24 +68,24 @@ public final class SLogUtil {
         log(Level.ERROR, DEFAULT_TAG, t);
     }
 
-    public static void v(String tag, String msg) {
-        log(Level.VERBOSE, tag, msg);
+    public static void v(String tag, Object msg) {
+        log(Level.VERBOSE, tag, msg == null ? "null" : msg.toString());
     }
 
-    public static void d(String tag, String msg) {
-        log(Level.DEBUG, tag, msg);
+    public static void d(String tag, Object msg) {
+        log(Level.DEBUG, tag, msg == null ? "null" : msg.toString());
     }
 
-    public static void i(String tag, String msg) {
-        log(Level.INFO, tag, msg);
+    public static void i(String tag, Object msg) {
+        log(Level.INFO, tag, msg == null ? "null" : msg.toString());
     }
 
-    public static void w(String tag, String msg) {
-        log(Level.WARN, tag, msg);
+    public static void w(String tag, Object msg) {
+        log(Level.WARN, tag, msg == null ? "null" : msg.toString());
     }
 
-    public static void e(String tag, String msg) {
-        log(Level.ERROR, tag, msg);
+    public static void e(String tag, Object msg) {
+        log(Level.ERROR, tag, msg == null ? "null" : msg.toString());
     }
 
     public static void v(String tag, Throwable t) {

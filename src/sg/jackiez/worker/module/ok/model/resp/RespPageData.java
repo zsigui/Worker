@@ -1,10 +1,12 @@
 package sg.jackiez.worker.module.ok.model.resp;
 
+import sg.jackiez.worker.module.ok.model.base.BaseM;
+
 /**
  * @Author JackieZ
  * @Date Created on 2018/9/9
  */
-abstract class RespPageData {
+abstract class RespPageData extends BaseM {
 
 	/**
 	 * 返回结果
@@ -14,7 +16,7 @@ abstract class RespPageData {
 	/**
 	 * 当前页码
 	 */
-	public int current_page;
+	public int currency_page;
 
 	/**
 	 * 每页数据条数
