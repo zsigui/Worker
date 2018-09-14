@@ -31,7 +31,7 @@ public class TradeInfo {
 
     @Override
     public String toString() {
-        return "TradeInfo{" +
+        return "{" +
                 "date=" + DateUtil.formatUnixTime(date_ms) +
                 ", date_ms=" + date_ms +
                 ", price=" + price +

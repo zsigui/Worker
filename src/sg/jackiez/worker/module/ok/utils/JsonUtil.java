@@ -7,10 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.model.ErrorItem;
+import sg.jackiez.worker.module.ok.model.KlineInfo;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.common.CommonUtil;
 
@@ -78,6 +81,37 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
+            SLogUtil.v(TAG, e);
+        }
+        return null;
+    }
+
+    public static List<KlineInfo> jsonToKlineList(String json) {
+        if (CommonUtil.isEmpty(json)) {
+            SLogUtil.v(TAG, "json is null or empty.");
+            return null;
+        }
+        try {
+            JsonNode tree = sObjectMapper.readTree(json);
+            if (tree.isArray()) {
+                ArrayList<KlineInfo> klineInfos = new ArrayList<>();
+                KlineInfo item;
+                for (JsonNode node : tree) {
+                    if (node == null || node.size() != 6) {
+                        continue;
+                    }
+                    item = new KlineInfo();
+                    item.time = node.asLong();
+                    item.open = node.asDouble();
+                    item.highest = node.asDouble();
+                    item.lowest = node.asDouble();
+                    item.close = node.asDouble();
+                    item.volumn = node.asDouble();
+                    klineInfos.add(item);
+                }
+                return klineInfos;
+            }
+        } catch (IOException e) {
             SLogUtil.v(TAG, e);
         }
         return null;
