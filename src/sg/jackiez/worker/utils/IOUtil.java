@@ -48,7 +48,7 @@ public final class IOUtil {
     /**
      * 从输入流中读取数据并返回指定编码的字符串,该操作完成后会关闭流
      */
-    public static String readBytes(InputStream in, String charset) {
+    public static String readString(InputStream in, String charset) {
         String result = null;
         try {
             result = new String(readBytes(in), charset);
