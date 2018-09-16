@@ -40,6 +40,6 @@ public class DefaultThread extends Thread{
     public void run() {
         long startTime = System.currentTimeMillis();
         super.run();
-        SLogUtil.d(getName(), "runnable total spend time : " + (System.currentTimeMillis() - startTime) + " ms");
+        SLogUtil.d(getName(), "thread total spend time : " + (System.currentTimeMillis() - startTime) + " ms");
     }
 }

@@ -15,14 +15,18 @@ public class ThreadUtil {
     );
 
     public static void post(Runnable task) {
-        sPoolExecutor.execute(task);
+        sPoolExecutor.execute(new DefaultDelayedRunnable(task, 0));
     }
 
     public static void postAtDelay(Runnable task, long delayInMillis) {
-        post(new DefaultDelayedRunnable(task, delayInMillis));
+        sPoolExecutor.execute(new DefaultDelayedRunnable(task, delayInMillis));
     }
 
     public static void remove(Runnable task) {
         sPoolExecutor.remove(task);
+    }
+
+    public static void shutdown() {
+        sPoolExecutor.shutdown();
     }
 }

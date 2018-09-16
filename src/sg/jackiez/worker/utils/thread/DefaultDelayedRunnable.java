@@ -14,9 +14,11 @@ public class DefaultDelayedRunnable implements Runnable {
 
     @Override
     public void run() {
-        try {
-            Thread.sleep(mDelayInMillis);
-        } catch (InterruptedException ignored) {
+        if (mDelayInMillis > 0) {
+            try {
+                Thread.sleep(mDelayInMillis);
+            } catch (InterruptedException ignored) {
+            }
         }
         long startTime = System.currentTimeMillis();
         mProxyRunnable.run();
