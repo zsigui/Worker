@@ -7,11 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.model.ErrorItem;
 import sg.jackiez.worker.utils.SLogUtil;
+import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 import sg.jackiez.worker.utils.common.CommonUtil;
 
 /**
@@ -79,6 +82,35 @@ public class JsonUtil {
             return null;
         } catch (Exception e) {
             SLogUtil.v(TAG, e);
+        }
+        return null;
+    }
+
+    public static List<KlineInfo> jsonToKlinkData(String json) {
+        if (CommonUtil.isEmpty(json)) {
+            SLogUtil.v(TAG, "json is null or empty.");
+            return null;
+        }
+        try {
+            ArrayList<KlineInfo> result = new ArrayList<>();
+            JsonNode node = sObjectMapper.readTree(json);
+            if (node.isArray()) {
+                KlineInfo tmp;
+                for (JsonNode child : node) {
+                    tmp = new KlineInfo();
+                    tmp.time = child.get(0).asLong();
+                    tmp.open = child.get(1).asDouble();
+                    tmp.highest = child.get(2).asDouble();
+                    tmp.lowest = child.get(3).asDouble();
+                    tmp.close = child.get(4).asDouble();
+                    tmp.volumn = child.get(5).asDouble();
+                    result.add(tmp);
+                }
+                return result;
+            }
+            return result;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }
