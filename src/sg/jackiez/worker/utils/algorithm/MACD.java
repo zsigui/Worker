@@ -25,13 +25,29 @@ public class MACD {
 	// 常用DIF周期值是9
 	private static final int DIF_PERIOD = 3;
 
+	private int mPeriodFast;
+	private int mPeriodSlow;
+	private int mPeriodDif;
+	// 指示是否使用需求指数进行计算，否则使用收盘价
+	private boolean mIsUseDI;
+
+	public MACD() {
+		this(FAST_PERIOD, SLOW_PERIOD, DIF_PERIOD, true);
+	}
+
+	public MACD(int periodFast, int periodSlow, int periodDif, boolean isUseDI) {
+		mPeriodFast = periodFast;
+		mPeriodSlow = periodSlow;
+		mPeriodDif = periodDif;
+		mIsUseDI = isUseDI;
+	}
+
 	/**
 	 * 根据当日盘面数据获取需求指数
 	 */
 	private double getDemandIndex(KlineInfo kline) {
 		// 需求指数，比起单独用收盘价来计算每日移动平均值更好点
-//		return kline.close
-		return (kline.close * 2 + kline.highest + kline.lowest) / 4;
+		return mIsUseDI ? (kline.close * 2 + kline.highest + kline.lowest) / 4 : kline.close;
 	}
 
 	private List<Double> calculateEMAs(@NonNull  List<KlineInfo> klineList, int n) {
@@ -65,9 +81,9 @@ public class MACD {
 			return null;
 		}
 
-		List<Double> emaFastList = calculateEMAs(klineList, FAST_PERIOD);
-		List<Double> emaDifList = calculateEMAs(klineList, DIF_PERIOD);
-		List<Double> emaSlowList = calculateEMAs(klineList, SLOW_PERIOD);
+		List<Double> emaFastList = calculateEMAs(klineList, mPeriodFast);
+		List<Double> emaDifList = calculateEMAs(klineList, mPeriodDif);
+		List<Double> emaSlowList = calculateEMAs(klineList, mPeriodSlow);
 
 		if (emaFastList == null || emaDifList == null || emaSlowList == null) {
 			SLogUtil.v(TAG, "error happen on calculate emaFast or emaSlow or emaDif.");
