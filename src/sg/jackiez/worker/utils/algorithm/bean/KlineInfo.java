@@ -17,21 +17,21 @@ public class KlineInfo {
 	 */
 	public double open;
 	/**
-	 * 收盘价
+	 * 最高价
 	 */
-	public double close;
+	public double highest;
 	/**
 	 * 最低价
 	 */
 	public double lowest;
 	/**
-	 * 最高价
+	 * 收盘价
 	 */
-	public double highest;
+	public double close;
 	/**
 	 * 交易量
 	 */
-	public double volumn;
+	public double volume;
 
 	@Override
 	public String toString() {
@@ -41,7 +41,7 @@ public class KlineInfo {
 				",close=" + close +
 				",lowest=" + lowest +
 				",highest=" + highest +
-				",volumn=" + volumn +
+				",volume=" + volume +
 				'}';
 	}
 }

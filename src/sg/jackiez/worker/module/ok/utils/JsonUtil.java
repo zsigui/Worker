@@ -13,8 +13,8 @@ import java.util.TimeZone;
 
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.model.ErrorItem;
-import sg.jackiez.worker.module.ok.model.KlineInfo;
 import sg.jackiez.worker.utils.SLogUtil;
+import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 import sg.jackiez.worker.utils.common.CommonUtil;
 
 /**
@@ -106,7 +106,7 @@ public class JsonUtil {
                     item.highest = node.asDouble();
                     item.lowest = node.asDouble();
                     item.close = node.asDouble();
-                    item.volumn = node.asDouble();
+                    item.volume = node.asDouble();
                     klineInfos.add(item);
                 }
                 return klineInfos;
