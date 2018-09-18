@@ -37,20 +37,23 @@ public class Main {
 //        SLogUtil.v(data);
 
         List<KlineInfo> klineInfos = JsonUtil.jsonToKlineList(stockRestApi.kLine("eos_usdt",
-                OKTypeConfig.KLINE_TYPE_30_MIN, "1000", null));
-        List<Double> rsiList = new RSI().calculateRSI(klineInfos);
+                OKTypeConfig.KLINE_TYPE_30_MIN, null, null));
+        List<List<Double>> rsiList = new RSI().calculateRSI(klineInfos);
         List<List<Double>> kdjList = new KDJ().calculateKDJ(klineInfos);
         List<List<Double>> macd = new MACD().calculateMACD(klineInfos);
         SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
         if (klineInfos != null) {
             startTime = System.currentTimeMillis();
             SLogUtil.v(klineInfos);
-            int lastIndex = klineInfos.size() - 1;
-            SLogUtil.v(rsiList.get(lastIndex));
-            SLogUtil.v("k =" + kdjList.get(0).get(lastIndex) + ", d = " + kdjList.get(1).get(lastIndex) + ", j = " + kdjList.get(2).get(lastIndex));
-            SLogUtil.v("dif = " + macd.get(0).get(lastIndex) + ", dea = "
-                    + macd.get(1).get(lastIndex) + ", bar = " + macd.get(2).get(lastIndex));
-            SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
+            for (int i = 1; i<= 5; i++) {
+                SLogUtil.v("第" + i + "项:");
+                int lastIndex = klineInfos.size() - i;
+                SLogUtil.v("rsi6 =" + rsiList.get(0).get(lastIndex) + ", rsi12 = " + rsiList.get(1).get(lastIndex)
+                        + ", rsi24 = " + rsiList.get(2).get(lastIndex));
+                SLogUtil.v("k =" + kdjList.get(0).get(lastIndex) + ", d = " + kdjList.get(1).get(lastIndex) + ", j = " + kdjList.get(2).get(lastIndex));
+                SLogUtil.v("dif = " + macd.get(0).get(lastIndex) + ", dea = "
+                        + macd.get(1).get(lastIndex) + ", bar = " + macd.get(2).get(lastIndex));
+            }
         }
 
 //        SLogUtil.v(JsonUtil.jsonToSuccessData(stockRestApi.orderHistory("eos_usdt",
