@@ -101,12 +101,12 @@ public class JsonUtil {
                         continue;
                     }
                     item = new KlineInfo();
-                    item.time = node.asLong();
-                    item.open = node.asDouble();
-                    item.highest = node.asDouble();
-                    item.lowest = node.asDouble();
-                    item.close = node.asDouble();
-                    item.volume = node.asDouble();
+                    item.time = node.get(0).asLong();
+                    item.open = node.get(1).asDouble();
+                    item.highest = node.get(2).asDouble();
+                    item.lowest = node.get(3).asDouble();
+                    item.close = node.get(4).asDouble();
+                    item.volume = node.get(5).asDouble();
                     klineInfos.add(item);
                 }
                 return klineInfos;

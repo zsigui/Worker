@@ -1,12 +1,17 @@
 package sg.jackiez.worker.app;
 
+import java.util.List;
+
 import sg.jackiez.worker.module.ok.OKHelper;
-import sg.jackiez.worker.module.ok.model.PairInfo;
-import sg.jackiez.worker.module.ok.model.resp.RespTicker;
+import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.stock.IStockRestApi;
 import sg.jackiez.worker.module.ok.stock.StockRestApi;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
+import sg.jackiez.worker.utils.algorithm.KDJ;
+import sg.jackiez.worker.utils.algorithm.MACD;
+import sg.jackiez.worker.utils.algorithm.RSI;
+import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class Main {
 
@@ -31,23 +36,21 @@ public class Main {
 //                "460034278"), new ArrayList<TradeInfo>(){}.getClass());
 //        SLogUtil.v(data);
 
-        PairInfo eosInfo = helper.findPairInfo("eos_usdt");
-        SLogUtil.v("eos pair info : " + eosInfo);
-        if (eosInfo != null) {
-            while (true) {
-                // 间隔500ms获取一次
-//                List<KlineInfo> klineData = JsonUtil.jsonToKlineList(stockRestApi.kLine("eos_usdt",
-//                        OKTypeConfig.KLINE_TYPE_1_MIN, null, null));
-//                ArrayList<ArrayList<Double>> klineData = JsonUtil.jsonToSuccessData(stockRestApi.kLine("eos_usdt",
-//                        OKTypeConfig.KLINE_TYPE_1_MIN, null, null), new ArrayList<ArrayList<Double>>(){}.getClass());
-
-                SLogUtil.v(JsonUtil.jsonToSuccessData(stockRestApi.ticker("eos_usdt"),
-                        RespTicker.class));
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException ignored) {
-                }
-            }
+        List<KlineInfo> klineInfos = JsonUtil.jsonToKlineList(stockRestApi.kLine("eos_usdt",
+                OKTypeConfig.KLINE_TYPE_30_MIN, "1000", null));
+        List<Double> rsiList = new RSI().calculateRSI(klineInfos);
+        List<List<Double>> kdjList = new KDJ().calculateKDJ(klineInfos);
+        List<List<Double>> macd = new MACD().calculateMACD(klineInfos);
+        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
+        if (klineInfos != null) {
+            startTime = System.currentTimeMillis();
+            SLogUtil.v(klineInfos);
+            int lastIndex = klineInfos.size() - 1;
+            SLogUtil.v(rsiList.get(lastIndex));
+            SLogUtil.v("k =" + kdjList.get(0).get(lastIndex) + ", d = " + kdjList.get(1).get(lastIndex) + ", j = " + kdjList.get(2).get(lastIndex));
+            SLogUtil.v("dif = " + macd.get(0).get(lastIndex) + ", dea = "
+                    + macd.get(1).get(lastIndex) + ", bar = " + macd.get(2).get(lastIndex));
+            SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
         }
 
 //        SLogUtil.v(JsonUtil.jsonToSuccessData(stockRestApi.orderHistory("eos_usdt",
