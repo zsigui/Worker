@@ -19,11 +19,11 @@ public class MACD {
 	private static final String TAG = "MACD";
 
 	// 常用快移动周期值是12
-	private static final int FAST_PERIOD = 6;
+	private static final int FAST_PERIOD = 12;
 	// 常用慢移动周期值是26
-	private static final int SLOW_PERIOD = 30;
+	private static final int SLOW_PERIOD = 26;
 	// 常用DIF周期值是9
-	private static final int DIF_PERIOD = 3;
+	private static final int DIF_PERIOD = 9;
 
 	private int mPeriodFast;
 	private int mPeriodSlow;
@@ -95,16 +95,11 @@ public class MACD {
 		ArrayList<Double> deaList = new ArrayList<>(count);
 		ArrayList<Double> barList = new ArrayList<>(count);
 
-		double dif = 0, dea = 0, bar = 0;
-		// 首日3个值都为0
-		difList.add(dif);
-		deaList.add(dea);
-		barList.add(bar);
-
-		// 首日已添加，所以从次日开始算起
-		for (int i = 1; i < count; i++) {
+		// 起始dea算0
+		double dif, dea = 0, bar;
+		for (int i = 0; i < count; i++) {
 			// DIF(N) = F_EMA(N) - S_EMA(N)
-			dif = emaDifList.get(i) - emaSlowList.get(i);
+			dif = emaFastList.get(i) - emaSlowList.get(i);
 			// DEA(N) = DEA(N-1) * 0.8 + DIF(N) * 0.2
 			dea = dea * 0.8 + dif * 0.2;
 			// BAR(N) = (DIF(N) - DEA(N)) * 2
