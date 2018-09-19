@@ -31,20 +31,24 @@ public class KDJ {
 	private List<Double> calculateRSV(@NonNull List<KlineInfo> klineList, int n) {
 
 		double lowest, highest, close, rs;
-		final int totalCount = klineList.size();
+		final int count = klineList.size();
 		KlineInfo tmp;
 		ArrayList<Double> rsv = new ArrayList<>(klineList.size());
-		for (int i = 0; i < totalCount; i++) {
+		// 周期内数据填充0
+		for (int i = 1; i < n; i++) {
+			rsv.add(0.0);
+		}
+		int start;
+		for (int i = n - 1; i < count; i++) {
 			tmp = klineList.get(i);
 			highest = tmp.highest;
 			lowest = tmp.lowest;
 			close = tmp.close;
 
 			// 数据量小于周期N，只找全部里面最低和最高价，如果数据量大于N，则找周期N内数据量即可
-			// 通常统计数据应该是大于N，因为小于N部分未真正使用公式，实际不准确,可移除
-			int firstInPeriod = i <= n ? 0 : i - n;
-			for (int j = firstInPeriod; j < i; j++) {
-				tmp = klineList.get(j);
+			start = i - n + 1;
+			while (start < i) {
+				tmp = klineList.get(start++);
 				highest = (highest > tmp.highest ? highest : tmp.highest);
 				lowest = (lowest < tmp.lowest ? lowest : tmp.lowest);
 			}
@@ -80,12 +84,26 @@ public class KDJ {
 		ArrayList<Double> dList = new ArrayList<>(count);
 		ArrayList<Double> jList = new ArrayList<>(count);
 
-		double kv = 50, dv = 50, jv;
+		int start = 0;
+		double kv = 50, dv = 50, jv = 50;
+		while (start < 2) {
+			kList.add(kv);
+			dList.add(dv);
+			jList.add(jv);
+			start++;
+		}
 		List<Double> rsvList = calculateRSV(klineList, mPeriodN);
-		for (int i = 0; i < count; i++) {
-			kv = (kv * 2 + rsvList.get(i)) / 3;
-			dv = (dv * 2 + kv) / 3;
+		for (int i = 2; i < count; i++) {
+			kv = kv * 2 / 3 + rsvList.get(i) / 3;
+			dv = dv * 2 / 3 + kv / 3;
 			jv = 3 * kv - 2 * dv;
+
+			if (jv > 100) {
+				jv = 100;
+			} else if (jv < 0) {
+				jv = 0;
+			}
+
 			kList.add(kv);
 			dList.add(dv);
 			jList.add(jv);
