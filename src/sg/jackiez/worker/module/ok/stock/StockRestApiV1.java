@@ -22,7 +22,7 @@ import static sg.jackiez.worker.module.ok.OkConfig.KEY_STATUS;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_SYMBOL;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_TYPE;
 
-public class StockRestApi implements IStockRestApi {
+public class StockRestApiV1 implements IStockRestApi {
 
     private HttpManager mHttpManager = HttpManager.get();
 

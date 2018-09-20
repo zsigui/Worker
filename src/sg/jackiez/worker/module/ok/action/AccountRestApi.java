@@ -7,6 +7,7 @@ import sg.jackiez.worker.utils.common.CollectionUtil;
 import sg.jackiez.worker.utils.http.HttpManager;
 import sg.jackiez.worker.utils.http.HttpUtil;
 
+import static sg.jackiez.worker.module.ok.OkConfig.KEY_AMOUNT;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_API_KEY;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_FROM;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_SIGN;
@@ -38,5 +39,18 @@ public class AccountRestApi implements IAccountRestApi{
         params.put(KEY_SIGN, sign);
 
         return mHttpManager.doPost(OkConfig.Account.WALLET_INFO, params);
+    }
+
+    @Override
+    public String devolveFutureAndSpot(String symbol, String type, String amount) {
+        Map<String, String> params = CollectionUtil.getExtraMap(
+                KEY_API_KEY, OkConfig.API_KEY,
+                KEY_SYMBOL, symbol,
+                KEY_AMOUNT, amount
+        );
+        String sign = HttpUtil.createOkSignByParam(params, OkConfig.SECRET_KEY);
+        params.put(KEY_SIGN, sign);
+
+        return mHttpManager.doPost(OkConfig.Account.DEVOLVE_URL, params);
     }
 }

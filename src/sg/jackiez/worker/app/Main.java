@@ -5,7 +5,7 @@ import java.util.List;
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.stock.IStockRestApi;
-import sg.jackiez.worker.module.ok.stock.StockRestApi;
+import sg.jackiez.worker.module.ok.stock.StockRestApiV1;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.KDJ;
@@ -21,8 +21,8 @@ public class Main {
         long startTime = System.currentTimeMillis();
         OKHelper helper = OKHelper.get();
 
-        IStockRestApi stockRestApi = new StockRestApi();
-//        RespTrade data = JsonUtil.jsonToSuccessData("{\"order_id\":123456, \"error_code\":12333}",
+        IStockRestApi stockRestApi = new StockRestApiV1();
+//        RespTrade data = JsonUtil.jsonToSuccessDataForSpot("{\"order_id\":123456, \"error_code\":12333}",
 //                RespTrade.class);
 
 //        ArrayList<ReqTrade> reqTrades = new ArrayList<>();
@@ -32,7 +32,7 @@ public class Main {
 //        trade.amount = 0.03;
 //        reqTrades.add(trade);
         // 交易历史
-//        ArrayList<TradeInfo> data = JsonUtil.jsonToSuccessData(stockRestApi.tradeHistory("eos_usdt",
+//        ArrayList<TradeInfo> data = JsonUtil.jsonToSuccessDataForSpot(stockRestApi.tradeHistory("eos_usdt",
 //                "460034278"), new ArrayList<TradeInfo>(){}.getClass());
 //        SLogUtil.v(data);
 
@@ -56,12 +56,12 @@ public class Main {
             }
         }
 
-//        SLogUtil.v(JsonUtil.jsonToSuccessData(stockRestApi.orderHistory("eos_usdt",
+//        SLogUtil.v(JsonUtil.jsonToSuccessDataForSpot(stockRestApi.orderHistory("eos_usdt",
 //                "1", "1", "30"), RespPageOrders.class));
 //        SLogUtil.i(JsonUtil.jsonToBackObj(stockRestApi.ticker("eos_usdt"),
 //                RespTicker.class, ErrorItem.class));
 //        AccountRestApi accountRestApi = new AccountRestApi();
-//        JsonUtil.jsonToSuccessData(accountRestApi.walletInfo(), ErrorItem.class);
+//        JsonUtil.jsonToSuccessDataForSpot(accountRestApi.walletInfo(), ErrorItem.class);
 
         SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
     }

@@ -18,6 +18,10 @@ public final class OkConfig {
     public static final String KEY_FROM = "from";
     public static final String KEY_TO = "to";
     public static final String KEY_SIZE = "size";
+    public static final String KEY_CONTRACT_TYPE = "contract_type";
+    public static final String KEY_DATE = "date";
+    public static final String KEY_LEVER_RATE = "lever_rate";
+    public static final String KEY_PAGE_NUMBER = "page_number";
 
     // 相关文件位置
     /**
@@ -32,7 +36,6 @@ public final class OkConfig {
      * 交易对信息
      */
     public static final String FILE_PAIRS_INCREMENT = "data/ok/pairs_increment";
-
 
     /**
      * 账户类型：币币账户
@@ -81,6 +84,11 @@ public final class OkConfig {
          * 获取用户钱包账户信息，频率 6次/2秒
          */
         String WALLET_INFO = totalUrl("/api/v1/wallet_info.do");
+
+        /**
+         * 个人账户资金划转，币币和合约互转
+         */
+        String DEVOLVE_URL = totalUrl("/api/v1/future_devolve.do");
     }
 
     /**
@@ -176,12 +184,22 @@ public final class OkConfig {
         /**
          * 期货取消订单URL
          */
-        String CANCEL_URL = totalUrl("/api/v1/future_cancel.do");
+        String CANCEL_ORDER_URL = totalUrl("/api/v1/future_cancel.do");
 
         /**
-         * 期货下单URL
+         * 期货下单URL(访问频率 20次/2秒(按币种单独计算)
          */
         String TRADE_URL = totalUrl("/api/v1/future_trade.do");
+
+        /**
+         * 期货批量下单URL(访问频率 10次/2秒 最多一次下1-5个订单（按币种单独计算）)
+         */
+        String BATCH_TRADE_URL = totalUrl("/api/v1/future_batch_trade.do");
+
+        /**
+         * 获取合约交易历史（访问频率 1次/120秒）
+         */
+        String PUBLIC_TRADES_URL = totalUrl("/api/v1/future_trades_history.do");
 
         /**
          * 期货账户信息URL
@@ -194,7 +212,7 @@ public final class OkConfig {
         String USERINFO_4FIX_URL = totalUrl("/api/v1/future_userinfo_4fix.do");
 
         /**
-         * 期货持仓查询URL
+         * 期货持仓查询URL(访问频率 10次/2秒)
          */
         String POSITION_URL = totalUrl("/api/v1/future_position.do");
 
@@ -207,5 +225,20 @@ public final class OkConfig {
          * 用户期货订单信息查询URL
          */
         String ORDER_INFO_URL = totalUrl("/api/v1/future_order_info.do");
+
+        /**
+         * 期货批量获取用户订单URL
+         */
+        String ORDERS_INFO_URL = totalUrl("/api/v1/future_orders_info.do");
+
+        /**
+         * 获取OKEx合约K线数据
+         */
+        String KLINE_URL = totalUrl("/api/v1/future_kline.do");
+
+        /**
+         * 获取合约爆仓单
+         */
+        String EXPLOSIVE_URL = totalUrl("/api/v1/future_explosive.do");
     }
 }
