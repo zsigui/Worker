@@ -1,4 +1,4 @@
-package sg.jackiez.worker.module.ok.action;
+package sg.jackiez.worker.module.ok.network.action;
 
 import java.util.Map;
 

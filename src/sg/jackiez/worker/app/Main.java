@@ -4,8 +4,8 @@ import java.util.List;
 
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
-import sg.jackiez.worker.module.ok.stock.IStockRestApi;
-import sg.jackiez.worker.module.ok.stock.StockRestApiV1;
+import sg.jackiez.worker.module.ok.network.stock.IStockRestApi;
+import sg.jackiez.worker.module.ok.network.stock.StockRestApiV1;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.KDJ;

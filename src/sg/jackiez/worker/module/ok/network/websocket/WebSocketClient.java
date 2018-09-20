@@ -1,4 +1,4 @@
-package sg.jackiez.worker.module.ok.stock.websocket;
+package sg.jackiez.worker.module.ok.network.websocket;
 
 import java.net.URI;
 

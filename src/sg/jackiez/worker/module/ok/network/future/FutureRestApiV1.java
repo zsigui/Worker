@@ -1,4 +1,4 @@
-package sg.jackiez.worker.module.ok.feature;
+package sg.jackiez.worker.module.ok.network.future;
 
 import java.util.Map;
 

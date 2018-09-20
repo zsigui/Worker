@@ -1,4 +1,4 @@
-package sg.jackiez.worker.module.ok.action;
+package sg.jackiez.worker.module.ok.network.action;
 
 import sg.jackiez.worker.utils.annotations.NonNull;
 
@@ -19,4 +19,6 @@ public interface IAccountRestApi {
      * @param amount 划转币的数量
      */
     String devolveFutureAndSpot(@NonNull String symbol, @NonNull String type, @NonNull String amount);
+
+
 }

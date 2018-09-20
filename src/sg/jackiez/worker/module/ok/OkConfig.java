@@ -23,6 +23,20 @@ public final class OkConfig {
     public static final String KEY_LEVER_RATE = "lever_rate";
     public static final String KEY_PAGE_NUMBER = "page_number";
 
+    // 返回的部分Key
+    /**
+     * 美元-人民币汇率
+     */
+    public static final String RESP_KEY_RATE = "rate";
+    /**
+     * 合约指数
+     */
+    public static final String RESP_KEY_FUTURE_INDEX = "future_index";
+    /**
+     * 交割预估期（注意：交割预估价只有交割前三小时返回）
+     */
+    public static final String RESP_KEY_FORECAST_PRICE = "forecast_price";
+
     // 相关文件位置
     /**
      * 现货交易接口错误码文件
@@ -89,6 +103,11 @@ public final class OkConfig {
          * 个人账户资金划转，币币和合约互转
          */
         String DEVOLVE_URL = totalUrl("/api/v1/future_devolve.do");
+
+        /**
+         * 获取当前可用合约总持仓量
+         */
+        String FUTURE_HOLD_AMOUNT_URL = totalUrl("/api/v1/future_hold_amount.do");
     }
 
     /**

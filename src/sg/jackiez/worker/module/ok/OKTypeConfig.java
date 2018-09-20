@@ -67,6 +67,7 @@ public class OKTypeConfig {
 	public static final byte SITE_FLAG_USDT = 1;
 
 	// 订阅的事件类型
+	// 现货
 	/**
 	 * 用于订阅行情数据
 	 */
@@ -88,4 +89,47 @@ public class OKTypeConfig {
 	 * 用于订阅K线数据，前为币对，后为K线周期，如1min/1hour
 	 */
 	public static final String SUB_EVENT_TYPE_KLINE = "ok_sub_spot_%s_kline_%s";
+	// 期货
+	/**
+	 * 订阅合约行情
+	 */
+	public static final String SUB_EVENT_TYPE_FUTURE_TICKER = "ok_sub_futureusdt_%s_ticker_%s";
+	/**
+	 *  订阅合约K线数据
+	 */
+	public static final String SUB_EVENT_TYPE_FUTURE_KLINE = "ok_sub_futureusdt_%s_kline_%s_%s";
+	/**
+	 * 订阅合约市场深度(200增量数据返回)
+	 */
+	public static final String SUB_EVENT_TYPE_FUTURE_DEPTH = "ok_sub_futureusdt_%s_depth_%s";
+	/**
+	 * 订阅合约市场深度数据，指定获取深度条数，如5/10/20（全量返回）
+	 */
+	public static final String SUB_EVENT_TYPE_FUTURE_DEPTH_WITH_SIZE = "ok_sub_futureusdt_%s_depth_%s_%s";
+	/**
+	 * 订阅合约交易信息
+	 */
+	public static final String SUB_EVENT_TYPE_FUTURE_TRADE = "ok_sub_futureusdt_%s_trade_%s";
+	/**
+	 * 订阅合约指数
+	 */
+	public static final String SUB_EVENT_TYPE_FUTURE_INDEX = "ok_sub_futureusdt_%s_index";
+	/**
+	 * 订阅合约预估交割价格
+	 */
+	public static final String SUB_EVENT_TYPE_FUTURE_FORCAST_PRICE = "%s_forecast_price";
+
+	// 合约类型
+	/**
+	 * 当周合约
+	 */
+	public static final String CONTRACT_TYPE_THIS_WEEK = "this_week";
+	/**
+	 * 下周合约
+	 */
+	public static final String CONTRACT_TYPE_NEXT_WEEK = "next_week";
+	/**
+	 * 季度合约
+	 */
+	public static final String CONTRACT_TYPE_QUARTER = "quarter";
 }

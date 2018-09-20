@@ -1,4 +1,4 @@
-package sg.jackiez.worker.module.ok.stock;
+package sg.jackiez.worker.module.ok.network.stock;
 
 import sg.jackiez.worker.utils.annotations.NonNull;
 import sg.jackiez.worker.utils.annotations.Nullable;
