@@ -9,7 +9,7 @@ public class RespTrade extends BaseM {
     /**
      * 下单成功后返回的订单ID
      */
-    public int order_id;
+    public long order_id;
 
     /**
      * 错误码

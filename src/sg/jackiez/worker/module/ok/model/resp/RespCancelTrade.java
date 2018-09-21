@@ -6,7 +6,7 @@ public class RespCancelTrade extends BaseM {
 
     // 针对单笔订单
     public boolean result;
-    public int order_id;
+    public long order_id;
 
     // 针对撤销多笔订单
     public String success;

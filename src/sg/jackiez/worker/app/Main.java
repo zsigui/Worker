@@ -1,17 +1,14 @@
 package sg.jackiez.worker.app;
 
-import java.util.List;
-
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
-import sg.jackiez.worker.module.ok.network.stock.IStockRestApi;
-import sg.jackiez.worker.module.ok.network.stock.StockRestApiV1;
+import sg.jackiez.worker.module.ok.model.DepthInfo;
+import sg.jackiez.worker.module.ok.model.resp.RespTicker;
+import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
+import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
+import sg.jackiez.worker.module.ok.utils.CompareUtil;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
-import sg.jackiez.worker.utils.algorithm.KDJ;
-import sg.jackiez.worker.utils.algorithm.MACD;
-import sg.jackiez.worker.utils.algorithm.RSI;
-import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class Main {
 
@@ -21,7 +18,7 @@ public class Main {
         long startTime = System.currentTimeMillis();
         OKHelper helper = OKHelper.get();
 
-        IStockRestApi stockRestApi = new StockRestApiV1();
+//        IStockRestApi stockRestApi = new StockRestApiV1();
 //        RespTrade data = JsonUtil.jsonToSuccessDataForSpot("{\"order_id\":123456, \"error_code\":12333}",
 //                RespTrade.class);
 
@@ -36,25 +33,25 @@ public class Main {
 //                "460034278"), new ArrayList<TradeInfo>(){}.getClass());
 //        SLogUtil.v(data);
 
-        List<KlineInfo> klineInfos = JsonUtil.jsonToKlineList(stockRestApi.kLine("eos_usdt",
-                OKTypeConfig.KLINE_TYPE_30_MIN, null, null));
-        List<List<Double>> rsiList = new RSI().calculateRSI(klineInfos);
-        List<List<Double>> kdjList = new KDJ().calculateKDJ(klineInfos);
-        List<List<Double>> macd = new MACD().calculateMACD(klineInfos);
-        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
-        if (klineInfos != null) {
-            startTime = System.currentTimeMillis();
-            SLogUtil.v(klineInfos);
-            for (int i = 1; i<= 5; i++) {
-                SLogUtil.v("第" + i + "项:");
-                int lastIndex = klineInfos.size() - i;
-                SLogUtil.v("rsi6 =" + rsiList.get(0).get(lastIndex) + ", rsi12 = " + rsiList.get(1).get(lastIndex)
-                        + ", rsi24 = " + rsiList.get(2).get(lastIndex));
-                SLogUtil.v("k =" + kdjList.get(0).get(lastIndex) + ", d = " + kdjList.get(1).get(lastIndex) + ", j = " + kdjList.get(2).get(lastIndex));
-                SLogUtil.v("dif = " + macd.get(0).get(lastIndex) + ", dea = "
-                        + macd.get(1).get(lastIndex) + ", bar = " + macd.get(2).get(lastIndex));
-            }
-        }
+//        List<KlineInfo> klineInfos = JsonUtil.jsonToKlineList(stockRestApi.kLine("eos_usdt",
+//                OKTypeConfig.KLINE_TYPE_30_MIN, null, null));
+//        List<List<Double>> rsiList = new RSI().calculateRSI(klineInfos);
+//        List<List<Double>> kdjList = new KDJ().calculateKDJ(klineInfos);
+//        List<List<Double>> macd = new MACD().calculateMACD(klineInfos);
+//        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
+//        if (klineInfos != null) {
+//            startTime = System.currentTimeMillis();
+//            SLogUtil.v(klineInfos);
+//            for (int i = 1; i<= 5; i++) {
+//                SLogUtil.v("第" + i + "项:");
+//                int lastIndex = klineInfos.size() - i;
+//                SLogUtil.v("rsi6 =" + rsiList.get(0).get(lastIndex) + ", rsi12 = " + rsiList.get(1).get(lastIndex)
+//                        + ", rsi24 = " + rsiList.get(2).get(lastIndex));
+//                SLogUtil.v("k =" + kdjList.get(0).get(lastIndex) + ", d = " + kdjList.get(1).get(lastIndex) + ", j = " + kdjList.get(2).get(lastIndex));
+//                SLogUtil.v("dif = " + macd.get(0).get(lastIndex) + ", dea = "
+//                        + macd.get(1).get(lastIndex) + ", bar = " + macd.get(2).get(lastIndex));
+//            }
+//        }
 
 //        SLogUtil.v(JsonUtil.jsonToSuccessDataForSpot(stockRestApi.orderHistory("eos_usdt",
 //                "1", "1", "30"), RespPageOrders.class));
@@ -62,6 +59,39 @@ public class Main {
 //                RespTicker.class, ErrorItem.class));
 //        AccountRestApi accountRestApi = new AccountRestApi();
 //        JsonUtil.jsonToSuccessDataForSpot(accountRestApi.walletInfo(), ErrorItem.class);
+
+        IFutureRestApi futureRestApi = new FutureRestApiV1();
+
+        int i = 0;
+        RespTicker ticker1, ticker2 = null;
+        long curTime, lastTime = System.currentTimeMillis();
+        int k = 0, totalTime = 0;
+        while (i++ < 100) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            ticker1 = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureTicker("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
+                    RespTicker.class);
+            DepthInfo depthInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureDepth("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
+                    DepthInfo.class);
+            SLogUtil.v("深度数据：" + depthInfo);
+            if (ticker1 == null || ticker1.ticker == null) {
+                SLogUtil.v("当前获取不到正确行情数据!");
+                continue;
+            }
+            if (ticker2 == null || !CompareUtil.equal(ticker1.ticker, ticker2.ticker)) {
+                ticker2 = ticker1;
+                curTime = System.currentTimeMillis();
+                SLogUtil.d("间隔时间：" + (curTime -  lastTime) + "ms, 获取到新的行情数据：" + ticker1);
+                if (k++ != 0) {
+                    totalTime += (curTime - lastTime);
+                }
+                lastTime = curTime;
+            }
+        }
+        SLogUtil.v("获取行情平均间隔: " + (totalTime / k) + "ms");
 
         SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
     }

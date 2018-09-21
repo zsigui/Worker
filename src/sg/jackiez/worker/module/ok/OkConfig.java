@@ -76,6 +76,7 @@ public final class OkConfig {
      */
 //    private static String REST_HOST = "https://www.okex.com";
     private static String REST_HOST = "https://www.okb.com";
+    public static String WSS_URL = "wss://real.okex.com:10440/websocket/okexapi";
 
 
     private static String totalUrl(String path) {

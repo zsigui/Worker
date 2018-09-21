@@ -1,11 +1,13 @@
 package sg.jackiez.worker.module.ok.model;
 
-public class Ticker {
+import sg.jackiez.worker.module.ok.model.base.BaseM;
+
+public class Ticker extends BaseM {
 
     /**
      * 合约ID，仅当进行期货请求时返回
      */
-    public int contract_id;
+    public long contract_id;
     /**
      * 合约面值
      */
@@ -31,19 +33,19 @@ public class Ticker {
      */
     public double sell;
     /**
-     * 成交量（最近24小时）
+     * 成交量（最近24小时，对于合约代表张数）
      */
     public double vol;
-
-    @Override
-    public String toString() {
-        return "Ticker{" +
-                "buy=" + buy +
-                ", high=" + high +
-                ", last=" + last +
-                ", low=" + low +
-                ", sell=" + sell +
-                ", vol=" + vol +
-                '}';
-    }
+    /**
+     * 24小时最高价
+     */
+    public double day_high;
+    /**
+     * 24小时最低价
+     */
+    public double day_low;
+    /**
+     * 币的成交量
+     */
+    public double coin_vol;
 }
