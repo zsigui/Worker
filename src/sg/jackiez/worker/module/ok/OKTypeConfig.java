@@ -132,4 +132,32 @@ public class OKTypeConfig {
 	 * 季度合约
 	 */
 	public static final String CONTRACT_TYPE_QUARTER = "quarter";
+
+	// 趋势类型
+	/**
+	 * 开多
+	 */
+	public static final byte TREND_TYPE_BUY_LONG = 1;
+	/**
+	 * 开空
+	 */
+	public static final byte TREND_TYPE_BUY_SHORT = 2;
+	/**
+	 * 平多
+	 */
+	public static final byte TREND_TYPE_SELL_LONG = 3;
+	/**
+	 * 平空
+	 */
+	public static final byte TREND_TYPE_SELL_SHORT = 4;
+
+	// 市价及非市价类型
+	/**
+	 * 指定价格买入
+	 */
+	public static final String PRICE_TYPE_PARTILY_PRICE = "0";
+	/**
+	 * 市价买入
+	 */
+	public static final String PRICE_TYPE_MARKET_PRICE = "1";
 }
