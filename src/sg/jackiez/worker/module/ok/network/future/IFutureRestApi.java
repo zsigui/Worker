@@ -68,8 +68,10 @@ public interface IFutureRestApi {
      * @param amount       委托数量
      * @param type         1:开多   2:开空   3:平多   4:平空
      * @param matchPrice   是否为对手价 0:不是    1:是   ,当取值为1时,price无效
+     * @param leverRate    杠杆倍数，正常下单时无需传送，后台直接取页面设置，不过难说
      */
-    String futureTrade(String symbol, String contractType, String price, String amount, String type, String matchPrice);
+    String futureTrade(String symbol, String contractType, String price, String amount, String type,
+                       String matchPrice, String leverRate);
 
     /**
      * 期货批量下单

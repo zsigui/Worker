@@ -160,4 +160,14 @@ public class OKTypeConfig {
 	 * 市价买入
 	 */
 	public static final String PRICE_TYPE_MARKET_PRICE = "1";
+
+	// 杠杆倍数
+	/**
+	 * 10倍
+	 */
+	public static final String LEVER_RATE_10 = "10";
+	/**
+	 * 20倍
+	 */
+	public static final String LEVER_RATE_20 = "20";
 }

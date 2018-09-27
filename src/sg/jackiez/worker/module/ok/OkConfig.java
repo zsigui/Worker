@@ -22,6 +22,7 @@ public final class OkConfig {
     public static final String KEY_DATE = "date";
     public static final String KEY_LEVER_RATE = "lever_rate";
     public static final String KEY_PAGE_NUMBER = "page_number";
+    public static final String KEY_MATCH_PRICE = "match_price";
 
     // 返回的部分Key
     /**

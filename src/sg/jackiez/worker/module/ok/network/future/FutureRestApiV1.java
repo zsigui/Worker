@@ -14,6 +14,7 @@ import static sg.jackiez.worker.module.ok.OkConfig.KEY_CONTRACT_TYPE;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_CURRENT_PAGE;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_DATE;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_LEVER_RATE;
+import static sg.jackiez.worker.module.ok.OkConfig.KEY_MATCH_PRICE;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_ORDERS_DATA;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_ORDER_ID;
 import static sg.jackiez.worker.module.ok.OkConfig.KEY_PAGE_LENGTH;
@@ -93,7 +94,8 @@ public class FutureRestApiV1 implements IFutureRestApi{
     }
 
     @Override
-    public String futureTrade(String symbol, String contractType, String price, String amount, String type, String matchPrice) {
+    public String futureTrade(String symbol, String contractType, String price, String amount, String type,
+                              String matchPrice, String leverRate) {
         Map<String, String> params = CollectionUtil.getExtraMap(
                 KEY_API_KEY, OkConfig.API_KEY,
                 KEY_SYMBOL, symbol,
@@ -105,6 +107,12 @@ public class FutureRestApiV1 implements IFutureRestApi{
         }
         if (!CommonUtil.isEmpty(amount)) {
             params.put(KEY_AMOUNT, amount);
+        }
+        if (!CommonUtil.isEmpty(matchPrice)) {
+            params.put(KEY_MATCH_PRICE, matchPrice);
+        }
+        if (!CommonUtil.isEmpty(leverRate)) {
+            params.put(KEY_LEVER_RATE, leverRate);
         }
         String sign = HttpUtil.createOkSignByParam(params, OkConfig.SECRET_KEY);
         params.put(KEY_SIGN, sign);

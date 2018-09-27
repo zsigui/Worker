@@ -48,4 +48,18 @@ public class Ticker extends BaseM {
      * 币的成交量
      */
     public double coin_vol;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Ticker)) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        Ticker t = (Ticker) obj;
+        return buy == t.buy && last == t.last
+                && sell == t.sell && high == t.high
+                && vol == t.vol;
+    }
 }

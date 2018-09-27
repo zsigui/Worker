@@ -10,14 +10,16 @@ public class FutureVendor {
 
     private IFutureRestApi mRestApi;
     private String mCurContractType;
+    private String mLeverRate;
 
     public FutureVendor(IFutureRestApi restApi) {
-        this(restApi, OKTypeConfig.CONTRACT_TYPE_QUARTER);
+        this(restApi, OKTypeConfig.CONTRACT_TYPE_QUARTER, OKTypeConfig.LEVER_RATE_20);
     }
 
-    public FutureVendor(IFutureRestApi restApi, String curContractType) {
+    public FutureVendor(IFutureRestApi restApi, String curContractType, String leverRate) {
         mRestApi = restApi;
         mCurContractType = curContractType;
+        mLeverRate = leverRate;
     }
 
     public void setCurContractType(String curContractType) {
@@ -27,7 +29,7 @@ public class FutureVendor {
     private void doTrade(String symbol, double price, double amount,
                          byte trendType, String priceType) {
         mRestApi.futureTrade(symbol, mCurContractType, price == 0 ? null : String.valueOf(price),
-                String.valueOf(amount), String.valueOf(trendType), priceType);
+                String.valueOf(amount), String.valueOf(trendType), priceType, mLeverRate);
     }
 
     public void buyShort(String symbol, double price, double amount) {
