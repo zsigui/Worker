@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
-import sg.jackiez.worker.module.ok.callback.FutureDataChangedCallback;
+import sg.jackiez.worker.module.ok.callback.CallbackManager;
 import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.model.resp.RespTicker;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
@@ -34,8 +34,6 @@ public class FutureDataGrabber {
     private boolean mIsRunning = false;
     private Thread mTickerGrabThread;
     private Thread mKlineGrabThread;
-
-    private FutureDataChangedCallback mDataChangedCallback;
 
     public FutureDataGrabber() {
         mVendor = new FutureVendor(mRestApi, mContractType, OKTypeConfig.LEVER_RATE_20);
@@ -68,7 +66,7 @@ public class FutureDataGrabber {
                     if (tickerNew != null && tickerNew.ticker != null) {
                         SLogUtil.v(TAG, "startTickerGrabThread() 当前获取不到正确行情数据!");
                         if (tickerOld == null || !CompareUtil.equal(tickerNew.ticker, tickerOld.ticker)) {
-                            mDataChangedCallback.onTickerDataUpdate(tickerNew.ticker);
+                            CallbackManager.get().onTickerDataUpdate(tickerNew.ticker);
                             tickerOld = tickerNew;
                         }
                     }
@@ -117,10 +115,9 @@ public class FutureDataGrabber {
                     }
                 }
 
-                if (mDataChangedCallback != null
-                        && (isUpdate1min || isUpdate15min)) {
+                if (isUpdate1min || isUpdate15min) {
                     // 短周期或者长周期的K线更新后，需要进行回调
-                    mDataChangedCallback.onKlineInfoUpdated(OKTypeConfig.KLINE_TYPE_1_MIN,
+                    CallbackManager.get().onKlineInfoUpdated(OKTypeConfig.KLINE_TYPE_1_MIN,
                             mStoreKlinesMap.get(OKTypeConfig.KLINE_TYPE_1_MIN),
                             OKTypeConfig.KLINE_TYPE_15_MIN,
                             mStoreKlinesMap.get(OKTypeConfig.KLINE_TYPE_15_MIN));

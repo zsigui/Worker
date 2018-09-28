@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.netty.util.internal.ConcurrentSet;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
+import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class CallbackManager implements FutureDataChangedCallback{
@@ -41,9 +42,17 @@ public class CallbackManager implements FutureDataChangedCallback{
     }
 
     @Override
-    public void onKlineInfoUpdated(List<KlineInfo> klineInfoList) {
+    public void onKlineInfoUpdated(String shortTimeType, List<KlineInfo> shortKlineInfos,
+                                   String longTimeType, List<KlineInfo> longKlineInfos) {
         for (FutureDataChangedCallback callback: mFutureDataChangedCallbacks) {
-            callback.onKlineInfoUpdated(klineInfoList);
+            callback.onKlineInfoUpdated(shortTimeType, shortKlineInfos, longTimeType, longKlineInfos);
+        }
+    }
+
+    @Override
+    public void onTickerDataUpdate(Ticker ticker) {
+        for (FutureDataChangedCallback callback: mFutureDataChangedCallbacks) {
+            callback.onTickerDataUpdate(ticker);
         }
     }
 }

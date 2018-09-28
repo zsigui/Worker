@@ -6,7 +6,7 @@ import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 /**
  * 用于进行期货交易及现有资产管理的处理类
  */
-public class FutureVendor {
+public class FutureVendor implements IVendor{
 
     private IFutureRestApi mRestApi;
     private String mCurContractType;
