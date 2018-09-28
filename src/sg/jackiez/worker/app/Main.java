@@ -1,8 +1,12 @@
 package sg.jackiez.worker.app;
 
+import java.util.ArrayList;
+
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
+import sg.jackiez.worker.module.ok.model.FutureHold4Fix;
+import sg.jackiez.worker.module.ok.model.resp.RespFutureAccount;
 import sg.jackiez.worker.module.ok.model.resp.RespTicker;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
@@ -15,7 +19,7 @@ public class Main {
     public static void main(String[] args) {
         // write your code here
 
-        long startTime = System.currentTimeMillis();
+
         OKHelper helper = OKHelper.get();
 
 //        IStockRestApi stockRestApi = new StockRestApiV1();
@@ -62,37 +66,41 @@ public class Main {
 
         IFutureRestApi futureRestApi = new FutureRestApiV1();
 
-        int i = 0;
-        RespTicker ticker1, ticker2 = null;
-        long curTime, lastTime = System.currentTimeMillis();
-        int k = 0, totalTime = 0;
-        while (i++ < 100) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            ticker1 = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureTicker("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
-                    RespTicker.class);
-            DepthInfo depthInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureDepth("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
-                    DepthInfo.class);
-            SLogUtil.v("深度数据：" + depthInfo);
-            if (ticker1 == null || ticker1.ticker == null) {
-                SLogUtil.v("当前获取不到正确行情数据!");
-                continue;
-            }
-            if (ticker2 == null || !CompareUtil.equal(ticker1.ticker, ticker2.ticker)) {
-                ticker2 = ticker1;
-                curTime = System.currentTimeMillis();
-                SLogUtil.d("间隔时间：" + (curTime -  lastTime) + "ms, 获取到新的行情数据：" + ticker1);
-                if (k++ != 0) {
-                    totalTime += (curTime - lastTime);
-                }
-                lastTime = curTime;
-            }
-        }
-        SLogUtil.v("获取行情平均间隔: " + (totalTime / k) + "ms");
-
+//        int i = 0;
+//        RespTicker ticker1, ticker2 = null;
+//        long curTime, lastTime = System.currentTimeMillis();
+//        int k = 0, totalTime = 0;
+//        while (i++ < 100) {
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            ticker1 = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureTicker("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
+//                    RespTicker.class);
+//            DepthInfo depthInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureDepth("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
+//                    DepthInfo.class);
+//            SLogUtil.v("深度数据：" + depthInfo);
+//            if (ticker1 == null || ticker1.ticker == null) {
+//                SLogUtil.v("当前获取不到正确行情数据!");
+//                continue;
+//            }
+//            if (ticker2 == null || !CompareUtil.equal(ticker1.ticker, ticker2.ticker)) {
+//                ticker2 = ticker1;
+//                curTime = System.currentTimeMillis();
+//                SLogUtil.d("间隔时间：" + (curTime -  lastTime) + "ms, 获取到新的行情数据：" + ticker1);
+//                if (k++ != 0) {
+//                    totalTime += (curTime - lastTime);
+//                }
+//                lastTime = curTime;
+//            }
+//        }
+//        SLogUtil.v("获取行情平均间隔: " + (totalTime / k) + "ms");
+        long startTime = System.currentTimeMillis();
+        ArrayList<FutureHold4Fix> holdList = JsonUtil.jsonToSuccessDataForFuture(
+                futureRestApi.futurePositionForFix("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
+                "holding", new ArrayList<FutureHold4Fix>(){}.getClass());
+        SLogUtil.v(holdList);
         SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
     }
 

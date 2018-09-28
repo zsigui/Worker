@@ -21,9 +21,7 @@ public class HttpUtil {
         try {
             String urlParam = convertMapToSortedUrlParam(param);
             urlParam = urlParam + "&secret_key=" + secretKey;
-            SLogUtil.d(TAG, "sign = " + urlParam);
             sign = CommonUtil.bytesToHex(MD5.genDigest(urlParam));
-            SLogUtil.d(TAG, "sign = " + sign);
         } catch (Exception e) {
             SLogUtil.e(TAG, e);
         }
