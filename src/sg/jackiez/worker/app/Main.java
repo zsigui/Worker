@@ -1,16 +1,12 @@
 package sg.jackiez.worker.app;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import sg.jackiez.worker.module.ok.OKHelper;
-import sg.jackiez.worker.module.ok.OKTypeConfig;
-import sg.jackiez.worker.module.ok.model.DepthInfo;
-import sg.jackiez.worker.module.ok.model.FutureHold4Fix;
-import sg.jackiez.worker.module.ok.model.resp.RespFutureAccount;
-import sg.jackiez.worker.module.ok.model.resp.RespTicker;
+import sg.jackiez.worker.module.ok.model.account.FutureContract;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
-import sg.jackiez.worker.module.ok.utils.CompareUtil;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 
@@ -96,11 +92,17 @@ public class Main {
 //            }
 //        }
 //        SLogUtil.v("获取行情平均间隔: " + (totalTime / k) + "ms");
+        String mSymbol = "eos_usdt";
         long startTime = System.currentTimeMillis();
-        ArrayList<FutureHold4Fix> holdList = JsonUtil.jsonToSuccessDataForFuture(
-                futureRestApi.futurePositionForFix("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER),
-                "holding", new ArrayList<FutureHold4Fix>(){}.getClass());
-        SLogUtil.v(holdList);
+        Map<String, FutureContract> userInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureUserInfoForFix(),
+                "info", new HashMap<String, FutureContract>(){}.getClass());
+        if (userInfo != null) {
+            // 获取账户信息成功
+            String s = mSymbol.substring(0, mSymbol.indexOf("_"));
+            FutureContract contract = userInfo.get(s);
+            SLogUtil.v("contract = " + contract.contracts);
+        }
+
         SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
     }
 

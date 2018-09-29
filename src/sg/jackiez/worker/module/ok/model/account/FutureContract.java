@@ -19,7 +19,7 @@ public class FutureContract extends BaseM {
 	/**
 	 * 持有的合约信息
 	 */
-	public List<FutureContract> contracts;
+	public List<FutureContractDetail> contracts;
 	/**
 	 * 账户权益
 	 */
