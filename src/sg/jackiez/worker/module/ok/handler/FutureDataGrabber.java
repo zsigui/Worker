@@ -1,5 +1,7 @@
 package sg.jackiez.worker.module.ok.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +64,7 @@ public class FutureDataGrabber {
                 lastTime = System.currentTimeMillis();
                 try {
                     tickerNew = JsonUtil.jsonToSuccessDataForFuture(mRestApi.futureTicker(mSymbol, mContractType),
-                            RespTicker.class);
+                            new TypeReference<RespTicker>() {});
                     if (tickerNew != null && tickerNew.ticker != null) {
                         SLogUtil.v(TAG, "startTickerGrabThread() 当前获取不到正确行情数据!");
                         if (tickerOld == null || !CompareUtil.equal(tickerNew.ticker, tickerOld.ticker)) {

@@ -2,6 +2,7 @@ package sg.jackiez.worker.module.ok.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -32,7 +33,7 @@ public class JsonUtil {
 
     /*============================== 特殊处理 Start ======================================*/
 
-    public static <T> T jsonToSuccessDataForSpot(String json, Class<T> type) {
+    public static <T> T jsonToSuccessDataForSpot(String json, TypeReference<T> type) {
         if (CommonUtil.isEmpty(json)) {
             SLogUtil.v(TAG, "json is null or empty.");
             return null;
@@ -59,7 +60,7 @@ public class JsonUtil {
         return null;
     }
 
-    public static <T> T jsonToSuccessDataForSpot(String json, String key, Class<T> type) {
+    public static <T> T jsonToSuccessDataForSpot(String json, String key, TypeReference<T> type) {
         if (CommonUtil.isEmpty(json)) {
             SLogUtil.v(TAG, "json is null or empty.");
             return null;
@@ -86,7 +87,7 @@ public class JsonUtil {
         return null;
     }
 
-    public static <T> T jsonToSuccessDataForFuture(String json, Class<T> type) {
+    public static <T> T jsonToSuccessDataForFuture(String json, TypeReference<T> type) {
         if (CommonUtil.isEmpty(json)) {
             SLogUtil.v(TAG, "json is null or empty.");
             return null;
@@ -113,7 +114,7 @@ public class JsonUtil {
         return null;
     }
 
-    public static <T> T jsonToSuccessDataForFuture(String json, String key, Class<T> type) {
+    public static <T> T jsonToSuccessDataForFuture(String json, String key, TypeReference<T> type) {
         if (CommonUtil.isEmpty(json)) {
             SLogUtil.v(TAG, "json is null or empty.");
             return null;
@@ -177,7 +178,7 @@ public class JsonUtil {
      * 将Json字符串优先转为Success实例,如果转换失败，则转为Fail实例
      */
     public static <S, F> Object jsonToBackObj(String json,
-                                       Class<S> successType, Class<F> failType) {
+                                              TypeReference<S> successType, TypeReference<F> failType) {
         if (CommonUtil.isEmpty(json)) {
             return null;
         }
@@ -189,10 +190,11 @@ public class JsonUtil {
         }
     }
 
-    public static  <T> T jsonToObj(String json, Class<T> type) {
+    public static  <T> T jsonToObj(String json, TypeReference<T> type) {
         try {
             return sObjectMapper.readValue(json, type);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }

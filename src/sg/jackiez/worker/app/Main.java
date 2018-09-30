@@ -1,10 +1,19 @@
 package sg.jackiez.worker.app;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.async.NonBlockingJsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.model.account.FutureContract;
+import sg.jackiez.worker.module.ok.model.account.FutureUserInfo;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
@@ -92,18 +101,33 @@ public class Main {
 //            }
 //        }
 //        SLogUtil.v("获取行情平均间隔: " + (totalTime / k) + "ms");
-        String mSymbol = "eos_usdt";
-        long startTime = System.currentTimeMillis();
-        Map<String, FutureContract> userInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureUserInfoForFix(),
-                "info", new HashMap<String, FutureContract>(){}.getClass());
-        if (userInfo != null) {
-            // 获取账户信息成功
-            String s = mSymbol.substring(0, mSymbol.indexOf("_"));
-            FutureContract contract = userInfo.get(s);
-            SLogUtil.v("contract = " + contract.contracts);
-        }
-
-        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
+//        String mSymbol = "eos_usdt";
+//        long startTime = System.currentTimeMillis();
+//        Map<String, FutureContract> userInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureUserInfoForFix(),
+//                "info", new HashMap<String, FutureContract>(){}.getClass());
+//        if (userInfo != null) {
+//            // 获取账户信息成功
+//            String s = mSymbol.substring(0, mSymbol.indexOf("_"));
+//            FutureContract contract = userInfo.get(s);
+//            SLogUtil.v("contract = " + contract.contracts);
+//        }
+//
+//        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String mSymbol = "eos_usdt";
+                HashMap<String, FutureContract> userInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureUserInfoForFix(),
+                        "info", new TypeReference<HashMap<String,FutureContract>>() {});
+                if (userInfo != null) {
+                    // 获取账户信息成功
+                    String s = mSymbol.substring(0, mSymbol.indexOf("_"));
+                    SLogUtil.v("contract = " + userInfo);
+                    FutureContract contract = userInfo.get(s);
+                    SLogUtil.v("contract = " + contract.contracts);
+                }
+            }
+        }).start();
     }
 
 }

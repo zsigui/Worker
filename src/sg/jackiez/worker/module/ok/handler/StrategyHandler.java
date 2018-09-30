@@ -1,5 +1,7 @@
 package sg.jackiez.worker.module.ok.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,12 +46,12 @@ public class StrategyHandler extends DefaultThread implements FutureDataChangedC
             while (mIsRunning) {
                 ArrayList<FutureHold4Fix> holdList = JsonUtil.jsonToSuccessDataForFuture(
                         mFutureRestApi.futurePositionForFix(mSymbol, mContractType),
-                        "holding", new ArrayList<FutureHold4Fix>(){}.getClass());
+                        "holding", new TypeReference<ArrayList<FutureHold4Fix>>(){});
                 if (holdList != null) {
                     // 当前有持仓
                 }
                 Map<String, FutureContract> userInfo = JsonUtil.jsonToSuccessDataForFuture(mFutureRestApi.futureUserInfoForFix(),
-                        "info", new HashMap<String, FutureContract>(){}.getClass());
+                        "info", new TypeReference<HashMap<String, FutureContract>>(){});
                 if (userInfo != null) {
                     // 获取账户信息成功
                     String s = mSymbol.substring(0, mSymbol.indexOf("_"));
