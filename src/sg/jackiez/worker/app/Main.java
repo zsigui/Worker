@@ -1,23 +1,11 @@
 package sg.jackiez.worker.app;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.json.async.NonBlockingJsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import sg.jackiez.worker.module.ok.OKHelper;
-import sg.jackiez.worker.module.ok.model.account.FutureContract;
-import sg.jackiez.worker.module.ok.model.account.FutureUserInfo;
+import sg.jackiez.worker.module.ok.OKTypeConfig;
+import sg.jackiez.worker.module.ok.handler.AccountDataGrabber;
+import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
-import sg.jackiez.worker.module.ok.utils.JsonUtil;
-import sg.jackiez.worker.utils.SLogUtil;
 
 public class Main {
 
@@ -113,21 +101,22 @@ public class Main {
 //        }
 //
 //        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String mSymbol = "eos_usdt";
-                HashMap<String, FutureContract> userInfo = JsonUtil.jsonToSuccessDataForFuture(futureRestApi.futureUserInfoForFix(),
-                        "info", new TypeReference<HashMap<String,FutureContract>>() {});
-                if (userInfo != null) {
-                    // 获取账户信息成功
-                    String s = mSymbol.substring(0, mSymbol.indexOf("_"));
-                    SLogUtil.v("contract = " + userInfo);
-                    FutureContract contract = userInfo.get(s);
-                    SLogUtil.v("contract = " + contract.contracts);
-                }
-            }
-        }).start();
+        AccountDataGrabber handler = new AccountDataGrabber("eos_usdt",
+                OKTypeConfig.CONTRACT_TYPE_QUARTER, futureRestApi);
+        handler.startGrabAccountDataThread();
+
+        try {
+            Thread.sleep(5_000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        AccountManager.get().setNeedUpdateInfo(true);
+        try {
+            Thread.sleep(5_000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        handler.stopGrabAccountDataThread();
     }
 
 }

@@ -194,7 +194,7 @@ public class JsonUtil {
         try {
             return sObjectMapper.readValue(json, type);
         } catch (IOException e) {
-            e.printStackTrace();
+            SLogUtil.v(TAG, e);
             return null;
         }
     }
@@ -203,6 +203,7 @@ public class JsonUtil {
         try {
             return sObjectMapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
+            SLogUtil.v(TAG, e);
             return null;
         }
     }

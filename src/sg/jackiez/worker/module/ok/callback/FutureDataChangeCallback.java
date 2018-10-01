@@ -6,7 +6,7 @@ import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
-public interface FutureDataChangedCallback {
+public interface FutureDataChangeCallback {
 
     void onDepthUpdated(List<DepthInfo> depthInfoList);
 

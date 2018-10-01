@@ -170,4 +170,15 @@ public class OKTypeConfig {
 	 * 20倍
 	 */
 	public static final String LEVER_RATE_20 = "20";
+
+	// 账户类型
+	/**
+	 * 逐仓账户
+	 */
+	public static final byte ACCOUNT_TYPE_4_FIX = 0;
+	/**
+	 * 全仓账户
+	 */
+	public static final byte ACCOUNT_TYPE_All = 1;
+
 }

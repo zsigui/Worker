@@ -25,11 +25,11 @@ public class FutureContractDetail extends BaseM {
 	/**
 	 * 合约ID
 	 */
-	public double contract_id;
+	public long contract_id;
 	/**
 	 * 合约类别
 	 */
-	public double contract_type;
+	public String contract_type;
 	/**
 	 * 冻结
 	 */
