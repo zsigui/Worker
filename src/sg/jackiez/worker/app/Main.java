@@ -3,6 +3,7 @@ package sg.jackiez.worker.app;
 import sg.jackiez.worker.module.ok.OKHelper;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.handler.AccountDataGrabber;
+import sg.jackiez.worker.module.ok.handler.FutureDataGrabber;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
@@ -101,22 +102,8 @@ public class Main {
 //        }
 //
 //        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
-        AccountDataGrabber handler = new AccountDataGrabber("eos_usdt",
-                OKTypeConfig.CONTRACT_TYPE_QUARTER, futureRestApi);
-        handler.startGrabAccountDataThread();
-
-        try {
-            Thread.sleep(5_000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        AccountManager.get().setNeedUpdateInfo(true);
-        try {
-            Thread.sleep(5_000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        handler.stopGrabAccountDataThread();
+        FutureDataGrabber grabber = new FutureDataGrabber();
+        grabber.start();
     }
 
 }

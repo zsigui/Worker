@@ -181,4 +181,17 @@ public class OKTypeConfig {
 	 */
 	public static final byte ACCOUNT_TYPE_All = 1;
 
+	// 钱包类型
+	/**
+	 * 钱包类型：币币账户
+	 */
+	public static final int FUNC_TYPE_SPOT = 1;
+	/**
+	 * 钱包类型：合约账户
+	 */
+	public static final int FUNC_TYPE_FUTURE = 3;
+	/**
+	 * 钱包类型：我的钱包
+	 */
+	public static final int FUNC_TYPE_WALLET = 6;
 }

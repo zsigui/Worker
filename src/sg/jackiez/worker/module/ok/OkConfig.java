@@ -1,5 +1,9 @@
 package sg.jackiez.worker.module.ok;
 
+import java.net.Proxy;
+
+import sg.jackiez.worker.utils.http.ProxyInfo;
+
 public final class OkConfig {
 
     // 请求的Key
@@ -52,19 +56,6 @@ public final class OkConfig {
      */
     public static final String FILE_PAIRS_INCREMENT = "data/ok/pairs_increment";
 
-    /**
-     * 账户类型：币币账户
-     */
-    public static final int FUNC_TYPE_SPOT = 1;
-    /**
-     * 账户类型：合约账户
-     */
-    public static final int FUNC_TYPE_FUTURE = 3;
-    /**
-     * 账户类型：我的钱包
-     */
-    public static final int FUNC_TYPE_WALLET = 6;
-
 
     // 相关Wiki地址：https://github.com/okcoin-okex/API-docs-OKEx.com
 
@@ -78,6 +69,10 @@ public final class OkConfig {
 //    private static String REST_HOST = "https://www.okex.com";
     private static String REST_HOST = "https://www.okb.com";
     public static String WSS_URL = "wss://real.okex.com:10440/websocket/okexapi";
+
+    // 配置是否适用代理
+    public static final boolean IS_USE_PROXY = true;
+    public static final ProxyInfo PROXY_INFO = new ProxyInfo(Proxy.Type.HTTP, "127.0.0.1", 8080);
 
 
     private static String totalUrl(String path) {

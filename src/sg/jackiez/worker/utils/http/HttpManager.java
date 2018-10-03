@@ -19,6 +19,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import sg.jackiez.worker.module.ok.OkConfig;
 import sg.jackiez.worker.utils.Config;
 import sg.jackiez.worker.utils.IOUtil;
 import sg.jackiez.worker.utils.SLogUtil;
@@ -234,7 +235,7 @@ public class HttpManager {
             url = HttpUtil.spliceUrlAndParam(url, paramStr);
         }
         byte[] result = doRequest(METHOD_GET, url, null,
-                TYPE_TEXT, null, null);
+                TYPE_TEXT, null, OkConfig.IS_USE_PROXY ? OkConfig.PROXY_INFO : null);
         return CommonUtil.isEmpty(result) ? "" : CommonUtil.bytesToStr(result);
     }
 
@@ -248,7 +249,7 @@ public class HttpManager {
         SLogUtil.d(TAG, paramStr);
         byte[] result = doRequest(METHOD_POST, url,
                 CommonUtil.isEmpty(paramStr) ? null : CommonUtil.strToByte(paramStr),
-                TYPE_URL_ENCODED, null, null);
+                TYPE_URL_ENCODED, null, OkConfig.IS_USE_PROXY ? OkConfig.PROXY_INFO : null);
         return CommonUtil.isEmpty(result) ? "" : CommonUtil.bytesToStr(result);
     }
 }
