@@ -7,7 +7,7 @@ import java.util.TimeZone;
 public class DateUtil {
 
     public static String formatCurrentTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss.sss");
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         return sdf.format(new Date(System.currentTimeMillis()));
     }
