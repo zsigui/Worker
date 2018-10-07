@@ -264,4 +264,13 @@ public class FutureRestApiV1 implements IFutureRestApi{
 
         return mHttpManager.doPost(OkConfig.Future.EXPLOSIVE_URL, params);
     }
+
+    @Override
+    public String futureHoldAmount(String symbol, String contractType) {
+        Map<String, String> params = CollectionUtil.getExtraMap(
+                KEY_SYMBOL, symbol,
+                KEY_CONTRACT_TYPE, contractType
+        );
+        return mHttpManager.doGet(OkConfig.Future.FUTURE_HOLD_AMOUNT_URL, params);
+    }
 }

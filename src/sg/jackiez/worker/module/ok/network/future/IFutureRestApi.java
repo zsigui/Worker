@@ -165,4 +165,13 @@ public interface IFutureRestApi {
      */
     String futureExplosiveInfo(String symbol, String contractType, String status, String currentPage,
                                String pageNumber, String pageLength);
+
+    /**
+     * 获取当前可用合约总持仓量
+     *
+     * @param symbol    btc_usd ltc_usd eth_usd etc_usd bch_usd
+     * @param contractType 合约类型: this_week:当周 next_week:下周 quarter:季度
+     * @return
+     */
+    String futureHoldAmount(String symbol, String contractType);
 }

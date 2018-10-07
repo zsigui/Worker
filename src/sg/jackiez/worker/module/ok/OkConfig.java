@@ -101,10 +101,6 @@ public final class OkConfig {
          */
         String DEVOLVE_URL = totalUrl("/api/v1/future_devolve.do");
 
-        /**
-         * 获取当前可用合约总持仓量
-         */
-        String FUTURE_HOLD_AMOUNT_URL = totalUrl("/api/v1/future_hold_amount.do");
     }
 
     /**
@@ -256,5 +252,10 @@ public final class OkConfig {
          * 获取合约爆仓单
          */
         String EXPLOSIVE_URL = totalUrl("/api/v1/future_explosive.do");
+
+        /**
+         * 获取当前可用合约总持仓量
+         */
+        String FUTURE_HOLD_AMOUNT_URL = totalUrl("/api/v1/future_hold_amount.do");
     }
 }
