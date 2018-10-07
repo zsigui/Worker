@@ -60,10 +60,10 @@ public class CallbackManager implements
 	/*======================== 调用实现Start ============================*/
 
 	@Override
-	public void onDepthUpdated(List<DepthInfo> depthInfoList) {
+	public void onDepthUpdated(DepthInfo depthInfo) {
 		SLogUtil.v(TAG, "onDepthUpdated");
 		for (FutureDataChangeCallback callback : mFutureDataChangedCallbacks) {
-			callback.onDepthUpdated(depthInfoList);
+			callback.onDepthUpdated(depthInfo);
 		}
 	}
 

@@ -8,7 +8,7 @@ import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public interface FutureDataChangeCallback {
 
-    void onDepthUpdated(List<DepthInfo> depthInfoList);
+    void onDepthUpdated(DepthInfo depthInfo);
 
     void onKlineInfoUpdated(String shortTimeType, List<KlineInfo> shortKlineInfos,
                             String longTimeType, List<KlineInfo> longKlineInfos);

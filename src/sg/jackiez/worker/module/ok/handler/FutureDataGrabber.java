@@ -2,12 +2,14 @@ package sg.jackiez.worker.module.ok.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
+import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.model.resp.RespTicker;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
@@ -30,12 +32,14 @@ public class FutureDataGrabber {
 	private List<Ticker> mTickers = new ArrayList<>();
 	private HashMap<String, List<KlineInfo>> mStoreKlinesMap = new HashMap<>(2);
 
-	private final int KLINE_GAP_TIME = 800;
-	private final int TICKER_GAP_TIME = 200;
+	private final int KLINE_GAP_TIME = 500;
+	private final int TICKER_GAP_TIME = 500;
+	private final int DEPTH_GAP_TIME = 200;
 
 	private boolean mIsRunning = false;
 	private Thread mTickerGrabThread;
 	private Thread mKlineGrabThread;
+	private Thread mDepthGrabThread;
 
 	public FutureDataGrabber() {
 		this("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER);
@@ -56,6 +60,39 @@ public class FutureDataGrabber {
 			} catch (InterruptedException ignored) {
 			}
 		}
+	}
+
+	private void startDepthGrabThread() {
+		if (mDepthGrabThread != null && mDepthGrabThread.isAlive()
+				&& !mDepthGrabThread.isInterrupted()) {
+			return;
+		}
+		mDepthGrabThread = new DefaultThread(() -> {
+			DepthInfo depthInfoNew;
+			long tickTime;
+			String lastDepthInfoStr = null, curDepthInfoStr;
+			while (mIsRunning) {
+				tickTime = System.currentTimeMillis();
+				try {
+					curDepthInfoStr = mRestApi.futureDepth(mSymbol, mContractType);
+					depthInfoNew = JsonUtil.jsonToSuccessDataForFuture(curDepthInfoStr,
+							new TypeReference<DepthInfo>() {
+							});
+					if (depthInfoNew != null && depthInfoNew.asks != null && depthInfoNew.bids != null
+							&& (lastDepthInfoStr == null || !CompareUtil.equal(lastDepthInfoStr, curDepthInfoStr))) {
+						// 深度行情数据更新
+						CallbackManager.get().onDepthUpdated(depthInfoNew);
+						lastDepthInfoStr = curDepthInfoStr;
+					}
+				} catch (Throwable e) {
+					SLogUtil.v(TAG, "startDepthGrabThread() 读取过程出现异常!");
+				} finally {
+					sleepIfInTime("ticker grab", tickTime, DEPTH_GAP_TIME);
+				}
+			}
+		});
+		mDepthGrabThread.setPriority(Thread.NORM_PRIORITY);
+		mDepthGrabThread.start();
 	}
 
 	private void startTickerGrabThread() {
@@ -79,7 +116,7 @@ public class FutureDataGrabber {
 							CallbackManager.get().onTickerDataUpdate(tickerNew.ticker);
 							nowTime = System.currentTimeMillis();
 							SLogUtil.v(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
-							  + (nowTime - lastTime) + " ms");
+									+ (nowTime - lastTime) + " ms");
 							lastTime = nowTime;
 							tickerOld = tickerNew;
 						}
@@ -158,8 +195,15 @@ public class FutureDataGrabber {
 		}
 	}
 
+	private void interruptDepthGrabThread() {
+		if (mDepthGrabThread != null && !mDepthGrabThread.isInterrupted()) {
+			mDepthGrabThread.interrupt();
+		}
+	}
+
 	public void start() {
 		mIsRunning = true;
+		startDepthGrabThread();
 		startKlineGrabThread();
 		startTickerGrabThread();
 	}
@@ -168,6 +212,7 @@ public class FutureDataGrabber {
 		mIsRunning = false;
 		interruptTickerGrabThread();
 		interruptKlineGrabThread();
+		interruptDepthGrabThread();
 	}
 
 }
