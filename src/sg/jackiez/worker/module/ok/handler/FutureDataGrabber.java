@@ -36,7 +36,9 @@ public class FutureDataGrabber {
 	private final int TICKER_GAP_TIME = 500;
 	private final int DEPTH_GAP_TIME = 500;
 
-	private boolean mIsRunning = false;
+	private boolean mIsTickerGrabRunning = false;
+	private boolean mIsKlineGrabRunning = false;
+	private boolean mIsDepthGrabRunning = false;
 	private Thread mTickerGrabThread;
 	private Thread mKlineGrabThread;
 	private Thread mDepthGrabThread;
@@ -67,13 +69,13 @@ public class FutureDataGrabber {
 				&& !mDepthGrabThread.isInterrupted()) {
 			return;
 		}
-		mIsRunning = true;
+		mIsDepthGrabRunning = true;
 		mDepthGrabThread = new DefaultThread(() -> {
 			DepthInfo depthInfoNew, depthInfoOld = null;
 			long tickTime;
 			long lastTime = System.currentTimeMillis();
 			long nowTime;
-			while (mIsRunning) {
+			while (mIsDepthGrabRunning) {
 				tickTime = System.currentTimeMillis();
 				try {
 					depthInfoNew = JsonUtil.jsonToSuccessDataForFuture(mRestApi.futureDepth(mSymbol, mContractType),
@@ -109,13 +111,13 @@ public class FutureDataGrabber {
 				&& !mTickerGrabThread.isInterrupted()) {
 			return;
 		}
-		mIsRunning = true;
+		mIsTickerGrabRunning = true;
 		mTickerGrabThread = new DefaultThread(() -> {
 			RespTicker tickerNew, tickerOld = null;
 			long lastTime = System.currentTimeMillis();
 			long nowTime;
 			long tickTime;
-			while (mIsRunning) {
+			while (mIsTickerGrabRunning) {
 				tickTime = System.currentTimeMillis();
 				try {
 					tickerNew = JsonUtil.jsonToSuccessDataForFuture(mRestApi.futureTicker(mSymbol, mContractType),
@@ -147,12 +149,12 @@ public class FutureDataGrabber {
 				&& !mKlineGrabThread.isInterrupted()) {
 			return;
 		}
-		mIsRunning = true;
+		mIsKlineGrabRunning = true;
 		mKlineGrabThread = new DefaultThread(() -> {
 			List<KlineInfo> _1minKlines, _15minKlines;
 			long tickTime;
 			boolean isUpdate1min, isUpdate15min;
-			while (mIsRunning) {
+			while (mIsKlineGrabRunning) {
 				isUpdate1min = false;
 				isUpdate15min = false;
 				tickTime = System.currentTimeMillis();
@@ -195,21 +197,21 @@ public class FutureDataGrabber {
 	}
 
 	public void interruptTickerGrabThread() {
-		mIsRunning = false;
+		mIsTickerGrabRunning = false;
 		if (mTickerGrabThread != null && !mTickerGrabThread.isInterrupted()) {
 			mTickerGrabThread.interrupt();
 		}
 	}
 
 	public void interruptKlineGrabThread() {
-		mIsRunning = false;
+		mIsKlineGrabRunning = false;
 		if (mKlineGrabThread != null && !mKlineGrabThread.isInterrupted()) {
 			mKlineGrabThread.interrupt();
 		}
 	}
 
 	public void interruptDepthGrabThread() {
-		mIsRunning = false;
+		mIsDepthGrabRunning = false;
 		if (mDepthGrabThread != null && !mDepthGrabThread.isInterrupted()) {
 			mDepthGrabThread.interrupt();
 		}
