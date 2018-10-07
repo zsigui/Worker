@@ -34,7 +34,7 @@ public class FutureDataGrabber {
 
 	private final int KLINE_GAP_TIME = 500;
 	private final int TICKER_GAP_TIME = 500;
-	private final int DEPTH_GAP_TIME = 200;
+	private final int DEPTH_GAP_TIME = 500;
 
 	private boolean mIsRunning = false;
 	private Thread mTickerGrabThread;
@@ -62,32 +62,41 @@ public class FutureDataGrabber {
 		}
 	}
 
-	private void startDepthGrabThread() {
+	public void startDepthGrabThread() {
 		if (mDepthGrabThread != null && mDepthGrabThread.isAlive()
 				&& !mDepthGrabThread.isInterrupted()) {
 			return;
 		}
+		mIsRunning = true;
 		mDepthGrabThread = new DefaultThread(() -> {
-			DepthInfo depthInfoNew;
+			DepthInfo depthInfoNew, depthInfoOld = null;
 			long tickTime;
-			String lastDepthInfoStr = null, curDepthInfoStr;
+			long lastTime = System.currentTimeMillis();
+			long nowTime;
 			while (mIsRunning) {
 				tickTime = System.currentTimeMillis();
 				try {
-					curDepthInfoStr = mRestApi.futureDepth(mSymbol, mContractType);
-					depthInfoNew = JsonUtil.jsonToSuccessDataForFuture(curDepthInfoStr,
+					depthInfoNew = JsonUtil.jsonToSuccessDataForFuture(mRestApi.futureDepth(mSymbol, mContractType),
 							new TypeReference<DepthInfo>() {
 							});
 					if (depthInfoNew != null && depthInfoNew.asks != null && depthInfoNew.bids != null
-							&& (lastDepthInfoStr == null || !CompareUtil.equal(lastDepthInfoStr, curDepthInfoStr))) {
-						// 深度行情数据更新
+							&& (depthInfoOld == null || depthInfoNew.asks.size() != depthInfoOld.asks.size()
+							|| depthInfoNew.bids.size() != depthInfoOld.bids.size()
+							|| !CompareUtil.equal(depthInfoNew.asks.get(depthInfoNew.asks.size() - 1).get(0),
+							depthInfoOld.asks.get(depthInfoOld.asks.size() - 1).get(0))
+							|| !CompareUtil.equal(depthInfoNew.bids.get(0).get(0),
+							depthInfoOld.bids.get(0).get(0)))) {
+						nowTime = System.currentTimeMillis();
 						CallbackManager.get().onDepthUpdated(depthInfoNew);
-						lastDepthInfoStr = curDepthInfoStr;
+						SLogUtil.v(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
+								+ (nowTime - lastTime) + " ms");
+						depthInfoOld = depthInfoNew;
+						lastTime = nowTime;
 					}
 				} catch (Throwable e) {
 					SLogUtil.v(TAG, "startDepthGrabThread() 读取过程出现异常!");
 				} finally {
-					sleepIfInTime("ticker grab", tickTime, DEPTH_GAP_TIME);
+					sleepIfInTime("depth grab", tickTime, DEPTH_GAP_TIME);
 				}
 			}
 		});
@@ -95,11 +104,12 @@ public class FutureDataGrabber {
 		mDepthGrabThread.start();
 	}
 
-	private void startTickerGrabThread() {
+	public void startTickerGrabThread() {
 		if (mTickerGrabThread != null && mTickerGrabThread.isAlive()
 				&& !mTickerGrabThread.isInterrupted()) {
 			return;
 		}
+		mIsRunning = true;
 		mTickerGrabThread = new DefaultThread(() -> {
 			RespTicker tickerNew, tickerOld = null;
 			long lastTime = System.currentTimeMillis();
@@ -132,11 +142,12 @@ public class FutureDataGrabber {
 		mTickerGrabThread.start();
 	}
 
-	private void startKlineGrabThread() {
+	public void startKlineGrabThread() {
 		if (mKlineGrabThread != null && mKlineGrabThread.isAlive()
 				&& !mKlineGrabThread.isInterrupted()) {
 			return;
 		}
+		mIsRunning = true;
 		mKlineGrabThread = new DefaultThread(() -> {
 			List<KlineInfo> _1minKlines, _15minKlines;
 			long tickTime;
@@ -183,33 +194,34 @@ public class FutureDataGrabber {
 		mKlineGrabThread.start();
 	}
 
-	private void interruptTickerGrabThread() {
+	public void interruptTickerGrabThread() {
+		mIsRunning = false;
 		if (mTickerGrabThread != null && !mTickerGrabThread.isInterrupted()) {
 			mTickerGrabThread.interrupt();
 		}
 	}
 
-	private void interruptKlineGrabThread() {
+	public void interruptKlineGrabThread() {
+		mIsRunning = false;
 		if (mKlineGrabThread != null && !mKlineGrabThread.isInterrupted()) {
 			mKlineGrabThread.interrupt();
 		}
 	}
 
-	private void interruptDepthGrabThread() {
+	public void interruptDepthGrabThread() {
+		mIsRunning = false;
 		if (mDepthGrabThread != null && !mDepthGrabThread.isInterrupted()) {
 			mDepthGrabThread.interrupt();
 		}
 	}
 
-	public void start() {
-		mIsRunning = true;
+	public void startAll() {
 		startDepthGrabThread();
 		startKlineGrabThread();
 		startTickerGrabThread();
 	}
 
-	public void stop() {
-		mIsRunning = false;
+	public void stopAll() {
 		interruptTickerGrabThread();
 		interruptKlineGrabThread();
 		interruptDepthGrabThread();

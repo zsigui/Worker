@@ -103,7 +103,7 @@ public class Main {
 //
 //        SLogUtil.v("total spend time on main = " + (System.currentTimeMillis() - startTime) + " ms");
         FutureDataGrabber grabber = new FutureDataGrabber();
-        grabber.start();
+        grabber.startDepthGrabThread();
     }
 
 }

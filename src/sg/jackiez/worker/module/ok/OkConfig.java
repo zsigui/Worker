@@ -71,7 +71,7 @@ public final class OkConfig {
     public static String WSS_URL = "wss://real.okex.com:10440/websocket/okexapi";
 
     // 配置是否适用代理
-    public static final boolean IS_USE_PROXY = true;
+    public static final boolean IS_USE_PROXY = false;
     public static final ProxyInfo PROXY_INFO = new ProxyInfo(Proxy.Type.HTTP, "127.0.0.1", 8080);
 
 
