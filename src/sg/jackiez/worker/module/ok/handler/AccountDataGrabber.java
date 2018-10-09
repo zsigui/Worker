@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.model.FutureHold4Fix;
 import sg.jackiez.worker.module.ok.model.account.FutureContract;
+import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
@@ -29,6 +31,10 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 
 	private String mSymbol;
 	private String mContractType;
+
+	public AccountDataGrabber() {
+		this("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
+	}
 
 	public AccountDataGrabber(String symbol,
 	                          String contractType,

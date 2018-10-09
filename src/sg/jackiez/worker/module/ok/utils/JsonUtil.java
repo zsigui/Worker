@@ -152,7 +152,7 @@ public class JsonUtil {
                 ArrayList<KlineInfo> klineInfos = new ArrayList<>();
                 KlineInfo item;
                 for (JsonNode node : tree) {
-                    if (node == null || node.size() != 6) {
+                    if (node == null || node.size() < 6) {
                         continue;
                     }
                     item = new KlineInfo();

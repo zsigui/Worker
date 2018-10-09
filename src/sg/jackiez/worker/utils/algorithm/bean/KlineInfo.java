@@ -34,6 +34,20 @@ public class KlineInfo {
 	public double volume;
 
 	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof KlineInfo)) {
+			return false;
+		}
+		if (obj == this) {
+			return true;
+		}
+		KlineInfo t = (KlineInfo) obj;
+		return time == t.time && close == t.close
+				&& open == t.open && highest == t.highest
+				&& lowest == t.lowest;
+	}
+
+	@Override
 	public String toString() {
 		return "{" +
 				"time=" + DateUtil.formatUnixTime(time) +
