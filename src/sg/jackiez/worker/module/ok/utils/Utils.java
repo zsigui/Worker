@@ -22,6 +22,7 @@ public class Utils {
 	 * @param closeBasePrice 结算基准价
 	 * @param currentPrice   当前价格
 	 * @param closeAmount    平仓数量
+	 * @return 盈利数量
 	 */
 	public static double getLongProfit(double contractValue,
 	                                   double closeBasePrice,
@@ -37,6 +38,7 @@ public class Utils {
 	 * @param closeBasePrice 结算基准价
 	 * @param currentPrice   平仓价格
 	 * @param closeAmount    平仓数量
+	 * @return 盈利数量
 	 */
 	public static double getShortProfit(double contractValue,
 	                                    double closeBasePrice,
