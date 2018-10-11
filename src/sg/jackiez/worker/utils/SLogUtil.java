@@ -7,7 +7,7 @@ public final class SLogUtil {
 
     public enum Level {
 
-        VERBOSE("V"), DEBUG("D"), INFO("I"), WARN("W"), ERROR("E"), NONE("N");
+        VERBOSE("VERBOSE"), DEBUG("DEBUG"), INFO("INFO"), WARN("WARN"), ERROR("ERROR"), ASSERT("ASSERT");
 
         String mTag;
         Level(String tag) {
@@ -147,7 +147,7 @@ public final class SLogUtil {
                     ("(" + caller.getFileName() + ":" + caller.getLineNumber() + ")") :
                     (caller.getFileName() != null ?  "("+caller.getFileName()+")" : "(Unknown Source)");
             String method = caller.isNativeMethod() ? caller.getMethodName() + "(Native Method)" : caller.getMethodName();
-            System.out.printf("%s %s/[%s#%s] [%s]：%s\n", DateUtil.formatCurrentTime(), level.toString(),
+            System.out.printf("%s [%s]/[%s#%s] [%s]：%s\n", DateUtil.formatCurrentTime(), level.toString(),
                     file, method, tag, msg);
         } else {
             System.out.printf("%s [%s] [%s]：%s\n", DateUtil.formatCurrentTime(), level.toString(), tag, msg);
