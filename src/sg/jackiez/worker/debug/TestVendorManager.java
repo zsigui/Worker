@@ -89,11 +89,34 @@ public class TestVendorManager {
             return;
         }
         double signal = mPIZ.calculate(klineInfos);
-        if (AccountManager.get().getEosContract().contracts.isEmpty()) {
+        double curEosToUsdt = klineInfos.get(klineInfos.size() - 1).close;
+        if (mTestAccount.isHoldContracts()) {
             // 没有持有合约，则当前根据信号量执行买入卖出
+            if (signal >= 1) {
+                mTestAccount.longBuyAll(curEosToUsdt);
+            } else if (signal <= -1) {
+                mTestAccount.shortBuyAll(curEosToUsdt);
+            } else if (signal > 0) {
+                mTestAccount.longBuyHalf(curEosToUsdt);
+            } else if (signal < 0) {
+                mTestAccount.shortBuyHalf(curEosToUsdt);
+            }
         } else {
             // 持有合约，这个时候判断卖出
-
+            double profitRate;
+            if (mTestAccount.getHoldDownPage() > 0) {
+                profitRate = 1 - curEosToUsdt / mTestAccount.getHoldDownPageValue();
+                if (-profitRate > TestAccount.MAX_LOSS_RATE) {
+                    // 赔过额度，卖出
+                    mTestAccount.shortSell(curEosToUsdt);
+                }
+            }
+            if (mTestAccount.getHoldUpPage() > 0) {
+                profitRate = 1 - curEosToUsdt / mTestAccount.getHoldUpPageValue();
+                if (-profitRate > TestAccount.MAX_LOSS_RATE) {
+                    mTestAccount.longSell(curEosToUsdt);
+                }
+            }
         }
     }
 

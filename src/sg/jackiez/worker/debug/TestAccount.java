@@ -103,7 +103,7 @@ public class TestAccount {
      * 按指定比例买入开空
      * @param eosToUsdt 买入eos价格
      */
-    private void shortBuy(double eosToUsdt, double buyPercent) {
+    public void shortBuy(double eosToUsdt, double buyPercent) {
         double maxMoney = mHoldMoney * buyPercent;
         // 当前最大可下单金额
         maxMoney = maxMoney > MAX_MONEY ? MAX_MONEY : maxMoney;
@@ -121,7 +121,7 @@ public class TestAccount {
      * 全部卖出平空
      * @param eosToUsdt 当前Eos价格
      */
-    private void shortSell(double eosToUsdt) {
+    public void shortSell(double eosToUsdt) {
         double money = Utils.getShortProfit(PAGE_VALUE, mHoldDownPageValue, eosToUsdt, mHoldDownPage)
                 * eosToUsdt * (1 - mTranslationFee);
         money = money > -mHoldDownMoney ? money : -mHoldDownMoney;
@@ -144,7 +144,7 @@ public class TestAccount {
      * 按指定比例买入开多
      * @param eosToUsdt 买入eos价格
      */
-    private void longBuy(double eosToUsdt, double buyPercent) {
+    public void longBuy(double eosToUsdt, double buyPercent) {
         double maxMoney = mHoldMoney * buyPercent;
         // 当前最大可下单金额
         maxMoney = maxMoney > MAX_MONEY ? MAX_MONEY : maxMoney;
@@ -162,7 +162,7 @@ public class TestAccount {
      * 全部卖出平空
      * @param eosToUsdt 当前Eos价格
      */
-    private void longSell(double eosToUsdt) {
+    public void longSell(double eosToUsdt) {
         double money = Utils.getLongProfit(PAGE_VALUE, mHoldUpPageValue, eosToUsdt, mHoldUpPage)
                 * eosToUsdt * (1 - mTranslationFee);
         money = money > -mHoldUpMoney ? money : -mHoldUpMoney;
@@ -182,6 +182,38 @@ public class TestAccount {
     }
 
     public double getCurrentMoney() {
+        return mHoldMoney;
+    }
+
+    public boolean isHoldContracts() {
+        return mHoldUpPage + mHoldDownPage > 0;
+    }
+
+    public int getHoldUpPage() {
+        return mHoldUpPage;
+    }
+
+    public double getHoldUpPageValue() {
+        return mHoldUpPageValue;
+    }
+
+    public double getHoldUpMoney() {
+        return mHoldUpMoney;
+    }
+
+    public int getHoldDownPage() {
+        return mHoldDownPage;
+    }
+
+    public double getHoldDownPageValue() {
+        return mHoldDownPageValue;
+    }
+
+    public double getHoldDownMoney() {
+        return mHoldDownMoney;
+    }
+
+    public double getHoldMoney() {
         return mHoldMoney;
     }
 }
