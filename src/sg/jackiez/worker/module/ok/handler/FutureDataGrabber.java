@@ -2,7 +2,6 @@ package sg.jackiez.worker.module.ok.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,8 +27,9 @@ public class FutureDataGrabber {
     private String mSymbol;
     private String mContractType;
 
-    private List<Ticker> mTickers = new ArrayList<>();
+    private Ticker mTicker;
     private HashMap<String, List<KlineInfo>> mStoreKlinesMap = new HashMap<>(2);
+    private DepthInfo mDepthInfo;
 
     private final int KLINE_GAP_TIME = 500;
     private final int TICKER_GAP_TIME = 500;
@@ -68,6 +68,14 @@ public class FutureDataGrabber {
         return mStoreKlinesMap;
     }
 
+    public DepthInfo getDepthInfo() {
+        return mDepthInfo;
+    }
+
+    public Ticker getTicker() {
+        return mTicker;
+    }
+
     public void startDepthGrabThread() {
         if (mDepthGrabThread != null && mDepthGrabThread.isAlive()
                 && !mDepthGrabThread.isInterrupted()) {
@@ -94,9 +102,10 @@ public class FutureDataGrabber {
                             depthInfoOld.bids.get(0).get(0)))) {
                         nowTime = System.currentTimeMillis();
                         CallbackManager.get().onDepthUpdated(depthInfoNew);
-                        SLogUtil.v(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
+                        SLogUtil.i(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
                                 + (nowTime - lastTime) + " ms");
                         depthInfoOld = depthInfoNew;
+                        mDepthInfo = depthInfoNew;
                         lastTime = nowTime;
                     }
                 } catch (Throwable e) {
@@ -131,10 +140,11 @@ public class FutureDataGrabber {
                         if (tickerOld == null || !CompareUtil.equal(tickerNew.ticker, tickerOld.ticker)) {
                             CallbackManager.get().onTickerDataUpdate(tickerNew.ticker);
                             nowTime = System.currentTimeMillis();
-                            SLogUtil.v(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
+                            SLogUtil.i(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
                                     + (nowTime - lastTime) + " ms");
                             lastTime = nowTime;
                             tickerOld = tickerNew;
+                            mTicker = tickerNew.ticker;
                         }
                     }
                 } catch (Throwable e) {
@@ -156,7 +166,9 @@ public class FutureDataGrabber {
         mIsKlineGrabRunning = true;
         mKlineGrabThread = new DefaultThread(() -> {
             List<KlineInfo> _1minKlines, _15minKlines;
+            long lastTime = System.currentTimeMillis();
             long tickTime;
+            long nowTime;
             boolean isUpdate1min, isUpdate15min;
             while (mIsKlineGrabRunning) {
                 isUpdate1min = false;
@@ -184,8 +196,10 @@ public class FutureDataGrabber {
 
                 if (isUpdate1min || isUpdate15min) {
                     // 短周期或者长周期的K线更新后，需要进行回调
-                    SLogUtil.v(TAG, "startKlineGrabThread K线数据有更新: 1min = " + isUpdate1min + ", 15min = " + isUpdate15min);
-                    SLogUtil.v(TAG, "startKlineGrabThread data = " + mStoreKlinesMap.get(OKTypeConfig.KLINE_TYPE_1_MIN).get(999));
+                    nowTime = System.currentTimeMillis();
+                    SLogUtil.i(TAG, "startKlineGrabThread K线数据有更新: 1min = " + isUpdate1min + ", 15min = " + isUpdate15min
+                     + ", 距离上次更新时间：" + (nowTime - lastTime) + "ms");
+                    lastTime = nowTime;
                     CallbackManager.get().onKlineInfoUpdated(OKTypeConfig.KLINE_TYPE_1_MIN,
                             mStoreKlinesMap.get(OKTypeConfig.KLINE_TYPE_1_MIN),
                             OKTypeConfig.KLINE_TYPE_15_MIN,
