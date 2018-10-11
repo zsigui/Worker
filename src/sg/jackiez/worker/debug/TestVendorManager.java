@@ -89,7 +89,15 @@ public class TestVendorManager {
             return;
         }
         double signal = mPIZ.calculate(klineInfos);
-        double curEosToUsdt = klineInfos.get(klineInfos.size() - 1).close;
+
+        double curEosToUsdt;
+        if (mFutureDataGrabber.getDepthInfo() != null) {
+            DepthInfo depthInfo = mFutureDataGrabber.getDepthInfo();
+            curEosToUsdt = (depthInfo.bids.get(0).get(0) + depthInfo.asks.get(depthInfo.asks.size() - 1).get(0));
+        } else {
+            List<KlineInfo> kinfo = mFutureDataGrabber.getKlineInfoMap().get(OKTypeConfig.KLINE_TYPE_1_MIN);
+            curEosToUsdt = kinfo.get(kinfo.size() - 1).close;
+        }
         if (mTestAccount.isHoldContracts()) {
             // 没有持有合约，则当前根据信号量执行买入卖出
             if (signal >= 1) {
@@ -109,11 +117,15 @@ public class TestVendorManager {
                 if (-profitRate > TestAccount.MAX_LOSS_RATE) {
                     // 赔过额度，卖出
                     mTestAccount.shortSell(curEosToUsdt);
+                } else if (signal > 0 || profitRate > 0.5f) {
+                    mTestAccount.shortSell(curEosToUsdt);
                 }
             }
             if (mTestAccount.getHoldUpPage() > 0) {
                 profitRate = 1 - curEosToUsdt / mTestAccount.getHoldUpPageValue();
                 if (-profitRate > TestAccount.MAX_LOSS_RATE) {
+                    mTestAccount.longSell(curEosToUsdt);
+                } else if (signal < 0 || profitRate > 0.5f) {
                     mTestAccount.longSell(curEosToUsdt);
                 }
             }
