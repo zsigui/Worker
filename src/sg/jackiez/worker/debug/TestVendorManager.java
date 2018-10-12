@@ -1,8 +1,5 @@
 package sg.jackiez.worker.debug;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
@@ -17,13 +14,13 @@ import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 import sg.jackiez.worker.module.util.UniversalDataSource;
-import sg.jackiez.worker.utils.Config;
-import sg.jackiez.worker.utils.DateUtil;
-import sg.jackiez.worker.utils.FileUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.PIZ;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
+/**
+ * 模拟关注线
+ */
 public class TestVendorManager {
 
     private static final String TAG = "TestVendorManager";
@@ -113,7 +110,7 @@ public class TestVendorManager {
             // 持有合约，这个时候判断卖出
             double profitRate;
             if (mTestAccount.getHoldDownPage() > 0) {
-                profitRate = 1 - curEosToUsdt / mTestAccount.getHoldDownPageValue();
+                profitRate = 1 - curEosToUsdt / mTestAccount.getHoldDownPageValue() * mTestAccount.getLeverRate();
                 if (-profitRate > TestAccount.MAX_LOSS_RATE) {
                     // 赔过额度，卖出
                     mTestAccount.shortSell(curEosToUsdt);
@@ -122,7 +119,7 @@ public class TestVendorManager {
                 }
             }
             if (mTestAccount.getHoldUpPage() > 0) {
-                profitRate = 1 - curEosToUsdt / mTestAccount.getHoldUpPageValue();
+                profitRate = 1 - curEosToUsdt / mTestAccount.getHoldUpPageValue() * mTestAccount.getLeverRate();
                 if (-profitRate > TestAccount.MAX_LOSS_RATE) {
                     mTestAccount.longSell(curEosToUsdt);
                 } else if (signal < 0 || profitRate > 0.5f) {
@@ -151,6 +148,10 @@ public class TestVendorManager {
         CallbackManager.get().removeAccountStateChangeCallback(mStateChangeCallback);
         CallbackManager.get().removeFutureDataChangeCallback(mDataChangeCallback);
 
+        printProfitList();
+    }
+
+    private void printProfitList() {
         StringBuilder builder = new StringBuilder();
         builder.append("所有交易结果：\n");
         builder.append(mTestAccount.mProfitRateList);
@@ -159,27 +160,6 @@ public class TestVendorManager {
         builder.append("最终盈利率：").append(TestAccount.INIT_MONEY / mTestAccount.getCurrentMoney() * 100).append("%\n");
         builder.append("原先金额：¥").append(TestAccount.INIT_MONEY * UniversalDataSource.get().getUsdToCny()).append('\n');
         builder.append("最终金额：¥").append(mTestAccount.getCurrentMoney() * UniversalDataSource.get().getUsdToCny()).append('\n');
-        writeLineToFile(builder.toString());
-    }
-
-    public void writeLineToFile(String line) {
-        long curTime = System.currentTimeMillis();
-        String date = DateUtil.formatDate(curTime);
-        File f = FileUtil.getFileBaseCurrentWork(PATH_PROFIT_LOG + File.separator + date + ".log");
-        if (f == null) {
-            SLogUtil.v(TAG, "no file path is found.");
-            return;
-        }
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(f, true);
-            fos.write(line.getBytes(Config.DEFAULT_SYS_CHARSET));
-            fos.write('\n');
-            fos.flush();
-        } catch (IOException e) {
-            SLogUtil.v(TAG, e);
-        } finally {
-            FileUtil.closeIO(fos);
-        }
+        SLogUtil.i(TAG, builder.toString());
     }
 }

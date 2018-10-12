@@ -48,13 +48,15 @@ public class Utils {
 	}
 
 	/**
-	 * 获取回本的
-	 * @param makerPoundage
-	 * @param takerPoundage
-	 * @return
+	 * 计算交易的手续费(经询问开仓跟平仓都是一样的手续费)
+	 *
+	 * @param contractValue 合约面值/开仓均价
+	 * @param amount 张数/开仓数量
+	 * @param feeRate 手续费率
 	 */
-	public static double getProfitPosition(double makerPoundage,
-	                                       double takerPoundage) {
-		return 1 / ((1 - makerPoundage) * (1 - takerPoundage));
+	public static double getTranslationFee(double contractValue,
+										   double amount,
+										   double feeRate) {
+		return contractValue * amount * feeRate;
 	}
 }

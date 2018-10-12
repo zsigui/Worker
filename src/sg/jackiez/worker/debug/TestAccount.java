@@ -123,7 +123,7 @@ public class TestAccount {
      */
     public void shortSell(double eosToUsdt) {
         double money = Utils.getShortProfit(PAGE_VALUE, mHoldDownPageValue, eosToUsdt, mHoldDownPage)
-                * eosToUsdt * (1 - mTranslationFee);
+                * eosToUsdt - Utils.getTranslationFee(PAGE_VALUE, mHoldDownPage, mTranslationFee);
         money = money > -mHoldDownMoney ? money : -mHoldDownMoney;
 
         ProfitObj profitObj = new ProfitObj();
@@ -164,7 +164,7 @@ public class TestAccount {
      */
     public void longSell(double eosToUsdt) {
         double money = Utils.getLongProfit(PAGE_VALUE, mHoldUpPageValue, eosToUsdt, mHoldUpPage)
-                * eosToUsdt * (1 - mTranslationFee);
+                * eosToUsdt - Utils.getTranslationFee(PAGE_VALUE, mHoldUpPage, mTranslationFee);
         money = money > -mHoldUpMoney ? money : -mHoldUpMoney;
 
         ProfitObj profitObj = new ProfitObj();
@@ -215,5 +215,9 @@ public class TestAccount {
 
     public double getHoldMoney() {
         return mHoldMoney;
+    }
+
+    public int getLeverRate() {
+        return mLeverRate;
     }
 }

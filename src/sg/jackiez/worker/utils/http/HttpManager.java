@@ -190,7 +190,7 @@ public class HttpManager {
                 }
 
                 // 失败，打印下错误日志
-                printConnRespCode(connection);
+                printConnRespCode(urlStr, connection);
                 return IOUtil.readBytes(connection.getErrorStream());
             } catch (Exception e) {
                 SLogUtil.e(TAG, e);
@@ -198,11 +198,11 @@ public class HttpManager {
             }
 
             // 失败，打印下错误日志
-            printConnRespCode(connection);
+            printConnRespCode(urlStr, connection);
 
 
         } catch (Exception e) {
-            SLogUtil.e(TAG, e);
+            SLogUtil.e(TAG, String.format("url: %s, exception: %s", urlStr, e));
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -214,8 +214,8 @@ public class HttpManager {
         return null;
     }
 
-    private void printConnRespCode(HttpURLConnection connection) throws IOException {
-        SLogUtil.d(TAG, String.format("code: %d, message: %s", connection.getResponseCode(),
+    private void printConnRespCode(String url, HttpURLConnection connection) throws IOException {
+        SLogUtil.i(TAG, String.format("url: %s, code: %d, message: %s", url, connection.getResponseCode(),
                 connection.getResponseMessage()));
     }
 
