@@ -203,16 +203,18 @@ public final class SLogUtil {
 
     private static void fileLog(String line) {
         long curTime = System.currentTimeMillis();
-        String date = DateUtil.formatDate(curTime);
-        File f = FileUtil.getFileBaseCurrentWork(PATH_PROFIT_LOG + File.separator + date + ".log");
+        String date = DateUtil.formatTime(curTime, "yyyy-MM-dd");
+        String time = DateUtil.formatTime(curTime, "dd-HH");
+        File f = FileUtil.getFileBaseCurrentWork(PATH_PROFIT_LOG + File.separator + date
+                + File.separator + time + ".log");
         if (f == null) {
             return;
         }
+        FileUtil.mkParentDirs(f);
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(f, true);
             fos.write(line.getBytes(Config.DEFAULT_SYS_CHARSET));
-            fos.write('\n');
             fos.flush();
         } catch (IOException ignored) {
         } finally {

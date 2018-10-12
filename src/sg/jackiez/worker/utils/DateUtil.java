@@ -7,19 +7,19 @@ import java.util.TimeZone;
 public class DateUtil {
 
     public static String formatCurrentTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        return sdf.format(new Date(System.currentTimeMillis()));
+        return formatTime(System.currentTimeMillis(), "MM-dd HH:mm:ss.SSS");
     }
 
     public static String formatUnixTime(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-        return sdf.format(new Date(time));
+        return formatTime(time, "yyyy-MM-dd HH:mm:ss");
     }
 
     public static String formatDate(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return formatTime(time, "yyyy-MM-dd");
+    }
+
+    public static String formatTime(long time, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         return sdf.format(new Date(time));
     }
