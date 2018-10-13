@@ -66,8 +66,8 @@ public final class OkConfig {
     /**
      * 请求的REST地址
      */
-//    private static String REST_HOST = "https://www.okex.com";
-    private static String REST_HOST = "https://www.okb.com";
+    private static String REST_HOST = "https://www.okex.com";
+//    private static String REST_HOST = "https://www.okb.com";
     public static String WSS_URL = "wss://real.okex.com:10440/websocket/okexapi";
 
     // 配置是否适用代理

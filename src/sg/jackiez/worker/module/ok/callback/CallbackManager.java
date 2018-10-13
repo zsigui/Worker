@@ -10,7 +10,8 @@ import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class CallbackManager implements
 		FutureDataChangeCallback,
-		AccountStateChangeCallback {
+		AccountStateChangeCallback,
+		VendorResultCallback {
 
 	private static final String TAG = "CallbackManager";
 
@@ -24,6 +25,7 @@ public class CallbackManager implements
 
 	private ConcurrentSet<FutureDataChangeCallback> mFutureDataChangedCallbacks = new ConcurrentSet<>();
 	private ConcurrentSet<AccountStateChangeCallback> mAccountStateChangeCallbacks = new ConcurrentSet<>();
+	private ConcurrentSet<VendorResultCallback> mVendorResultCallbacks = new ConcurrentSet<>();
 
 	/*======================== 添加/移除回调Start ============================*/
 
@@ -53,6 +55,20 @@ public class CallbackManager implements
 			return;
 		}
 		mAccountStateChangeCallbacks.remove(callback);
+	}
+
+	public void addVendorResultCallback(VendorResultCallback callback) {
+		if (callback == null) {
+			return;
+		}
+		mVendorResultCallbacks.add(callback);
+	}
+
+	public void removeVendorResultCallback(VendorResultCallback callback) {
+		if (callback == null) {
+			return;
+		}
+		mVendorResultCallbacks.remove(callback);
 	}
 
 	/*======================== 添加/移除回调End ============================*/
@@ -98,6 +114,26 @@ public class CallbackManager implements
 		for (AccountStateChangeCallback callback : mAccountStateChangeCallbacks) {
 			callback.onAccountInfoOutdated();
 		}
+	}
+
+	@Override
+	public void onTradeSuccess() {
+
+	}
+
+	@Override
+	public void onTradeFail() {
+
+	}
+
+	@Override
+	public void onCancelOrderSuccess() {
+
+	}
+
+	@Override
+	public void onCancelOrderFail() {
+
 	}
 
 	/*======================== 调用实现End ============================*/

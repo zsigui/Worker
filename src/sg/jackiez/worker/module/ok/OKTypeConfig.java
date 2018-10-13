@@ -2,6 +2,10 @@ package sg.jackiez.worker.module.ok;
 
 public class OKTypeConfig {
 
+	// 期货币对
+	public static final String SYMBOL_EOS = "eos_usd";
+	public static final String SYMBOL_BTC = "btc_usd";
+
 	/**
 	 * 买入
 	 */

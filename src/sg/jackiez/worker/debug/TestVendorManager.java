@@ -6,6 +6,7 @@ import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
 import sg.jackiez.worker.module.ok.callback.FutureDataChangeCallback;
+import sg.jackiez.worker.module.ok.callback.VendorResultCallback;
 import sg.jackiez.worker.module.ok.handler.AccountDataGrabber;
 import sg.jackiez.worker.module.ok.handler.FutureDataGrabber;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
@@ -25,7 +26,6 @@ public class TestVendorManager {
 
     private static final String TAG = "TestVendorManager";
 
-    private static final String PATH_PROFIT_LOG = "log";
     private PIZ mPIZ = new PIZ();
 
     private AccountDataGrabber mAccountDataGrabber;
@@ -69,12 +69,36 @@ public class TestVendorManager {
         }
     };
 
+    private VendorResultCallback mVendorResultCallback = new VendorResultCallback() {
+        @Override
+        public void onTradeSuccess() {
+
+        }
+
+        @Override
+        public void onTradeFail() {
+
+        }
+
+        @Override
+        public void onCancelOrderSuccess() {
+
+        }
+
+        @Override
+        public void onCancelOrderFail() {
+
+        }
+    };
+
     private void handleKlineForSignal(List<KlineInfo> klineInfos) {
         if (klineInfos == null || klineInfos.isEmpty()) {
             return;
         }
         if (mTestAccount.getCurrentMoney() < TestAccount.INIT_MONEY
-                && (1 - mTestAccount.getCurrentMoney() / TestAccount.INIT_MONEY) > TestAccount.TOTAL_LOSS_RATE_TO_STOP) {
+                && (1 - mTestAccount.getCurrentMoney() / TestAccount.INIT_MONEY) > TestAccount.TOTAL_LOSS_RATE_TO_STOP
+                && mTestAccount.getHoldUpPage() == 0 && mTestAccount.getHoldDownPage() == 0) {
+            // 未持有情况下亏光了
             stop();
             return;
         }
@@ -131,7 +155,7 @@ public class TestVendorManager {
 
     public void start() {
         IFutureRestApi futureRestApi = new FutureRestApiV1();
-        String symbol = "eos_usdt";
+        String symbol = OKTypeConfig.SYMBOL_EOS;
         String contractType = OKTypeConfig.CONTRACT_TYPE_QUARTER;
         mAccountDataGrabber = new AccountDataGrabber(symbol, contractType,
                 futureRestApi);
@@ -140,6 +164,7 @@ public class TestVendorManager {
         mFutureDataGrabber.startAll();
         CallbackManager.get().addAccountStateChangeCallback(mStateChangeCallback);
         CallbackManager.get().addFutureDataChangeCallback(mDataChangeCallback);
+        CallbackManager.get().addVendorResultCallback(mVendorResultCallback);
     }
 
     public void stop() {
@@ -147,6 +172,7 @@ public class TestVendorManager {
         mFutureDataGrabber.stopAll();
         CallbackManager.get().removeAccountStateChangeCallback(mStateChangeCallback);
         CallbackManager.get().removeFutureDataChangeCallback(mDataChangeCallback);
+        CallbackManager.get().removeVendorResultCallback(mVendorResultCallback);
 
         printProfitList();
     }

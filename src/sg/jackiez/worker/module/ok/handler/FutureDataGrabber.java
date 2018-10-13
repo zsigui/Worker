@@ -23,7 +23,6 @@ public class FutureDataGrabber {
     private static final String TAG = "FutureDataGrabber";
 
     private IFutureRestApi mRestApi;
-    private FutureVendor mVendor;
     private String mSymbol;
     private String mContractType;
 
@@ -49,7 +48,6 @@ public class FutureDataGrabber {
     public FutureDataGrabber(String symbol, String contractType, IFutureRestApi restApi) {
         mSymbol = symbol;
         mContractType = contractType;
-        mVendor = new FutureVendor(mRestApi, mContractType, OKTypeConfig.LEVER_RATE_20);
         mRestApi = restApi;
     }
 
