@@ -59,4 +59,24 @@ public class Utils {
 										   double feeRate) {
 		return contractValue * amount * feeRate;
 	}
+
+	/**
+	 * 获取当前合约的保证金率
+	 *
+	 * @param fixProtectionFee 固定保证金
+	 * @param unProfit 未实现权益
+	 * @param openPrice 开仓均价
+	 * @param leverRate 倍率
+	 * @param pageValue 合约面值
+	 * @param amount 合约数量
+	 * @return
+	 */
+	public static double getProtectionRate(double fixProtectionFee,
+	                                       double unProfit,
+	                                       double openPrice,
+	                                       int leverRate,
+	                                       double pageValue,
+	                                       int amount) {
+		return (fixProtectionFee + unProfit) * openPrice * leverRate / (pageValue * amount);
+	}
 }
