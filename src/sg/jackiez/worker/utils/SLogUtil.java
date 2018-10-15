@@ -166,8 +166,8 @@ public final class SLogUtil {
     private static String constructStackString(Level level, String tag, String msg) {
         String result;
         StackTraceElement[] ts = Thread.currentThread().getStackTrace();
-        if (ts.length > 3) {
-            StackTraceElement caller = ts[3];
+        if (ts.length > 4) {
+            StackTraceElement caller = ts[4];
             String file = (caller.getFileName() != null && caller.getLineNumber() >= 0) ?
                     ("(" + caller.getFileName() + ":" + caller.getLineNumber() + ")") :
                     (caller.getFileName() != null ?  "("+caller.getFileName()+")" : "(Unknown Source)");
