@@ -7,6 +7,7 @@ import sg.jackiez.worker.utils.http.ProxyInfo;
 public final class OkConfig {
 
     // 请求的Key
+    // v1
     public static final String KEY_SYMBOL = "symbol";
     public static final String KEY_SINCE = "since";
     public static final String KEY_API_KEY = "api_key";
@@ -27,6 +28,11 @@ public final class OkConfig {
     public static final String KEY_LEVER_RATE = "lever_rate";
     public static final String KEY_PAGE_NUMBER = "page_number";
     public static final String KEY_MATCH_PRICE = "match_price";
+
+    // v3
+    public static final String KEY_START = "start";
+    public static final String KEY_END = "end";
+    public static final String KEY_GRANULARITY = "granularity";
     // header key
     public static final String HEADER_ACCESS_KEY = "OK-ACCESS-KEY";
     public static final String HEADER_ACCESS_SIGN = "OK-ACCESS-SIGN";
@@ -280,5 +286,9 @@ public final class OkConfig {
          * 获取合约杠杆倍数
          */
         String LEVER_RATE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
+        /**
+         * 获取合约K线数据
+         */
+        String KLINE_URL = totalUrl("/api/futures/v3/instruments/%s/candles");
     }
 }

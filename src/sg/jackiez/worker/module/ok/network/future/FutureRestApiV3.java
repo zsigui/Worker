@@ -81,4 +81,19 @@ public class FutureRestApiV3 {
 		String realUrl = String.format(OkConfig.FutureV3.LEVER_RATE_URL, coin);
 		return doGet(realUrl, null);
 	}
+
+	public String getKlineInfo(String instrumentId, String start, String end, String granularity) {
+		String realUrl = String.format(OkConfig.FutureV3.KLINE_URL, instrumentId);
+		HashMap<String, String> params = new HashMap<>();
+		if (!CommonUtil.isEmpty(start)) {
+			params.put(OkConfig.KEY_START, start);
+		}
+		if (!CommonUtil.isEmpty(end)) {
+			params.put(OkConfig.KEY_END, end);
+		}
+		if (!CommonUtil.isEmpty(granularity)) {
+			params.put(OkConfig.KEY_GRANULARITY, granularity);
+		}
+		return doGet(realUrl, params);
+	}
 }
