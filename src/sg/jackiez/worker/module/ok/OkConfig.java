@@ -27,6 +27,11 @@ public final class OkConfig {
     public static final String KEY_LEVER_RATE = "lever_rate";
     public static final String KEY_PAGE_NUMBER = "page_number";
     public static final String KEY_MATCH_PRICE = "match_price";
+    // header key
+    public static final String HEADER_ACCESS_KEY = "OK-ACCESS-KEY";
+    public static final String HEADER_ACCESS_SIGN = "OK-ACCESS-SIGN";
+    public static final String HEADER_ACCESS_TIMESTAMP = "OK-ACCESS-TIMESTAMP";
+    public static final String HEADER_ACCESS_PASSPHRASE = "OK-ACCESS-PASSPHRASE";
 
     // 返回的部分Key
     /**
@@ -57,21 +62,25 @@ public final class OkConfig {
     public static final String FILE_PAIRS_INCREMENT = "data/ok/pairs_increment";
 
 
-    // 相关Wiki地址：https://github.com/okcoin-okex/API-docs-OKEx.com
+	// 相关Wiki地址：https://github.com/okcoin-okex/API-docs-OKEx.com
 
-//    public static String API_KEY = "8a4d0dbb-8f1d-4c25-a238-ef41d6e75ba8";
-//    public static String SECRET_KEY = "074AD4B323E4ECB5190C63648643FA0D";
-    public static String API_KEY = "7a082e8e-cf90-4450-82fd-3063009ae88b";
-    public static String SECRET_KEY = "FD63F9C95FAA082F761797C7B25890E7";
+//    public static final String API_KEY = "8a4d0dbb-8f1d-4c25-a238-ef41d6e75ba8";
+//    public static final String SECRET_KEY = "074AD4B323E4ECB5190C63648643FA0D";
+    public static final String API_KEY = "7a082e8e-cf90-4450-82fd-3063009ae88b";
+    public static final String SECRET_KEY = "FD63F9C95FAA082F761797C7B25890E7";
+    public static final String V3_API_KEY = "02058f3f-0241-4ad2-8923-d03ca675c373";
+    public static final String V3_SECRET_KEY = "AC40F2FEA58D65794322726DAD93453A";
+    public static final String V3_PASSPHRASE = "!@#1234kkkk";
+
     /**
      * 请求的REST地址
      */
-    private static String REST_HOST = "https://www.okex.com";
+    public static String REST_HOST = "https://www.okex.com";
 //    private static String REST_HOST = "https://www.okb.com";
     public static String WSS_URL = "wss://real.okex.com:10440/websocket/okexapi";
 
     // 配置是否适用代理
-    public static final boolean IS_USE_PROXY = false;
+    public static final boolean IS_USE_PROXY = true;
     public static final ProxyInfo PROXY_INFO = new ProxyInfo(Proxy.Type.HTTP, "127.0.0.1", 8080);
 
 
@@ -257,5 +266,19 @@ public final class OkConfig {
          * 获取当前可用合约总持仓量
          */
         String FUTURE_HOLD_AMOUNT_URL = totalUrl("/api/v1/future_hold_amount.do");
+    }
+
+    /**
+     * 期货的URL
+     */
+    public interface FutureV3 {
+        /**
+         * 获取合约信息
+         */
+        String INSTRUMENTS_URL = totalUrl("/api/futures/v3/instruments");
+        /**
+         * 获取合约杠杆倍数
+         */
+        String LEVER_RATE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
     }
 }
