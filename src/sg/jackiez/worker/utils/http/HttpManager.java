@@ -5,6 +5,7 @@ import com.sun.deploy.net.HttpRequest;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -221,10 +222,14 @@ public class HttpManager {
 
 
     public String doGet(String url) {
-        return doGet(url, null);
+        return doGet(url, null, null);
     }
 
     public String doGet(String url, Map<String, String> params) {
+        return doGet(url, params, null);
+    }
+
+    public String doGet(String url, Map<String, String> params, Map<String, String> headers) {
         if (CommonUtil.isEmpty(url)) {
             SLogUtil.d(TAG, "doGet request url is " + url);
             return "";
@@ -235,7 +240,7 @@ public class HttpManager {
             url = HttpUtil.spliceUrlAndParam(url, paramStr);
         }
         byte[] result = doRequest(METHOD_GET, url, null,
-                TYPE_TEXT, null, OkConfig.IS_USE_PROXY ? OkConfig.PROXY_INFO : null);
+                TYPE_TEXT, headers, OkConfig.IS_USE_PROXY ? OkConfig.PROXY_INFO : null);
         return CommonUtil.isEmpty(result) ? "" : CommonUtil.bytesToStr(result);
     }
 
@@ -250,6 +255,18 @@ public class HttpManager {
         byte[] result = doRequest(METHOD_POST, url,
                 CommonUtil.isEmpty(paramStr) ? null : CommonUtil.strToByte(paramStr),
                 TYPE_URL_ENCODED, null, OkConfig.IS_USE_PROXY ? OkConfig.PROXY_INFO : null);
+        return CommonUtil.isEmpty(result) ? "" : CommonUtil.bytesToStr(result);
+    }
+
+    public String doJsonPost(String url, String jsonBody, Map<String, String> headers) {
+        byte[] result = null;
+        try {
+            result = doRequest(METHOD_POST, url,
+                    jsonBody.getBytes(Config.DEFAULT_SYS_CHARSET),
+                    TYPE_JSON, headers, OkConfig.IS_USE_PROXY ? OkConfig.PROXY_INFO : null);
+        } catch (UnsupportedEncodingException e) {
+            SLogUtil.e(TAG, e);
+        }
         return CommonUtil.isEmpty(result) ? "" : CommonUtil.bytesToStr(result);
     }
 }

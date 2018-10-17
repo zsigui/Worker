@@ -6,6 +6,9 @@ import java.util.TimeZone;
 
 public class DateUtil {
 
+    private static TimeZone UTCTimeZone = TimeZone.getTimeZone("UTC");
+    private static TimeZone GMT8TimeZone = TimeZone.getTimeZone("GMT+8");
+
     public static String formatCurrentTime() {
         return formatTime(System.currentTimeMillis(), "MM-dd HH:mm:ss.SSS");
     }
@@ -20,7 +23,13 @@ public class DateUtil {
 
     public static String formatTime(long time, String format) {
         SimpleDateFormat sdf = new SimpleDateFormat(format);
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        sdf.setTimeZone(GMT8TimeZone);
+        return sdf.format(new Date(time));
+    }
+
+    public static String formatISOTime(long time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(UTCTimeZone);
         return sdf.format(new Date(time));
     }
 }
