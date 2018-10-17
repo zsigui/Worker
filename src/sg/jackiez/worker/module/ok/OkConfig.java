@@ -281,6 +281,10 @@ public final class OkConfig {
      */
     public interface FutureV3 {
         /**
+         * 获取合约K线数据
+         */
+        String TIMESTAMP_URL = totalUrl("/api/general/v3/time");
+        /**
          * 获取合约信息
          */
         String INSTRUMENTS_URL = totalUrl("/api/futures/v3/instruments");

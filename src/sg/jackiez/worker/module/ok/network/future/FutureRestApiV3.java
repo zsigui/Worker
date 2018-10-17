@@ -94,6 +94,10 @@ public class FutureRestApiV3 {
 		if (!CommonUtil.isEmpty(granularity)) {
 			params.put(OkConfig.KEY_GRANULARITY, granularity);
 		}
-		return doGet(realUrl, params);
+		return HttpManager.get().doGet(realUrl, params);
+	}
+
+	public String getTimeStamp() {
+		return HttpManager.get().doGet(OkConfig.FutureV3.TIMESTAMP_URL);
 	}
 }
