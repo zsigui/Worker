@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
+import sg.jackiez.worker.module.ok.OkConfig;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
 import sg.jackiez.worker.module.ok.model.base.BaseM;
 import sg.jackiez.worker.module.ok.model.resp.RespCancelTrade;
@@ -120,24 +121,29 @@ public class FutureVendor implements IVendor{
         while (rsp == null && retryTime-- > 0) {
             rsp = doCancelOrder(info.symbol, info.orderId);
         }
-        // TODO 简单处理，后续需要重新调整
-        if (rsp == null) {
-            CallbackManager.get().onCancelOrderFail();
+        if (OkConfig.IS_TEST) {
+            // 测试，直接当成成功处理
+            CallbackManager.get().onCancelOrderSuccess();
         } else {
-            if (CommonUtil.isEmpty(rsp.order_id)) {
-                // 单笔订单处理
-                if (rsp.result) {
-                    // 成功
-                    CallbackManager.get().onCancelOrderSuccess();
-                } else {
-                    CallbackManager.get().onCancelOrderFail();
-                }
+            // TODO 简单处理，后续需要重新调整
+            if (rsp == null) {
+                CallbackManager.get().onCancelOrderFail();
             } else {
-                // 多笔订单处理
-                if (CommonUtil.isEmpty(rsp.success)) {
-                    CallbackManager.get().onCancelOrderFail();
+                if (CommonUtil.isEmpty(rsp.order_id)) {
+                    // 单笔订单处理
+                    if (rsp.result) {
+                        // 成功
+                        CallbackManager.get().onCancelOrderSuccess();
+                    } else {
+                        CallbackManager.get().onCancelOrderFail();
+                    }
                 } else {
-                    CallbackManager.get().onCancelOrderSuccess();
+                    // 多笔订单处理
+                    if (CommonUtil.isEmpty(rsp.success)) {
+                        CallbackManager.get().onCancelOrderFail();
+                    } else {
+                        CallbackManager.get().onCancelOrderSuccess();
+                    }
                 }
             }
         }
@@ -151,11 +157,16 @@ public class FutureVendor implements IVendor{
             rsp = doTrade(info.symbol, info.price, info.amount, info.trendType,
                     info.priceType);
         }
-        // TODO 简单处理，后续需要重新调整
-        if (rsp == null || !rsp.result) {
-            CallbackManager.get().onTradeFail();
-        } else {
+        if (OkConfig.IS_TEST) {
+            // 测试，直接当成成功处理
             CallbackManager.get().onTradeSuccess();
+        } else {
+            // TODO 简单处理，后续需要重新调整
+            if (rsp == null || !rsp.result) {
+                CallbackManager.get().onTradeFail();
+            } else {
+                CallbackManager.get().onTradeSuccess();
+            }
         }
     }
 

@@ -6,6 +6,8 @@ import sg.jackiez.worker.utils.http.ProxyInfo;
 
 public final class OkConfig {
 
+    public static boolean IS_TEST = false;
+
     // 请求的Key
     // v1
     public static final String KEY_SYMBOL = "symbol";

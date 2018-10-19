@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
+import sg.jackiez.worker.module.ok.OkConfig;
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
 import sg.jackiez.worker.module.ok.callback.FutureDataChangeCallback;
@@ -223,6 +224,8 @@ public class TestVendorManager {
     }
 
     public void start() {
+        OkConfig.IS_TEST = true;
+        SLogUtil.setPrintFile(true);
         IFutureRestApi futureRestApi = new FutureRestApiV1();
         String contractType = OKTypeConfig.CONTRACT_TYPE_QUARTER;
         mAccountDataGrabber = new AccountDataGrabber(symbol, contractType,
@@ -238,6 +241,7 @@ public class TestVendorManager {
     }
 
     public void stop() {
+        OkConfig.IS_TEST = false;
         mAccountDataGrabber.stopGrabAccountDataThread();
         mFutureDataGrabber.stopAll();
         mFutureVendor.stopTradeThread();
