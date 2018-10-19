@@ -100,7 +100,7 @@ public class FutureDataGrabber {
                             depthInfoOld.bids.get(0).get(0)))) {
                         nowTime = System.currentTimeMillis();
                         CallbackManager.get().onDepthUpdated(depthInfoNew);
-                        SLogUtil.i(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
+                        SLogUtil.i(TAG, "startDepthGrabThread() 获取到新行情数据, 距上次时间: "
                                 + (nowTime - lastTime) + " ms");
                         depthInfoOld = depthInfoNew;
                         mDepthInfo = depthInfoNew;
