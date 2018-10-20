@@ -2,12 +2,15 @@ package sg.jackiez.worker.module.ok.network.future;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import sg.jackiez.worker.module.ok.OkConfig;
+import sg.jackiez.worker.module.ok.model.TradeInfo;
+import sg.jackiez.worker.module.ok.model.TradeInfoV3;
+import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.DateUtil;
 import sg.jackiez.worker.utils.SLogUtil;
-import sg.jackiez.worker.utils.annotations.NonNull;
 import sg.jackiez.worker.utils.chiper.HmacSHA256;
 import sg.jackiez.worker.utils.common.CollectionUtil;
 import sg.jackiez.worker.utils.common.CommonUtil;
@@ -53,23 +56,26 @@ public class FutureRestApiV3 {
 		return HttpManager.get().doGet(requestUrl, null, headers);
 	}
 
-	private String doJsonPost(String requestUrl, Map<String, String> params, String jsonData) {
+	private String doJsonPost(String requestUrl, Map<String, String> params,
+	                          Map<String, String> contentParams) {
+		String jsonData = CommonUtil.isEmpty(contentParams) ? "" : JsonUtil.objToJson(contentParams);
 		String paramStr = HttpUtil.convertMapToEncodedUrlParam(params);
 		if (!CommonUtil.isEmpty(paramStr)) {
 			requestUrl = HttpUtil.spliceUrlAndParam(requestUrl, paramStr);
 		}
 
-		String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+		String timestamp = DateUtil.formatISOTime(System.currentTimeMillis());
 		String data = preSignData(timestamp, "POST",
 				requestUrl.replace(OkConfig.REST_HOST, ""), jsonData);
 		String sign = Base64.getEncoder().encodeToString(
-				HmacSHA256.genDigest(data, OkConfig.V3_PASSPHRASE));
+				HmacSHA256.genDigest(data, OkConfig.V3_SECRET_KEY));
 		HashMap<String, String> headers = CollectionUtil.getExtraMap(
-				OkConfig.HEADER_ACCESS_KEY, OkConfig.API_KEY,
+				OkConfig.HEADER_ACCESS_KEY, OkConfig.V3_API_KEY,
 				OkConfig.HEADER_ACCESS_SIGN, sign,
 				OkConfig.HEADER_ACCESS_PASSPHRASE, OkConfig.V3_PASSPHRASE,
 				OkConfig.HEADER_ACCESS_TIMESTAMP, timestamp
 		);
+		SLogUtil.d(TAG, "doGet: jsonData = " + jsonData + "\ndata = " + data + "\nsign = " + sign +"\nheader = " + headers);
 		return HttpManager.get().doJsonPost(requestUrl, jsonData, headers);
 	}
 
@@ -77,8 +83,8 @@ public class FutureRestApiV3 {
 		return doGet(OkConfig.FutureV3.INSTRUMENTS_URL, null);
 	}
 
-	public String getLeverRate(String coin) {
-		String realUrl = String.format(OkConfig.FutureV3.LEVER_RATE_URL, coin);
+	public String getLeverRate(String currency) {
+		String realUrl = String.format(OkConfig.FutureV3.LEVER_RATE_URL, currency);
 		return doGet(realUrl, null);
 	}
 
@@ -99,5 +105,141 @@ public class FutureRestApiV3 {
 
 	public String getTimeStamp() {
 		return HttpManager.get().doGet(OkConfig.FutureV3.TIMESTAMP_URL);
+	}
+
+	public String getTickerInfo(String instrumentId) {
+		String realUrl = String.format(OkConfig.FutureV3.TICKER_URL, instrumentId);
+		return HttpManager.get().doGet(realUrl, null);
+	}
+
+	public String getTotalTickerInfos() {
+		return HttpManager.get().doGet(OkConfig.FutureV3.TOTAL_TICKERS_URL, null);
+	}
+
+	public String getInstrumentsInfo() {
+		return HttpManager.get().doGet(OkConfig.FutureV3.INSTRUMENTS_URL, null);
+	}
+
+	public String getDepthInfo(String instrumentId, String size) {
+		String realUrl = String.format(OkConfig.FutureV3.DEPTH_INFO_URL, instrumentId);
+		Map<String, String> params = CollectionUtil.singletonMap(OkConfig.KEY_SIZE, String.valueOf(size));
+		return HttpManager.get().doGet(realUrl, params);
+	}
+
+	public String getTradeDetail(String orderId, String instrumentId, String from, String to, String limit) {
+		Map<String, String> params = CollectionUtil.getExtraMap(
+				OkConfig.KEY_ORDER_ID, orderId,
+				OkConfig.KEY_INSTRUMENT_ID, instrumentId
+		);
+		if (!CommonUtil.isEmpty(from)) {
+			params.put(OkConfig.KEY_FROM, from);
+		}
+		if (!CommonUtil.isEmpty(to)) {
+			params.put(OkConfig.KEY_TO, to);
+		}
+		if (!CommonUtil.isEmpty(limit)) {
+			params.put(OkConfig.KEY_LIMIT, limit);
+		}
+		return doGet(OkConfig.FutureV3.LEVER_RATE_URL, params);
+	}
+
+	public String getOrderList(String instrumentId, String status, String from, String to, String limit) {
+		String realUrl = String.format(OkConfig.FutureV3.ORDER_LIST_URL, instrumentId);
+		Map<String, String> params = CollectionUtil.getExtraMap(
+				OkConfig.KEY_STATUS, status,
+				OkConfig.KEY_INSTRUMENT_ID, instrumentId
+		);
+		if (!CommonUtil.isEmpty(to)) {
+			params.put(OkConfig.KEY_FROM, from);
+		}
+		if (!CommonUtil.isEmpty(to)) {
+			params.put(OkConfig.KEY_TO, to);
+		}
+		if (!CommonUtil.isEmpty(to)) {
+			params.put(OkConfig.KEY_LIMIT, limit);
+		}
+		return doGet(realUrl, params);
+	}
+
+	public String getOrderDetail(String orderId, String instrumentId) {
+		String realUrl = String.format(OkConfig.FutureV3.ORDER_DETAIL_URL, instrumentId);
+		Map<String, String> params = CollectionUtil.getExtraMap(
+				OkConfig.KEY_ORDER_ID, orderId,
+				OkConfig.KEY_INSTRUMENT_ID, instrumentId
+		);
+		return doGet(realUrl, params);
+	}
+
+	public String doTrade(String instrumentId, String type, String price, String size,
+	                      String matchPrice, String leverage, String clientOID) {
+		Map<String, String> params = CollectionUtil.getExtraMap(
+				OkConfig.KEY_INSTRUMENT_ID, instrumentId,
+				OkConfig.KEY_TYPE, type,
+				OkConfig.KEY_PRICE, price,
+				OkConfig.KEY_SIGN, size,
+				OkConfig.KEY_LEVERAGE, leverage
+		);
+		if (!CommonUtil.isEmpty(matchPrice)) {
+			params.put(OkConfig.KEY_MATCH_PRICE, matchPrice);
+		}
+		if (!CommonUtil.isEmpty(clientOID)) {
+			params.put(OkConfig.KEY_CLIENT_OID, clientOID);
+		}
+		return doJsonPost(OkConfig.FutureV3.TRADE_URL, null, params);
+	}
+
+	public String doBatchTrade(String instrumentId, List<TradeInfoV3> tradeInfoList, String leverage) {
+		Map<String, String> params = CollectionUtil.getExtraMap(
+				OkConfig.KEY_INSTRUMENT_ID, instrumentId,
+				OkConfig.KEY_ORDERS_DATA, JsonUtil.objToJson(tradeInfoList),
+				OkConfig.KEY_LEVERAGE, leverage
+		);
+		return doJsonPost(OkConfig.FutureV3.BATCH_TRADE_URL, null, params);
+	}
+
+	public String doCancelTrade(String orderId, String instrumentId) {
+		String realUrl = String.format(OkConfig.FutureV3.CANCEL_TRADE_URL, instrumentId, orderId);
+		return doJsonPost(realUrl, null, null);
+	}
+
+	public String doBatchCancelTrade(String instrumentId, String orderIds) {
+		String realUrl = String.format(OkConfig.FutureV3.BATCH_CANCEL_TRADE_URL, instrumentId);
+		Map<String, String> params = CollectionUtil.singletonMap(OkConfig.KEY_ORDER_IDS, orderIds);
+		return doJsonPost(realUrl, null, params);
+	}
+
+	public String getLeverage(String currency) {
+		String realUrl = String.format(OkConfig.FutureV3.GET_LEVERAGE_URL, currency);
+		return doGet(realUrl, null);
+	}
+
+	public String setLeverage(String currency, String leverage,
+	                          String instrumentId, String direction) {
+		String realUrl = String.format(OkConfig.FutureV3.SET_LEVERAGE_URL, currency);
+		Map<String, String> params = CollectionUtil.getExtraMap(
+				OkConfig.KEY_CURRENT_PAGE, currency,
+				OkConfig.KEY_LEVERAGE, leverage
+		);
+		// 后面两个逐仓也得填
+		if (!CommonUtil.isEmpty(instrumentId)) {
+			params.put(OkConfig.KEY_INSTRUMENT_ID, instrumentId);
+		}
+		if (!CommonUtil.isEmpty(direction)) {
+			params.put(OkConfig.KEY_DIRECTION, direction);
+		}
+		return doJsonPost(realUrl, null, params);
+	}
+
+	public String getUserInfo() {
+		return doGet(OkConfig.FutureV3.USER_INFO_URL, null);
+	}
+
+	public String getAllPositionInfo() {
+		return doGet(OkConfig.FutureV3.ALL_POSITION_URL, null);
+	}
+
+	public String getPositionInfo(String instrumentId) {
+		String realUrl = String.format(OkConfig.FutureV3.POSITION_URL, instrumentId);
+		return doGet(realUrl, null);
 	}
 }

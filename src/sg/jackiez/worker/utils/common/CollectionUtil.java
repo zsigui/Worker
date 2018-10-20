@@ -2,7 +2,12 @@ package sg.jackiez.worker.utils.common;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+
+import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class CollectionUtil {
 
@@ -58,5 +63,32 @@ public class CollectionUtil {
             }
         }
         return ~lo;  // value not present
+    }
+
+    /**
+     * 限制传入的列表实例不超过指定大小,如果超过的话从指定方向移除多余项
+     * @param listObj 列表对象
+     * @param limitSize 限制大小
+     * @param fromHead 是否从头部(下标0)开始移除
+     */
+    public static <T> List<T> limit(List<T> listObj, int limitSize, boolean fromHead) {
+        if (listObj == null) {
+            return null;
+        }
+
+        ListIterator<T> it = listObj.listIterator();
+        final int size = listObj.size();
+        if (fromHead) {
+            while (it.hasNext() && size > limitSize) {
+                it.next();
+                it.remove();
+            }
+        } else {
+            while (it.hasPrevious() && size > limitSize) {
+                it.previous();
+                it.remove();
+            }
+        }
+        return listObj;
     }
 }

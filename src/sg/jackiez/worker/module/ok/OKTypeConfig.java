@@ -53,18 +53,18 @@ public class OKTypeConfig {
 	 */
 	public static final int ORDER_TYPE_FINISHED = 1;
 
-	public static final String KLINE_TYPE_1_MIN = "1min";
-	public static final String KLINE_TYPE_3_MIN = "3min";
-	public static final String KLINE_TYPE_5_MIN = "5min";
-	public static final String KLINE_TYPE_15_MIN = "15min";
-	public static final String KLINE_TYPE_30_MIN = "30min";
-	public static final String KLINE_TYPE_1_DAY = "1day";
-	public static final String KLINE_TYPE_1_WEEK = "1week";
-	public static final String KLINE_TYPE_1_HOUR = "1hour";
-	public static final String KLINE_TYPE_2_HOUR = "2hour";
-	public static final String KLINE_TYPE_4_HOUR = "4hour";
-	public static final String KLINE_TYPE_6_HOUR = "6hour";
-	public static final String KLINE_TYPE_12_HOUR = "12hour";
+	public static final String KLINE_TYPE_1_MIN = "60";
+	public static final String KLINE_TYPE_3_MIN = "180";
+	public static final String KLINE_TYPE_5_MIN = "300";
+	public static final String KLINE_TYPE_15_MIN = "900";
+	public static final String KLINE_TYPE_30_MIN = "1800";
+	public static final String KLINE_TYPE_1_HOUR = "3600";
+	public static final String KLINE_TYPE_2_HOUR = "7200";
+	public static final String KLINE_TYPE_4_HOUR = "14400";
+	public static final String KLINE_TYPE_6_HOUR = "21600";
+	public static final String KLINE_TYPE_12_HOUR = "43200";
+	public static final String KLINE_TYPE_1_DAY = "86400";
+	public static final String KLINE_TYPE_1_WEEK = "604800";
 
 
 	public static final byte SITE_FLAG_CNY = 0;
@@ -198,4 +198,14 @@ public class OKTypeConfig {
 	 * 钱包类型：我的钱包
 	 */
 	public static final int FUNC_TYPE_WALLET = 6;
+
+	// 开仓方向
+	/**
+	 * 开仓做多
+	 */
+	public static final String DIRECTION_LONG = "long";
+	/**
+	 * 开仓做空
+	 */
+	public static final String DIRECTION_SHORT = "short";
 }

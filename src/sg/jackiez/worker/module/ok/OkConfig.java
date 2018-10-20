@@ -35,6 +35,12 @@ public final class OkConfig {
     public static final String KEY_START = "start";
     public static final String KEY_END = "end";
     public static final String KEY_GRANULARITY = "granularity";
+    public static final String KEY_INSTRUMENT_ID = "instrument_id";
+    public static final String KEY_LIMIT = "limit";
+    public static final String KEY_CLIENT_OID = "client_oid";
+    public static final String KEY_LEVERAGE = "leverage";
+    public static final String KEY_DIRECTION = "direction";
+    public static final String KEY_ORDER_IDS = "order_ids";
     // header key
     public static final String HEADER_ACCESS_KEY = "OK-ACCESS-KEY";
     public static final String HEADER_ACCESS_SIGN = "OK-ACCESS-SIGN";
@@ -296,5 +302,61 @@ public final class OkConfig {
          * 获取合约K线数据
          */
         String KLINE_URL = totalUrl("/api/futures/v3/instruments/%s/candles");
+        /**
+         * 单个Ticker信息
+         */
+        String TICKER_URL = totalUrl("/api/futures/v3/instruments/%s/ticker");
+        /**
+         * 全部Ticker信息
+         */
+        String TOTAL_TICKERS_URL = totalUrl("/api/futures/v3/instruments/ticker");
+        /**
+         * 获取深度数据
+         */
+        String DEPTH_INFO_URL = totalUrl("/api/futures/v3/instruments/%s/book");
+        /**
+         * 获取订单列表
+         */
+        String ORDER_LIST_URL = totalUrl("/api/futures/v3/orders/%s");
+        /**
+         * 获取订单列表
+         */
+        String ORDER_DETAIL_URL = totalUrl("/api/futures/v3/orders/%s");
+        /**
+         * 下单
+         */
+        String TRADE_URL = totalUrl("/api/futures/v3/order");
+        /**
+         * 批量下单
+         */
+        String BATCH_TRADE_URL = totalUrl("/api/futures/v3/orders");
+        /**
+         * 取消下单
+         */
+        String CANCEL_TRADE_URL = totalUrl("/api/futures/v3/cancel_order/%s/%s");
+        /**
+         * 批量取消下单
+         */
+        String BATCH_CANCEL_TRADE_URL = totalUrl("/api/futures/v3/cancel_batch_orders/%s");
+        /**
+         * 设置合约币种杠杆倍率
+         */
+        String SET_LEVERAGE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
+        /**
+         * 获取合约币种杠杆倍率
+         */
+        String GET_LEVERAGE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
+        /**
+         * 获取所有币种的合约账户信息
+         */
+        String USER_INFO_URL = totalUrl("/api/futures/v3/accounts");
+        /**
+         * 获取所有持仓信息
+         */
+        String ALL_POSITION_URL = totalUrl("/api/futures/v3/position");
+        /**
+         * 获取单个合约持仓信息
+         */
+        String POSITION_URL = totalUrl("/api/futures/v3/%s/position");
     }
 }
