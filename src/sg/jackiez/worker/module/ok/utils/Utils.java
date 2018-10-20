@@ -87,4 +87,11 @@ public class Utils {
 	                                       int amount) {
 		return (fixProtectionFee + unProfit) * openPrice * leverRate / (pageValue * amount);
 	}
+
+	/**
+	 * 根据下单精度获取下单数量
+	 */
+	public static double getCountByIncrement(double val, double trade_increment) {
+		return (int)(val / trade_increment) * trade_increment;
+	}
 }

@@ -77,14 +77,14 @@ public class CollectionUtil {
         }
 
         ListIterator<T> it = listObj.listIterator();
-        final int size = listObj.size();
+        int size = listObj.size();
         if (fromHead) {
-            while (it.hasNext() && size > limitSize) {
+            while (it.hasNext() && size-- > limitSize) {
                 it.next();
                 it.remove();
             }
         } else {
-            while (it.hasPrevious() && size > limitSize) {
+            while (it.hasPrevious() && size-- > limitSize) {
                 it.previous();
                 it.remove();
             }

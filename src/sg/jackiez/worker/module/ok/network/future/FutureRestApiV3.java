@@ -116,10 +116,6 @@ public class FutureRestApiV3 {
 		return HttpManager.get().doGet(OkConfig.FutureV3.TOTAL_TICKERS_URL, null);
 	}
 
-	public String getInstrumentsInfo() {
-		return HttpManager.get().doGet(OkConfig.FutureV3.INSTRUMENTS_URL, null);
-	}
-
 	public String getDepthInfo(String instrumentId, String size) {
 		String realUrl = String.format(OkConfig.FutureV3.DEPTH_INFO_URL, instrumentId);
 		Map<String, String> params = CollectionUtil.singletonMap(OkConfig.KEY_SIZE, String.valueOf(size));
