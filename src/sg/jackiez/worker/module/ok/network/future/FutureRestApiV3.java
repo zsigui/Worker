@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import sg.jackiez.worker.module.ok.OkConfig;
-import sg.jackiez.worker.module.ok.model.TradeInfo;
 import sg.jackiez.worker.module.ok.model.TradeInfoV3;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.DateUtil;
@@ -136,7 +135,24 @@ public class FutureRestApiV3 {
 		if (!CommonUtil.isEmpty(limit)) {
 			params.put(OkConfig.KEY_LIMIT, limit);
 		}
-		return doGet(OkConfig.FutureV3.LEVER_RATE_URL, params);
+		return doGet(OkConfig.FutureV3.TRADE_DETAIL_URL, params);
+	}
+
+	public String getTradeHistory(String instrumentId, String from, String to, String limit) {
+		String realUrl = String.format(OkConfig.FutureV3.TRADE_HISTORY_URL, instrumentId);
+		Map<String, String> params = CollectionUtil.getExtraMap(
+				OkConfig.KEY_INSTRUMENT_ID, instrumentId
+		);
+		if (!CommonUtil.isEmpty(from)) {
+			params.put(OkConfig.KEY_FROM, from);
+		}
+		if (!CommonUtil.isEmpty(to)) {
+			params.put(OkConfig.KEY_TO, to);
+		}
+		if (!CommonUtil.isEmpty(limit)) {
+			params.put(OkConfig.KEY_LIMIT, limit);
+		}
+		return doGet(realUrl, params);
 	}
 
 	public String getOrderList(String instrumentId, String status, String from, String to, String limit) {

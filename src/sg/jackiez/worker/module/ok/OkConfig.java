@@ -354,5 +354,13 @@ public final class OkConfig {
          * 获取单个合约持仓信息
          */
         String POSITION_URL = totalUrl("/api/futures/v3/%s/position");
+	    /**
+	     * 获取成交明细
+	     */
+	    String TRADE_DETAIL_URL = totalUrl("/api/futures/v3/fills");
+	    /**
+	     * 获取合约最新的成交数据列表(最多2000条)
+	     */
+	    String TRADE_HISTORY_URL = totalUrl("/api/futures/v3/instruments/%s/trades");
     }
 }

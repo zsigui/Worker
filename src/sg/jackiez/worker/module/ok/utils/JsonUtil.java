@@ -162,6 +162,9 @@ public class JsonUtil {
                     item.lowest = node.get(3).asDouble();
                     item.close = node.get(4).asDouble();
                     item.volume = node.get(5).asDouble();
+                    if (node.size() > 6) {
+                        item.currency_volume = node.get(6).asDouble();
+                    }
                     klineInfos.add(item);
                 }
                 return klineInfos;

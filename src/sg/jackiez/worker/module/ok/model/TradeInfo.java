@@ -1,8 +1,12 @@
 package sg.jackiez.worker.module.ok.model;
 
+import sg.jackiez.worker.module.ok.model.base.BaseM;
 import sg.jackiez.worker.utils.DateUtil;
 
-public class TradeInfo {
+/**
+ * 个人成交记录明细
+ */
+public class TradeInfo extends BaseM {
 
     /**
      * 交易时间(s)

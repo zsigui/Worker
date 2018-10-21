@@ -32,6 +32,10 @@ public class KlineInfo {
 	 * 交易量
 	 */
 	public double volume;
+	/**
+	 * 按币种折算的交易量
+	 */
+	public double currency_volume;
 
 	@Override
 	public boolean equals(Object obj) {

@@ -100,7 +100,7 @@ public class DBUtil {
             }
             /**开始拼插入的sql语句**/
             StringBuilder sql = new StringBuilder();
-            sql.append("INSERT INTO ");
+            sql.append("INSERT IGNORE INTO ");
             sql.append(tableName);
             sql.append(" (");
             sql.append(columnSql);
