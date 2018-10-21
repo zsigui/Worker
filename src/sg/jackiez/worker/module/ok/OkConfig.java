@@ -339,13 +339,9 @@ public final class OkConfig {
          */
         String BATCH_CANCEL_TRADE_URL = totalUrl("/api/futures/v3/cancel_batch_orders/%s");
         /**
-         * 设置合约币种杠杆倍率
+         * 获取/设置合约币种杠杆倍率
          */
-        String SET_LEVERAGE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
-        /**
-         * 获取合约币种杠杆倍率
-         */
-        String GET_LEVERAGE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
+        String LEVERAGE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
         /**
          * 获取所有币种的合约账户信息
          */

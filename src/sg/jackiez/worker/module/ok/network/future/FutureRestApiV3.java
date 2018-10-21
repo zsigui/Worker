@@ -172,7 +172,7 @@ public class FutureRestApiV3 {
 				OkConfig.KEY_INSTRUMENT_ID, instrumentId,
 				OkConfig.KEY_TYPE, type,
 				OkConfig.KEY_PRICE, price,
-				OkConfig.KEY_SIGN, size,
+				OkConfig.KEY_SIZE, size,
 				OkConfig.KEY_LEVERAGE, leverage
 		);
 		if (!CommonUtil.isEmpty(matchPrice)) {
@@ -205,15 +205,14 @@ public class FutureRestApiV3 {
 	}
 
 	public String getLeverage(String currency) {
-		String realUrl = String.format(OkConfig.FutureV3.GET_LEVERAGE_URL, currency);
+		String realUrl = String.format(OkConfig.FutureV3.LEVERAGE_URL, currency);
 		return doGet(realUrl, null);
 	}
 
 	public String setLeverage(String currency, String leverage,
 	                          String instrumentId, String direction) {
-		String realUrl = String.format(OkConfig.FutureV3.SET_LEVERAGE_URL, currency);
+		String realUrl = String.format(OkConfig.FutureV3.LEVERAGE_URL, currency);
 		Map<String, String> params = CollectionUtil.getExtraMap(
-				OkConfig.KEY_CURRENT_PAGE, currency,
 				OkConfig.KEY_LEVERAGE, leverage
 		);
 		// 后面两个逐仓也得填
