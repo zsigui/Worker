@@ -161,7 +161,7 @@ public class JsonUtil {
                     item.highest = node.get(2).asDouble();
                     item.lowest = node.get(3).asDouble();
                     item.close = node.get(4).asDouble();
-                    item.volume = node.get(5).asDouble();
+                    item.volume = node.get(5).asLong();
                     if (node.size() > 6) {
                         item.currency_volume = node.get(6).asDouble();
                     }

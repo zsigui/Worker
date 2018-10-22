@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sg.jackiez.worker.module.ok.handler.DBDataHandler;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.utils.DateUtil;
 import sg.jackiez.worker.utils.SLogUtil;
@@ -44,8 +45,10 @@ public class DBManager {
 	}
 
 	private interface Kline15MinDeatil extends KlineDetail {
-		String TABLE_NAME = "kline_1min";
+		String TABLE_NAME = "kline_15min";
 	}
+
+	private DBDataHandler mHandler = new DBDataHandler();
 
 	private static final class SingletonHolder {
 		static final DBManager sInstance = new DBManager();
@@ -55,6 +58,14 @@ public class DBManager {
 
 	public static DBManager get() {
 		return SingletonHolder.sInstance;
+	}
+
+	public void startGrab() {
+		mHandler.startDBThread();
+	}
+
+	public void stopGrab() {
+		mHandler.startDBThread();
 	}
 
 	private int batchInsertData(String table, List<Map<String, Object>> data) {

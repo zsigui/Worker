@@ -31,7 +31,7 @@ public class KlineInfo {
 	/**
 	 * 交易量
 	 */
-	public double volume;
+	public long volume;
 	/**
 	 * 按币种折算的交易量
 	 */

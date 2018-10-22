@@ -4,6 +4,7 @@ import java.util.List;
 
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
+import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public interface FutureDataChangeCallback {
@@ -14,4 +15,6 @@ public interface FutureDataChangeCallback {
                             String longTimeType, List<KlineInfo> longKlineInfos);
 
     void onTickerDataUpdate(Ticker ticker);
+
+    void onGetTradeHistory(List<TradeHistoryItem> tradeHistory);
 }

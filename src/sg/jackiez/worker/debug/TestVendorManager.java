@@ -15,6 +15,7 @@ import sg.jackiez.worker.module.ok.handler.FutureVendor;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
+import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 import sg.jackiez.worker.module.util.UniversalDataSource;
@@ -76,6 +77,11 @@ public class TestVendorManager {
         @Override
         public void onTickerDataUpdate(Ticker ticker) {
             // 暂时忽略这个的处理
+        }
+
+        @Override
+        public void onGetTradeHistory(List<TradeHistoryItem> tradeHistory) {
+
         }
     };
 

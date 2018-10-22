@@ -5,6 +5,7 @@ import java.util.List;
 import io.netty.util.internal.ConcurrentSet;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
+import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
@@ -97,6 +98,14 @@ public class CallbackManager implements
 		SLogUtil.v(TAG, "onTickerDataUpdate");
 		for (FutureDataChangeCallback callback : mFutureDataChangedCallbacks) {
 			callback.onTickerDataUpdate(ticker);
+		}
+	}
+
+	@Override
+	public void onGetTradeHistory(List<TradeHistoryItem> tradeHistory) {
+		SLogUtil.v(TAG, "onGetTradeHistory");
+		for (FutureDataChangeCallback callback : mFutureDataChangedCallbacks) {
+			callback.onGetTradeHistory(tradeHistory);
 		}
 	}
 

@@ -10,6 +10,7 @@ import sg.jackiez.worker.module.ok.callback.CallbackManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.InstrumentInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
+import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.module.ok.model.resp.RespTicker;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
@@ -37,10 +38,12 @@ public class FutureDataGrabber {
 	private HashMap<String, Long> mStoreKlinesLastDataTimeMap = new HashMap<>(2);
 	private HashMap<String, List<KlineInfo>> mStoreKlinesMap = new HashMap<>(2);
 	private DepthInfo mDepthInfo;
+	private List<TradeHistoryItem> mLastTradeHistory;
 
 	private final int KLINE_GAP_TIME = 500;
 	private final int TICKER_GAP_TIME = 500;
 	private final int DEPTH_GAP_TIME = 500;
+	private final int TRADE_GAP_TIME = 300;
 	// 一年时间
 	private static final long ONE_YEAR_TIME_IN_MILLIS = 365L * 7 * 24 * 60 * 60 * 1000;
 	private static final int KLINE_LIMIT_SIZE = 1000;
@@ -48,9 +51,12 @@ public class FutureDataGrabber {
 	private boolean mIsTickerGrabRunning = false;
 	private boolean mIsKlineGrabRunning = false;
 	private boolean mIsDepthGrabRunning = false;
+	private boolean mIsTradeGrabRunning = false;
 	private Thread mTickerGrabThread;
 	private Thread mKlineGrabThread;
 	private Thread mDepthGrabThread;
+	private Thread mTradeGrabThread;
+
 
 	public FutureDataGrabber() {
 		this("eos_usd", OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
@@ -84,6 +90,12 @@ public class FutureDataGrabber {
 
 	public Ticker getTicker() {
 		return mTicker;
+	}
+
+	private void judgeInstrumentId() {
+		if (mInstrumentId == null) {
+			initInstrumentId();
+		}
 	}
 
 	public void initInstrumentId() {
@@ -124,10 +136,12 @@ public class FutureDataGrabber {
 	}
 
 	public void startDepthGrabThread() {
+		judgeInstrumentId();
 		if (mDepthGrabThread != null && mDepthGrabThread.isAlive()
 				&& !mDepthGrabThread.isInterrupted()) {
 			return;
 		}
+
 		mIsDepthGrabRunning = true;
 		mDepthGrabThread = new DefaultThread(() -> {
 			DepthInfo depthInfoNew, depthInfoOld = null;
@@ -167,10 +181,12 @@ public class FutureDataGrabber {
 	}
 
 	public void startTickerGrabThread() {
+		judgeInstrumentId();
 		if (mTickerGrabThread != null && mTickerGrabThread.isAlive()
 				&& !mTickerGrabThread.isInterrupted()) {
 			return;
 		}
+
 		mIsTickerGrabRunning = true;
 		mTickerGrabThread = new DefaultThread(() -> {
 			RespTicker tickerNew, tickerOld = null;
@@ -205,14 +221,54 @@ public class FutureDataGrabber {
 		mTickerGrabThread.start();
 	}
 
+	public void startTradeGrabThread() {
+		judgeInstrumentId();
+		if (mTradeGrabThread != null && mTradeGrabThread.isAlive()
+				&& !mTradeGrabThread.isInterrupted()) {
+			return;
+		}
+
+		mIsTradeGrabRunning = true;
+		mTradeGrabThread = new DefaultThread(() -> {
+			List<TradeHistoryItem> tradeHistory;
+			long lastTime = System.currentTimeMillis();
+			long nowTime;
+			long tickTime;
+			while (mIsTradeGrabRunning) {
+				tickTime = System.currentTimeMillis();
+				try {
+					tradeHistory = JsonUtil.jsonToSuccessDataForFuture(mRestApiV3.getTradeHistory(mInstrumentId, "",
+							"", ""),
+							new TypeReference<List<TradeHistoryItem>>() {
+							});
+					if (tradeHistory != null && !tradeHistory.isEmpty()) {
+						mLastTradeHistory = tradeHistory;
+						CallbackManager.get().onGetTradeHistory(tradeHistory);
+						nowTime = System.currentTimeMillis();
+						SLogUtil.i(TAG, "startTradeGrabThread() 数据更新, 距上次时间: "
+								+ (nowTime - lastTime) + " ms");
+						lastTime = nowTime;
+					}
+				} catch (Throwable e) {
+					SLogUtil.v(TAG, e);
+				} finally {
+					sleepIfInTime("trade grab", tickTime, TRADE_GAP_TIME);
+				}
+			}
+		});
+		mTradeGrabThread.setPriority(Thread.NORM_PRIORITY);
+		mTradeGrabThread.start();
+	}
+
 	public void startKlineGrabThread() {
+		judgeInstrumentId();
 		if (mKlineGrabThread != null && mKlineGrabThread.isAlive()
 				&& !mKlineGrabThread.isInterrupted()) {
 			return;
 		}
+
 		mIsKlineGrabRunning = true;
 		mKlineGrabThread = new DefaultThread(() -> {
-			List<KlineInfo> _1minKlines, _15minKlines, tmp;
 			long lastTime = System.currentTimeMillis();
 			long tickTime;
 			long nowTime;
@@ -298,16 +354,25 @@ public class FutureDataGrabber {
 		}
 	}
 
+	public void interruptTradeGrabThread() {
+		mIsTradeGrabRunning = false;
+		if (mTradeGrabThread != null && !mTradeGrabThread.isInterrupted()) {
+			mTradeGrabThread.interrupt();
+		}
+	}
+
 	public void startAll() {
 		startDepthGrabThread();
 		startKlineGrabThread();
 		startTickerGrabThread();
+		startTradeGrabThread();
 	}
 
 	public void stopAll() {
 		interruptTickerGrabThread();
 		interruptKlineGrabThread();
 		interruptDepthGrabThread();
+		interruptTradeGrabThread();
 	}
 
 }
