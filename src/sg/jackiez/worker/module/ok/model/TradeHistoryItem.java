@@ -31,7 +31,7 @@ public class TradeHistoryItem extends BaseM {
 	/**
 	 * 成交数量/张
 	 */
-	public double qty;
+	public long qty;
 	/**
 	 * 成交方向 buy / sell
 	 */

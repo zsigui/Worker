@@ -362,16 +362,16 @@ public class FutureDataGrabber {
 	}
 
 	public void startAll() {
-		startDepthGrabThread();
+//		startDepthGrabThread();
 		startKlineGrabThread();
-		startTickerGrabThread();
+//		startTickerGrabThread();
 		startTradeGrabThread();
 	}
 
 	public void stopAll() {
-		interruptTickerGrabThread();
+//		interruptTickerGrabThread();
 		interruptKlineGrabThread();
-		interruptDepthGrabThread();
+//		interruptDepthGrabThread();
 		interruptTradeGrabThread();
 	}
 

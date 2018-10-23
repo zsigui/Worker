@@ -50,7 +50,7 @@ public class DBUtil {
         }
         /**开始拼插入的sql语句**/
         StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO ");
+        sql.append("INSERT IGNORE INTO ");
         sql.append(tableName);
         sql.append(" (");
         sql.append(columnSql);
@@ -260,7 +260,7 @@ public class DBUtil {
             String operate;
             if (sql.toUpperCase().indexOf("DELETE FROM") != -1) {
                 operate = "删除";
-            } else if (sql.toUpperCase().indexOf("INSERT INTO") != -1) {
+            } else if (sql.toUpperCase().indexOf("INSERT IGNORE INTO") != -1) {
                 operate = "新增";
             } else {
                 operate = "修改";

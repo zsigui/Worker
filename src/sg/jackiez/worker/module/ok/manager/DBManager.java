@@ -2,13 +2,13 @@ package sg.jackiez.worker.module.ok.manager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import sg.jackiez.worker.module.ok.handler.DBDataHandler;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
-import sg.jackiez.worker.utils.DateUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 import sg.jackiez.worker.utils.db.DBUtil;
@@ -124,5 +124,26 @@ public class DBManager {
 
 	public int saveKline15minData(List<KlineInfo> klineInfoList) {
 		return saveKlineData(Kline15MinDeatil.TABLE_NAME, klineInfoList);
+	}
+
+	public void test() {
+		TradeHistoryItem item = new TradeHistoryItem();
+		item.price = 5.30;
+		item.qty = 1341235L;
+		item.side = "short";
+		item.timestamp = new Date(System.currentTimeMillis());
+		item.trade_id = 1234123412333L;
+
+		Map<String, Object> dataItem = new HashMap<>();
+		dataItem.put(TradeHistory.TRADE_ID, item.trade_id);
+		dataItem.put(TradeHistory.TIMESTAMP, item.timestamp.getTime());
+		dataItem.put(TradeHistory.PRICE, item.price);
+		dataItem.put(TradeHistory.QTY, item.qty);
+		dataItem.put(TradeHistory.SIDE, item.side);
+		try {
+			DBUtil.insert(TradeHistory.TABLE_NAME, dataItem);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }
