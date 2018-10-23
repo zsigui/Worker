@@ -13,12 +13,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.annotations.Nullable;
 
 /**
  * 数据库JDBC连接工具类
  */
 public class DBUtil {
+
+    private static final String TAG = "DBUtil";
+
     /**
      * 执行数据库插入操作
      *
@@ -54,7 +58,7 @@ public class DBUtil {
         sql.append(tableName);
         sql.append(" (");
         sql.append(columnSql);
-        sql.append(" )  VALUES (");
+        sql.append(" ) VALUES (");
         sql.append(unknownMarkSql);
         sql.append(" )");
         return executeUpdate(sql.toString(), bindArgs);
@@ -70,7 +74,7 @@ public class DBUtil {
      */
     public static int insertAll(String tableName, List<Map<String, Object>> datas) throws SQLException {
         /**影响的行数**/
-        int affectRowCount = -1;
+        int affectRowCount;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
@@ -104,7 +108,7 @@ public class DBUtil {
             sql.append(tableName);
             sql.append(" (");
             sql.append(columnSql);
-            sql.append(" )  VALUES (");
+            sql.append(" ) VALUES (");
             sql.append(unknownMarkSql);
             sql.append(" )");
 
@@ -112,7 +116,7 @@ public class DBUtil {
             preparedStatement = connection.prepareStatement(sql.toString());
             /**设置不自动提交，以便于在出现异常的时候数据库回滚**/
             connection.setAutoCommit(false);
-            System.out.println(sql.toString());
+            SLogUtil.v(TAG, sql.toString());
             for (int j = 0; j < datas.size(); j++) {
                 for (int k = 0; k < keys.length; k++) {
                     preparedStatement.setObject(k + 1, datas.get(j).get(keys[k]));
@@ -122,13 +126,11 @@ public class DBUtil {
             int[] arr = preparedStatement.executeBatch();
             connection.commit();
             affectRowCount = arr.length;
-            System.out.println("成功了插入了" + affectRowCount + "行");
-            System.out.println();
+            SLogUtil.d(TAG, "succeed insert rows : " + affectRowCount);
         } catch (Exception e) {
             if (connection != null) {
                 connection.rollback();
             }
-            e.printStackTrace();
             throw e;
         } finally {
             if (preparedStatement != null) {
@@ -167,7 +169,7 @@ public class DBUtil {
         while (iterator.hasNext()) {
             String key = iterator.next();
             columnSql.append(i == 0 ? "" : ",");
-            columnSql.append(key + " = ? ");
+            columnSql.append(key).append(" = ? ");
             objects.add(valueMap.get(key));
             i++;
         }
@@ -182,7 +184,7 @@ public class DBUtil {
             while (iterator.hasNext()) {
                 String key = iterator.next();
                 whereSql.append(j == 0 ? "" : " AND ");
-                whereSql.append(key + " = ? ");
+                whereSql.append(key).append(" = ? ");
                 objects.add(whereMap.get(key));
                 j++;
             }
@@ -237,17 +239,17 @@ public class DBUtil {
      */
     public static int executeUpdate(String sql, Object[] bindArgs) throws SQLException {
         /**影响的行数**/
-        int affectRowCount = -1;
+        int affectRowCount;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
             /**从数据库连接池中获取数据库连接**/
             connection = DBConnectionPool.getInstance().getConnection();
             /**执行SQL预编译**/
-            preparedStatement = connection.prepareStatement(sql.toString());
+            preparedStatement = connection.prepareStatement(sql);
             /**设置不自动提交，以便于在出现异常的时候数据库回滚**/
             connection.setAutoCommit(false);
-            System.out.println(getExecSQL(sql, bindArgs));
+            SLogUtil.v(TAG, getExecSQL(sql, bindArgs));
             if (bindArgs != null) {
                 /**绑定参数设置sql占位符中的值**/
                 for (int i = 0; i < bindArgs.length; i++) {
@@ -258,20 +260,19 @@ public class DBUtil {
             affectRowCount = preparedStatement.executeUpdate();
             connection.commit();
             String operate;
-            if (sql.toUpperCase().indexOf("DELETE FROM") != -1) {
-                operate = "删除";
-            } else if (sql.toUpperCase().indexOf("INSERT IGNORE INTO") != -1) {
-                operate = "新增";
+            if (sql.toUpperCase().contains("DELETE FROM")) {
+                operate = "delete";
+            } else if (sql.toUpperCase().contains("INSERT IGNORE INTO")) {
+                operate = "insert";
             } else {
-                operate = "修改";
+                operate = "modify";
             }
-            System.out.println("成功" + operate + "了" + affectRowCount + "行");
-            System.out.println();
+            SLogUtil.d(TAG, "succeed to " + operate + " rows : " + affectRowCount);
         } catch (Exception e) {
             if (connection != null) {
                 connection.rollback();
             }
-            e.printStackTrace();
+            SLogUtil.e(TAG, e);
             throw e;
         } finally {
             if (preparedStatement != null) {
@@ -391,13 +392,12 @@ public class DBUtil {
                     preparedStatement.setObject(i + 1, bindArgs[i]);
                 }
             }
-            System.out.println(getExecSQL(sql, bindArgs));
+            SLogUtil.v(TAG, getExecSQL(sql, bindArgs));
             /**执行sql语句，获取结果集**/
             resultSet = preparedStatement.executeQuery();
             datas = getDatas(resultSet);
-            System.out.println();
         } catch (Exception e) {
-            e.printStackTrace();
+            SLogUtil.e(TAG, e);
             throw e;
         } finally {
             if (resultSet != null) {
@@ -432,11 +432,7 @@ public class DBUtil {
             }
             datas.add(rowMap);
         }
-        System.out.println("成功查询到了" + datas.size() + "行数据");
-        for (int i = 0; i < datas.size(); i++) {
-            Map<String, Object> map = datas.get(i);
-            System.out.println("第" + (i + 1) + "行：" + map);
-        }
+        SLogUtil.d(TAG, "succeed to query rows: " + datas.size());
         return datas;
     }
 
@@ -563,9 +559,9 @@ public class DBUtil {
         StringBuilder sb = new StringBuilder(sql);
         if (bindArgs != null && bindArgs.length > 0) {
             int index = 0;
-            for (int i = 0; i < bindArgs.length; i++) {
+            for (Object bindArg : bindArgs) {
                 index = sb.indexOf("?", index);
-                sb.replace(index, index + 1, String.valueOf(bindArgs[i]));
+                sb.replace(index, index + 1, String.valueOf(bindArg));
             }
         }
         return sb.toString();

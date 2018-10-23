@@ -10,9 +10,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import sg.jackiez.worker.utils.SLogUtil;
+
 public class DBConnectionPool {
+    private static final String TAG = "DBConnectionPool";
+
     private static volatile DBConnectionPool dbConnection;
     private ComboPooledDataSource cpds;
+
 
     /**
      * 在构造函数初始化的时候获取数据库连接
@@ -67,10 +72,8 @@ public class DBConnectionPool {
              但是数据源仍有效的保留,并在下次调用getConnection()的时候继续尝试获取连接.如果设为true,
              那么尝试获取连接失败后该数据源将申明已经断开并永久关闭.默认为false**/
             cpds.setBreakAfterAcquireFailure(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (PropertyVetoException e) {
-            e.printStackTrace();
+        } catch (IOException | PropertyVetoException e) {
+            SLogUtil.v(TAG, e);
         }
 
     }
