@@ -126,7 +126,7 @@ public class DBUtil {
             int[] arr = preparedStatement.executeBatch();
             connection.commit();
             affectRowCount = arr.length;
-            SLogUtil.d(TAG, "succeed insert rows : " + affectRowCount);
+            SLogUtil.i(TAG, "succeed insert rows : " + affectRowCount);
         } catch (Exception e) {
             if (connection != null) {
                 connection.rollback();
@@ -267,7 +267,7 @@ public class DBUtil {
             } else {
                 operate = "modify";
             }
-            SLogUtil.d(TAG, "succeed to " + operate + " rows : " + affectRowCount);
+            SLogUtil.i(TAG, "succeed to " + operate + " rows : " + affectRowCount);
         } catch (Exception e) {
             if (connection != null) {
                 connection.rollback();
@@ -432,7 +432,7 @@ public class DBUtil {
             }
             datas.add(rowMap);
         }
-        SLogUtil.d(TAG, "succeed to query rows: " + datas.size());
+        SLogUtil.i(TAG, "succeed to query rows: " + datas.size());
         return datas;
     }
 
