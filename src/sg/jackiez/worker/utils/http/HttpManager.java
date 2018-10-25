@@ -38,7 +38,7 @@ public class HttpManager {
     private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Mobile Safari/537.36";
     private static final String DEFAULT_ACCEPT = "*/*";
 
-    private static final int CONNECTION_TIMEOUT = 15_000;
+    private static final int CONNECTION_TIMEOUT = 30_000;
     private static final int READ_TIMEOUT = 15_000;
 
     private static final String METHOD_GET = "GET";
