@@ -23,6 +23,28 @@ public class DBUtil {
 
     private static final String TAG = "DBUtil";
 
+    public static int FLAG_INSERT_DEFAULT = 0;
+    public static int FLAG_INSERT_REPLACE = 1;
+
+    /**
+     * 构建插入SQL语句
+     */
+    private static String spliceInsertSql(String tableName, int flag, StringBuilder columnSql, StringBuilder unknownMarkSql) {
+        StringBuilder sql = new StringBuilder();
+        if (flag == FLAG_INSERT_REPLACE) {
+            sql.append("REPLACE INTO ");
+        } else {
+            sql.append("INSERT IGNORE INTO ");
+        }
+        sql.append(tableName);
+        sql.append(" (");
+        sql.append(columnSql);
+        sql.append(" ) VALUES (");
+        sql.append(unknownMarkSql);
+        sql.append(" )");
+        return sql.toString();
+    }
+
     /**
      * 执行数据库插入操作
      *
@@ -31,7 +53,7 @@ public class DBUtil {
      * @return 影响的行数
      * @throws SQLException SQL异常
      */
-    public static int insert(String tableName, Map<String, Object> valueMap) throws SQLException {
+    public static int insert(String tableName, Map<String, Object> valueMap, int flag) throws SQLException {
 
         /**获取数据库插入的Map的键值对的值**/
         Set<String> keySet = valueMap.keySet();
@@ -53,15 +75,8 @@ public class DBUtil {
             i++;
         }
         /**开始拼插入的sql语句**/
-        StringBuilder sql = new StringBuilder();
-        sql.append("INSERT IGNORE INTO ");
-        sql.append(tableName);
-        sql.append(" (");
-        sql.append(columnSql);
-        sql.append(" ) VALUES (");
-        sql.append(unknownMarkSql);
-        sql.append(" )");
-        return executeUpdate(sql.toString(), bindArgs);
+        String sql = spliceInsertSql(tableName, flag, columnSql, unknownMarkSql);
+        return executeUpdate(sql, bindArgs);
     }
 
     /**
@@ -72,7 +87,7 @@ public class DBUtil {
      * @return 影响的行数
      * @throws SQLException SQL异常
      */
-    public static int insertAll(String tableName, List<Map<String, Object>> datas) throws SQLException {
+    public static int insertAll(String tableName, List<Map<String, Object>> datas, int flag) throws SQLException {
         /**影响的行数**/
         int affectRowCount;
         Connection connection = null;
@@ -103,20 +118,13 @@ public class DBUtil {
                 i++;
             }
             /**开始拼插入的sql语句**/
-            StringBuilder sql = new StringBuilder();
-            sql.append("INSERT IGNORE INTO ");
-            sql.append(tableName);
-            sql.append(" (");
-            sql.append(columnSql);
-            sql.append(" ) VALUES (");
-            sql.append(unknownMarkSql);
-            sql.append(" )");
+            String sql = spliceInsertSql(tableName, flag, columnSql, unknownMarkSql);
 
             /**执行SQL预编译**/
-            preparedStatement = connection.prepareStatement(sql.toString());
+            preparedStatement = connection.prepareStatement(sql);
             /**设置不自动提交，以便于在出现异常的时候数据库回滚**/
             connection.setAutoCommit(false);
-            SLogUtil.v(TAG, sql.toString());
+            SLogUtil.v(TAG, sql);
             for (int j = 0; j < datas.size(); j++) {
                 for (int k = 0; k < keys.length; k++) {
                     preparedStatement.setObject(k + 1, datas.get(j).get(keys[k]));
@@ -262,10 +270,10 @@ public class DBUtil {
             String operate;
             if (sql.toUpperCase().contains("DELETE FROM")) {
                 operate = "delete";
-            } else if (sql.toUpperCase().contains("INSERT IGNORE INTO")) {
-                operate = "insert";
-            } else {
+            } else if (sql.toUpperCase().contains("UPDATE")) {
                 operate = "modify";
+            } else {
+                operate = "insert";
             }
             SLogUtil.i(TAG, "succeed to " + operate + " rows : " + affectRowCount);
         } catch (Exception e) {

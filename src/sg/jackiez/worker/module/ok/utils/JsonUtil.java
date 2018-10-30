@@ -151,6 +151,7 @@ public class JsonUtil {
             if (tree.isArray()) {
                 ArrayList<KlineInfo> klineInfos = new ArrayList<>();
                 KlineInfo item;
+                int last0VloumeIndex = -1;
                 for (JsonNode node : tree) {
                     if (node == null || node.size() < 6) {
                         continue;
@@ -165,7 +166,17 @@ public class JsonUtil {
                     if (node.size() > 6) {
                         item.currency_volume = node.get(6).asDouble();
                     }
+                    if (item.volume == 0) {
+                        // OK的机制，比如当前12:00:03，此时可以拿到12:00:00~12:00:59的数据，但实际拿到的量为0
+                        last0VloumeIndex = klineInfos.size();
+                        SLogUtil.i(TAG, "Filter 0 volume K-Line data : " + json);
+                    }
                     klineInfos.add(item);
+                }
+
+                if (last0VloumeIndex != -1 && last0VloumeIndex == klineInfos.size() - 1) {
+                    // 如果是最后一个数据，且量为0，表示还没获取到有效数据，移除掉
+                    klineInfos.remove(last0VloumeIndex);
                 }
                 return klineInfos;
             }

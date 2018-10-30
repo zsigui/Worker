@@ -70,7 +70,7 @@ public class DBManager {
 
 	private int batchInsertData(String table, List<Map<String, Object>> data) {
 		try {
-			return DBUtil.insertAll(table, data);
+			return DBUtil.insertAll(table, data, DBUtil.FLAG_INSERT_REPLACE);
 		} catch (SQLException e) {
 			SLogUtil.d(TAG, e);
 		}
@@ -141,7 +141,7 @@ public class DBManager {
 		dataItem.put(TradeHistory.QTY, item.qty);
 		dataItem.put(TradeHistory.SIDE, item.side);
 		try {
-			DBUtil.insert(TradeHistory.TABLE_NAME, dataItem);
+			DBUtil.insert(TradeHistory.TABLE_NAME, dataItem, DBUtil.FLAG_INSERT_REPLACE);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
