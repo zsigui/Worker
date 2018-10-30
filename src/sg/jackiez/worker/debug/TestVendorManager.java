@@ -11,7 +11,7 @@ import sg.jackiez.worker.module.ok.callback.FutureDataChangeCallback;
 import sg.jackiez.worker.module.ok.callback.VendorResultCallback;
 import sg.jackiez.worker.module.ok.handler.AccountDataGrabber;
 import sg.jackiez.worker.module.ok.handler.FutureDataGrabber;
-import sg.jackiez.worker.module.ok.handler.FutureVendor;
+import sg.jackiez.worker.module.ok.handler.vendor.FutureVendor;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;

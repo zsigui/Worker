@@ -1,4 +1,4 @@
-package sg.jackiez.worker.module.ok.handler;
+package sg.jackiez.worker.module.ok.handler.vendor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -184,66 +184,66 @@ public class FutureVendor implements IVendor{
     }
 
     @Override
-    public void buyShort(String symbol, double price, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, price, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
+    public void buyShort(String instrumentId, double price, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
     }
 
     @Override
-    public void buyShortDirectly(String symbol, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, 0, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
+    public void buyShortDirectly(String instrumentId, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
     }
 
     @Override
-    public void sellShort(String symbol, double price, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, price, amount, OKTypeConfig.TREND_TYPE_SELL_SHORT,
+    public void sellShort(String instrumentId, double price, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
     }
 
     @Override
-    public void sellShortDirectly(String symbol, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
+    public void sellShortDirectly(String instrumentId, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
     }
 
     @Override
-    public void buyLong(String symbol, double price, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, price, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
+    public void buyLong(String instrumentId, double price, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
     }
 
     @Override
-    public void buyLongDirectly(String symbol, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, 0, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
+    public void buyLongDirectly(String instrumentId, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
     }
 
     @Override
-    public void sellLong(String symbol, double price, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, price, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
+    public void sellLong(String instrumentId, double price, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
     }
 
     @Override
-    public void sellLongDirectly(String symbol, double amount) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
+    public void sellLongDirectly(String instrumentId, double amount) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
     }
 
     @Override
-    public void cancelOrder(String symbol, String orderId) {
-        addTradeInfoAndNotify(new FutureTradeInfo(symbol, orderId));
+    public void cancelOrder(String instrumentId, String orderId) {
+        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, orderId));
     }
 
     @Override
-    public void cancelOrders(String symbol, List<String> orderIds) {
+    public void cancelOrders(String instrumentId, List<String> orderIds) {
         StringBuilder builder = new StringBuilder();
         for (String orderId : orderIds) {
             builder.append(orderId).append(",");
         }
         builder.deleteCharAt(builder.length() - 1);
-        cancelOrder(symbol, builder.toString());
+        cancelOrder(instrumentId, builder.toString());
     }
 
     static class FutureTradeInfo extends BaseM {

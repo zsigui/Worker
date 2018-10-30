@@ -33,7 +33,7 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 	private String mContractType;
 
 	public AccountDataGrabber() {
-		this("eos_usdt", OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
+		this(OKTypeConfig.SYMBOL_EOS, OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
 	}
 
 	public AccountDataGrabber(String symbol,

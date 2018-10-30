@@ -59,7 +59,7 @@ public class FutureDataGrabber {
 
 
 	public FutureDataGrabber() {
-		this("eos_usd", OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
+		this(OKTypeConfig.SYMBOL_EOS, OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
 	}
 
 	public FutureDataGrabber(String symbol, String contractType, IFutureRestApi restApi) {
