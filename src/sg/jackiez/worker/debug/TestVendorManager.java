@@ -236,9 +236,9 @@ public class TestVendorManager {
         IFutureRestApi futureRestApi = new FutureRestApiV1();
         FutureRestApiV3 futureRestApiV3 = new FutureRestApiV3();
         String contractType = OKTypeConfig.CONTRACT_TYPE_QUARTER;
-        mAccountDataGrabber = new AccountDataGrabber(symbol, contractType,
-                futureRestApiV3);
         mFutureDataGrabber = new FutureDataGrabber(symbol, contractType, futureRestApi);
+        mFutureDataGrabber.initInstrumentId();
+        mAccountDataGrabber = new AccountDataGrabber(mFutureDataGrabber.getInstrumentId(), futureRestApiV3);
         mAccountDataGrabber.startGrabAccountDataThread();
         mFutureDataGrabber.startAll();
         mFutureVendor = new FutureVendorV3(futureRestApiV3, contractType, OKTypeConfig.LEVER_RATE_20);
