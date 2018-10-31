@@ -2,6 +2,33 @@ package sg.jackiez.worker.module.ok;
 
 public class OKTypeConfig {
 
+	// 自定义数据库订单处理状态
+	/**
+	 * 初始化状态
+	 */
+	public static final int DB_STATE_INIT = 0;
+	/**
+	 * 表示下单成功，交易中，需要后续查询更新状态
+	 */
+	public static final int DB_STATE_TRADING = 1;
+	/**
+	 * 部分交易完成状态，未完成部分，可撤单
+	 */
+	public static final int DB_STATE_PART_TRADE = 2;
+	/**
+	 * 完全交易完成状态，不可撤单
+	 */
+	public static final int DB_STATE_FULL_TRADE = 3;
+	/**
+	 * 取消订单处理中
+	 */
+	public static final int DB_STATE_CANCELLING = 4;
+	/**
+	 * 取消订单完成
+	 */
+	public static final int DB_STATE_CANCELLED = 5;
+
+
 	// 期货币对
 	public static final String SYMBOL_EOS = "eos_usd";
 	public static final String SYMBOL_BTC = "btc_usd";

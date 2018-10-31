@@ -11,12 +11,13 @@ import sg.jackiez.worker.module.ok.callback.FutureDataChangeCallback;
 import sg.jackiez.worker.module.ok.callback.VendorResultCallback;
 import sg.jackiez.worker.module.ok.handler.AccountDataGrabber;
 import sg.jackiez.worker.module.ok.handler.FutureDataGrabber;
-import sg.jackiez.worker.module.ok.handler.vendor.FutureVendor;
+import sg.jackiez.worker.module.ok.handler.vendor.FutureVendorV3;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
+import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
 import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 import sg.jackiez.worker.module.util.UniversalDataSource;
 import sg.jackiez.worker.utils.SLogUtil;
@@ -34,7 +35,7 @@ public class TestVendorManager {
 
     private AccountDataGrabber mAccountDataGrabber;
     private FutureDataGrabber mFutureDataGrabber;
-    private FutureVendor mFutureVendor;
+    private FutureVendorV3 mFutureVendor;
     private TestAccount mTestAccount = new TestAccount();
     private boolean mIsDataChange;
 
@@ -233,13 +234,14 @@ public class TestVendorManager {
         OkConfig.IS_TEST = true;
         SLogUtil.setPrintFile(true);
         IFutureRestApi futureRestApi = new FutureRestApiV1();
+        FutureRestApiV3 futureRestApiV3 = new FutureRestApiV3();
         String contractType = OKTypeConfig.CONTRACT_TYPE_QUARTER;
         mAccountDataGrabber = new AccountDataGrabber(symbol, contractType,
-                futureRestApi);
+                futureRestApiV3);
         mFutureDataGrabber = new FutureDataGrabber(symbol, contractType, futureRestApi);
         mAccountDataGrabber.startGrabAccountDataThread();
         mFutureDataGrabber.startAll();
-        mFutureVendor = new FutureVendor(futureRestApi, contractType, OKTypeConfig.LEVER_RATE_20);
+        mFutureVendor = new FutureVendorV3(futureRestApiV3, contractType, OKTypeConfig.LEVER_RATE_20);
         mFutureVendor.startTradeThread();
         CallbackManager.get().addAccountStateChangeCallback(mStateChangeCallback);
         CallbackManager.get().addFutureDataChangeCallback(mDataChangeCallback);

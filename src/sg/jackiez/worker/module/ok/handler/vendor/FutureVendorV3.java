@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.OkConfig;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
+import sg.jackiez.worker.module.ok.manager.DBManager;
 import sg.jackiez.worker.module.ok.model.base.BaseM;
 import sg.jackiez.worker.module.ok.model.resp.RespBatchCancelTradeV3;
 import sg.jackiez.worker.module.ok.model.resp.RespCancelTradeV3;
@@ -51,8 +52,14 @@ public class FutureVendorV3 implements IVendor{
         if (info == null) {
             return;
         }
+        info.clientOId = generateClientOId();
         mTradeInfoList.add(info);
         startTradeThread();
+    }
+
+    private String generateClientOId() {
+        return String.valueOf(System.currentTimeMillis())
+                + String.valueOf((int)(Math.random() * 900 + 100));
     }
 
     private boolean isTradeThreadAlive() {
@@ -137,6 +144,8 @@ public class FutureVendorV3 implements IVendor{
                 // 单笔订单处理
                 if (rsp.result) {
                     // 成功
+                    DBManager.get().updateCancelTradeState(info.instrumentId,
+                            info.orderId, OKTypeConfig.DB_STATE_CANCELLING);
                     CallbackManager.get().onCancelOrderSuccess();
                 } else {
                     CallbackManager.get().onCancelOrderFail();
@@ -174,6 +183,7 @@ public class FutureVendorV3 implements IVendor{
         int retryTime;
         RespTradeV3 rsp = null;
         retryTime = MAXT_RETRY_TIME;
+        DBManager.get().saveTrade(info, mLeverRate, OKTypeConfig.DB_STATE_INIT);
         while (rsp == null && retryTime-- > 0) {
             rsp = doTrade(info.instrumentId, info.price, info.amount, info.trendType,
                     info.priceType, info.clientOId);
@@ -186,6 +196,7 @@ public class FutureVendorV3 implements IVendor{
             if (rsp == null || !rsp.result) {
                 CallbackManager.get().onTradeFail();
             } else {
+                DBManager.get().updateTradeState(info.clientOId, rsp.order_id, OKTypeConfig.DB_STATE_TRADING);
                 CallbackManager.get().onTradeSuccess();
             }
         }
@@ -267,20 +278,20 @@ public class FutureVendorV3 implements IVendor{
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, orderIds));
     }
 
-    static class FutureTradeInfo extends BaseM {
+    public static class FutureTradeInfo extends BaseM {
 
         // 进行交易记录
-        String instrumentId;
-        double price;
-        double amount;
-        byte trendType;
-        String priceType;
-        String clientOId;
+        public String instrumentId;
+        public double price;
+        public double amount;
+        public byte trendType;
+        public String priceType;
+        public String clientOId;
 
         // 取消订单记录
-        String orderId;
+        public String orderId;
         boolean isCancelOp;
-        List<String> orderIds;
+        public List<String> orderIds;
 
         FutureTradeInfo(String instrumentId, double price, double amount, byte trendType, String priceType) {
             this.instrumentId = instrumentId;

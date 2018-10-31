@@ -6,8 +6,8 @@ import java.util.Map;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
-import sg.jackiez.worker.module.ok.model.FutureHold;
-import sg.jackiez.worker.module.ok.model.account.FutureContract;
+import sg.jackiez.worker.module.ok.model.FuturePosition4Fix;
+import sg.jackiez.worker.module.ok.model.account.FutureContract4FixV3;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.annotations.NonNull;
 
@@ -36,11 +36,11 @@ public class AccountManager {
 	/**
 	 * 当前合约信息
 	 */
-	private HashMap<String, FutureContract> mCoinContractMap = new HashMap<>();
+	private HashMap<String, FutureContract4FixV3> mCoinContractMap = new HashMap<>();
 	/**
 	 * 当前持有的合约单信息, key = symbol + contract_id
 	 */
-	private HashMap<String, FutureHold> mFutureHoldMap = new HashMap<>();
+	private HashMap<String, FuturePosition4Fix> mFutureHoldMap = new HashMap<>();
 
 	private boolean mNeedUpdateInfo = false;
 
@@ -48,20 +48,20 @@ public class AccountManager {
 		return mAccountType;
 	}
 
-	public FutureContract getContractByCoin(String coinName) {
+	public FutureContract4FixV3 getContractByCoin(String coinName) {
 		return mCoinContractMap.get(coinName);
 	}
 
-	public FutureContract getEosContract() {
+	public FutureContract4FixV3 getEosContract() {
 		return getContractByCoin("eos");
 	}
 
-	public FutureHold getHold(String key) {
+	public FuturePosition4Fix getHold(String key) {
 		return mFutureHoldMap.get(key);
 	}
 
-	public void putAccountInfo(@NonNull Map<String, FutureContract> contractMap,
-	                           @NonNull List<? extends FutureHold> futureHoldList) {
+	public void putAccountInfo(@NonNull Map<String, FutureContract4FixV3> contractMap,
+	                           @NonNull List<? extends FuturePosition4Fix> futureHoldList) {
 		if (contractMap == null || futureHoldList == null) {
 			SLogUtil.d(TAG, "putAccountInfo params are not null.");
 			return;
@@ -69,8 +69,8 @@ public class AccountManager {
 		mCoinContractMap.clear();
 		futureHoldList.clear();
 		mCoinContractMap.putAll(contractMap);
-		for (FutureHold hold : futureHoldList) {
-			mFutureHoldMap.put(hold.symbol + hold.contract_id, hold);
+		for (FuturePosition4Fix hold : futureHoldList) {
+			mFutureHoldMap.put(hold.instrument_id, hold);
 		}
 		setNeedUpdateInfo(false);
 		CallbackManager.get().onAccountInfoUpdated();

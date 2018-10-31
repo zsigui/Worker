@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.model.FutureHold4Fix;
+import sg.jackiez.worker.module.ok.model.FuturePosition4Fix;
 import sg.jackiez.worker.module.ok.model.account.FutureContract;
-import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
-import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
+import sg.jackiez.worker.module.ok.model.account.FutureContract4FixV3;
+import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.thread.DefaultThread;
@@ -27,21 +27,17 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 
 	private boolean mIsRunning = false;
 	private Thread mGrabDataThread;
-	private IFutureRestApi mFutureRestApi;
+	private FutureRestApiV3 mFutureRestApi;
+	private String mInstrumentId;
 
-	private String mSymbol;
-	private String mContractType;
-
-	public AccountDataGrabber() {
-		this(OKTypeConfig.SYMBOL_EOS, OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
+	public AccountDataGrabber(String instrumentId) {
+		this(instrumentId, new FutureRestApiV3());
 	}
 
-	public AccountDataGrabber(String symbol,
-	                          String contractType,
-	                          IFutureRestApi futureRestApi) {
+	public AccountDataGrabber(String instrumentId,
+							  FutureRestApiV3 futureRestApi) {
+		mInstrumentId = instrumentId;
 		mFutureRestApi = futureRestApi;
-		mSymbol = symbol;
-		mContractType = contractType;
 	}
 
 	private boolean isGrabAccountDataThreadAlive() {
@@ -60,8 +56,8 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 
 		mIsRunning = true;
 		mGrabDataThread = new DefaultThread(() -> {
-			ArrayList<FutureHold4Fix> holdList;
-			Map<String, FutureContract> userInfo;
+			ArrayList<FuturePosition4Fix> holdList;
+			Map<String, FutureContract4FixV3> userInfo;
 
 			int retryTime;
 			long startTime;
@@ -72,16 +68,16 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 				holdList = null;
 				while (holdList == null && retryTime-- > 0) {
 					holdList = JsonUtil.jsonToSuccessDataForFuture(
-							mFutureRestApi.futurePositionForFix(mSymbol, mContractType),
-							"holding", new TypeReference<ArrayList<FutureHold4Fix>>() {
+							mFutureRestApi.getAllPositionInfo(),
+							"holding", new TypeReference<ArrayList<FuturePosition4Fix>>() {
 							});
 				}
 
 				retryTime = MAX_RETRY_TIME;
 				userInfo = null;
 				while (userInfo == null && retryTime-- > 0) {
-					userInfo = JsonUtil.jsonToSuccessDataForFuture(mFutureRestApi.futureUserInfoForFix(),
-							"info", new TypeReference<HashMap<String, FutureContract>>() {
+					userInfo = JsonUtil.jsonToSuccessDataForFuture(mFutureRestApi.getAllPositionInfo(),
+							"info", new TypeReference<HashMap<String, FutureContract4FixV3>>() {
 							});
 				}
 

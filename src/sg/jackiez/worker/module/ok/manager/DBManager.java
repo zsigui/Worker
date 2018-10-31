@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import sg.jackiez.worker.module.ok.handler.DBDataHandler;
+import sg.jackiez.worker.module.ok.handler.vendor.FutureVendorV3;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
@@ -46,6 +47,19 @@ public class DBManager {
 
 	private interface Kline15MinDeatil extends KlineDetail {
 		String TABLE_NAME = "kline_15min";
+	}
+
+	private interface TradeInfo {
+		String TABLE_NAME = "trade_info";
+		String CLIENT_OID = "client_oid";
+		String INSTRUMENT_ID = "instrument_id";
+		String ORDER_ID = "order_id";
+		String TYPE = "type";
+		String PRICE = "price";
+		String SIZE = "size";
+		String MATCH_PRICE = "match_price";
+		String LEVERAGE = "leverage";
+		String STATE = "state";
 	}
 
 	private DBDataHandler mHandler = new DBDataHandler();
@@ -124,6 +138,57 @@ public class DBManager {
 
 	public int saveKline15minData(List<KlineInfo> klineInfoList) {
 		return saveKlineData(Kline15MinDeatil.TABLE_NAME, klineInfoList);
+	}
+
+	public int saveTrade(FutureVendorV3.FutureTradeInfo item,
+								String leverage,
+								int state) {
+		if (item == null) {
+			return 0;
+		}
+		Map<String, Object> dataItem = new HashMap<>();
+		dataItem.put(TradeInfo.INSTRUMENT_ID, item.instrumentId);
+		dataItem.put(TradeInfo.ORDER_ID, item.orderId);
+		dataItem.put(TradeInfo.PRICE, item.price);
+		dataItem.put(TradeInfo.TYPE, item.trendType);
+		dataItem.put(TradeInfo.MATCH_PRICE, item.priceType);
+		dataItem.put(TradeInfo.SIZE, item.amount);
+		dataItem.put(TradeInfo.LEVERAGE, leverage);
+		dataItem.put(TradeInfo.STATE, state);
+		try {
+			return DBUtil.insert(TradeInfo.TABLE_NAME, dataItem, DBUtil.FLAG_INSERT_REPLACE);
+		} catch (SQLException e) {
+			SLogUtil.d(TAG, e);
+		}
+		return 0;
+	}
+
+	public int updateTradeState(String clientOId, String orderId, int state) {
+		Map<String, Object> dataItem = new HashMap<>();
+		dataItem.put(TradeInfo.STATE, state);
+		dataItem.put(TradeInfo.ORDER_ID, orderId);
+		Map<String, Object> whereMap = new HashMap<>();
+		whereMap.put(TradeInfo.CLIENT_OID, clientOId);
+		try {
+			return DBUtil.update(TradeInfo.TABLE_NAME, dataItem, whereMap);
+		} catch (SQLException e) {
+			SLogUtil.d(TAG, e);
+		}
+		return 0;
+	}
+
+	public int updateCancelTradeState(String instrumentId, String orderId, int state) {
+		Map<String, Object> dataItem = new HashMap<>();
+		dataItem.put(TradeInfo.STATE, state);
+		Map<String, Object> whereMap = new HashMap<>();
+		whereMap.put(TradeInfo.ORDER_ID, orderId);
+		whereMap.put(TradeInfo.INSTRUMENT_ID, instrumentId);
+		try {
+			return DBUtil.update(TradeInfo.TABLE_NAME, dataItem, whereMap);
+		} catch (SQLException e) {
+			SLogUtil.d(TAG, e);
+		}
+		return 0;
 	}
 
 	public void test() {
