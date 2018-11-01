@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import sg.jackiez.worker.module.ok.OKError;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.OkConfig;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
@@ -84,7 +85,8 @@ public class FutureVendorV3 implements IVendor{
                         if (CommonUtil.isEmpty(info.orderId)) {
                             handleCancelOrder(info);
                         } else {
-                            handleCancelMultiOrder(info);
+                            SLogUtil.i(TAG, "暂不处理多笔订单撤销逻辑");
+//                            handleCancelMultiOrder(info);
                         }
                     } else {
                         handleTrade(info);
@@ -129,49 +131,49 @@ public class FutureVendorV3 implements IVendor{
         }
         if (OkConfig.IS_TEST) {
             // 测试，直接当成成功处理
-            CallbackManager.get().onCancelOrderSuccess();
+            CallbackManager.get().onCancelOrderSuccess("123456", "123456");
         } else {
             // TODO 简单处理，后续需要重新调整
             if (rsp == null) {
-                CallbackManager.get().onCancelOrderFail();
+                CallbackManager.get().onCancelOrderFail(OKError.E_NULL, OKError.STR_E_NULL);
             } else {
                 // 单笔订单处理
                 if (rsp.result) {
                     // 成功
                     DBManager.get().updateCancelTradeState(info.instrumentId,
                             info.orderId, OKTypeConfig.DB_STATE_CANCELLING);
-                    CallbackManager.get().onCancelOrderSuccess();
+                    CallbackManager.get().onCancelOrderSuccess(info.orderId, info.instrumentId);
                 } else {
-                    CallbackManager.get().onCancelOrderFail();
+                    CallbackManager.get().onCancelOrderFail(OKError.E_REQ_FAIL, OKError.STR_E_REQ_FAIL);
                 }
             }
         }
     }
 
-    private void handleCancelMultiOrder(FutureTradeInfo info) {
-        int retryTime;
-        RespBatchCancelTradeV3 rsp = null;
-        retryTime = MAXT_RETRY_TIME;
-        while (rsp == null && retryTime-- > 0) {
-            rsp = doCancelMultiOrder(info.instrumentId, info.orderIds);
-        }
-        if (OkConfig.IS_TEST) {
-            // 测试，直接当成成功处理
-            CallbackManager.get().onCancelOrderSuccess();
-        } else {
-            // TODO 简单处理，后续需要重新调整
-            if (rsp == null) {
-                CallbackManager.get().onCancelOrderFail();
-            } else {
-                // 多笔订单处理
-                if (!rsp.result) {
-                    CallbackManager.get().onCancelOrderFail();
-                } else {
-                    CallbackManager.get().onCancelOrderSuccess();
-                }
-            }
-        }
-    }
+//    private void handleCancelMultiOrder(FutureTradeInfo info) {
+//        int retryTime;
+//        RespBatchCancelTradeV3 rsp = null;
+//        retryTime = MAXT_RETRY_TIME;
+//        while (rsp == null && retryTime-- > 0) {
+//            rsp = doCancelMultiOrder(info.instrumentId, info.orderIds);
+//        }
+//        if (OkConfig.IS_TEST) {
+//            // 测试，直接当成成功处理
+//            CallbackManager.get().onCancelOrderSuccess("123456", "123456");
+//        } else {
+//            // TODO 简单处理，后续需要重新调整
+//            if (rsp == null) {
+//                CallbackManager.get().onCancelOrderFail(OKError.E_NULL, OKError.STR_E_NULL);
+//            } else {
+//                // 多笔订单处理
+//                if (!rsp.result) {
+//                    CallbackManager.get().onCancelOrderFail();
+//                } else {
+//                    CallbackManager.get().onCancelOrderSuccess(info.orderId, info.instrumentId);
+//                }
+//            }
+//        }
+//    }
 
     private void handleTrade(FutureTradeInfo info) {
         int retryTime;
@@ -184,14 +186,18 @@ public class FutureVendorV3 implements IVendor{
         }
         if (OkConfig.IS_TEST) {
             // 测试，直接当成成功处理
-            CallbackManager.get().onTradeSuccess();
+            CallbackManager.get().onTradeSuccess("1234123","1234123412", "EOS-USD-181228");
         } else {
             // TODO 简单处理，后续需要重新调整
             if (rsp == null || !rsp.result) {
-                CallbackManager.get().onTradeFail();
+                if (rsp == null) {
+                    CallbackManager.get().onTradeFail(OKError.E_NULL, OKError.STR_E_NULL);
+                } else {
+                    CallbackManager.get().onTradeFail(rsp.error_code, rsp.error_message);
+                }
             } else {
                 DBManager.get().updateTradeState(info.clientOId, rsp.order_id, OKTypeConfig.DB_STATE_TRADING);
-                CallbackManager.get().onTradeSuccess();
+                CallbackManager.get().onTradeSuccess(info.instrumentId, rsp.order_id, info.instrumentId);
             }
         }
     }

@@ -126,23 +126,37 @@ public class CallbackManager implements
 	}
 
 	@Override
-	public void onTradeSuccess() {
-
+	public void onTradeSuccess(String clientOId, String orderId, String instrumentId) {
+		SLogUtil.v(TAG, "onTradeSuccess: clientOId = " + clientOId + ", orderId = " + orderId
+				+ ", instrumentId = " + instrumentId);
+		for (VendorResultCallback callback : mVendorResultCallbacks) {
+			callback.onTradeSuccess(clientOId, orderId, instrumentId);
+		}
 	}
 
 	@Override
-	public void onTradeFail() {
-
+	public void onTradeFail(int errCode, String errMsg) {
+		SLogUtil.v(TAG, "onTradeSuccess: errCode = " + errCode + ", errMsg = " + errMsg);
+		for (VendorResultCallback callback : mVendorResultCallbacks) {
+			callback.onTradeFail(errCode, errMsg);
+		}
 	}
 
 	@Override
-	public void onCancelOrderSuccess() {
-
+	public void onCancelOrderSuccess(String orderId, String instrumentId) {
+		SLogUtil.v(TAG, "onCancelOrderSuccess: orderId = " + orderId
+				+ ", instrumentId = " + instrumentId);
+		for (VendorResultCallback callback : mVendorResultCallbacks) {
+			callback.onCancelOrderSuccess(orderId, instrumentId);
+		}
 	}
 
 	@Override
-	public void onCancelOrderFail() {
-
+	public void onCancelOrderFail(int errCode, String errMsg) {
+		SLogUtil.v(TAG, "onCancelOrderFail: errCode = " + errCode + ", errMsg = " + errMsg);
+		for (VendorResultCallback callback : mVendorResultCallbacks) {
+			callback.onCancelOrderFail(errCode, errMsg);
+		}
 	}
 
 	/*======================== 调用实现End ============================*/

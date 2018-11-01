@@ -86,7 +86,7 @@ public class TestVendorManager {
 
     private VendorResultCallback mVendorResultCallback = new VendorResultCallback() {
         @Override
-        public void onTradeSuccess() {
+        public void onTradeSuccess(String clientOId, String orderId, String instrumentId) {
             printProfitList();
             // 重新拉取账户信息
             AccountManager.get().setNeedUpdateInfo(true);
@@ -105,17 +105,17 @@ public class TestVendorManager {
         }
 
         @Override
-        public void onTradeFail() {
+        public void onTradeFail(int errCode, String errMsg) {
 
         }
 
         @Override
-        public void onCancelOrderSuccess() {
+        public void onCancelOrderSuccess(String orderId, String instrumentId) {
 
         }
 
         @Override
-        public void onCancelOrderFail() {
+        public void onCancelOrderFail(int errCode, String errMsg) {
 
         }
     };

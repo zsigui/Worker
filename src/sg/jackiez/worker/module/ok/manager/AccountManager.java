@@ -95,4 +95,21 @@ public class AccountManager {
             mNeedUpdateInfo = needUpdateInfo;
         }
     }
+
+    /**
+     * 打印当前账户持仓信息
+     */
+    public void printLogInfo() {
+        if (PrecursorManager.get().isFixedAccount()) {
+            SLogUtil.i(TAG, "逐仓合约信息：");
+            SLogUtil.i(TAG, mFutureFixedContractMap);
+            SLogUtil.i(TAG, "逐仓持仓信息：");
+            SLogUtil.i(TAG, mFutureFixedPositionMap);
+        } else {
+            SLogUtil.i(TAG, "全仓合约信息：");
+            SLogUtil.i(TAG, mFutureCrossedContractMap);
+            SLogUtil.i(TAG, "逐仓持仓信息：");
+            SLogUtil.i(TAG, mFutureCrossedPositionMap);
+        }
+    }
 }
