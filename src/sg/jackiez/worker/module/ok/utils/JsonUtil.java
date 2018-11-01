@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import sg.jackiez.worker.module.ok.OKHelper;
+import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.model.ErrorItem;
+import sg.jackiez.worker.module.ok.model.Leverage;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 import sg.jackiez.worker.utils.common.CommonUtil;
@@ -182,6 +184,33 @@ public class JsonUtil {
             }
         } catch (IOException e) {
             SLogUtil.v(TAG, e);
+        }
+        return null;
+    }
+
+    public static Leverage jsonToLeverage(String json, String instrumentId) {
+        if (CommonUtil.isEmpty(json)) {
+            SLogUtil.v(TAG, "json is null or empty.");
+            return null;
+        }
+        try {
+            JsonNode tree = sObjectMapper.readTree(json);
+            Leverage leverage = new Leverage();
+            leverage.margin_mode = tree.get("margin_mode").asText("");
+            if (OKTypeConfig.ACCOUNT_TYPE_4_FIXED.equalsIgnoreCase(leverage.margin_mode)) {
+                leverage.key = instrumentId;
+                JsonNode node = tree.get(instrumentId);
+                if (node != null) {
+                    leverage.long_leverage = node.get("long_leverage").asInt();
+                    leverage.short_leverage = node.get("short_leverage").asInt();
+                }
+            } else {
+                leverage.key = tree.get("currency").asText("");
+                leverage.long_leverage = leverage.short_leverage = tree.get("leverage").asInt();
+            }
+            return leverage;
+        } catch (Exception e) {
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
         }
         return null;
     }

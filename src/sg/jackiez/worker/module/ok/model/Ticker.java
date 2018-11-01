@@ -1,53 +1,55 @@
 package sg.jackiez.worker.module.ok.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
+
 import sg.jackiez.worker.module.ok.model.base.BaseM;
+import sg.jackiez.worker.utils.DateUtil;
 
 public class Ticker extends BaseM {
 
     /**
-     * 合约ID，仅当进行期货请求时返回
+     * 合约ID
      */
-    public long contract_id;
+    public String instrumentId;
+
     /**
-     * 合约面值
-     */
-    public double unit_amount;
-    /**
-     * 买一价
-     */
-    public double buy;
-    /**
-     * 最高价
-     */
-    public double high;
-    /**
-     * 最新成交价
+     * 	最新成交价
      */
     public double last;
-    /**
-     * 最低价
-     */
-    public double low;
+
     /**
      * 卖一价
      */
-    public double sell;
+    public double best_ask;
+
     /**
-     * 成交量（最近24小时，对于合约代表张数）
+     * 买一价
      */
-    public double vol;
+    public double best_bid;
+
     /**
      * 24小时最高价
      */
-    public double day_high;
+    public double high_24h;
+
     /**
      * 24小时最低价
      */
-    public double day_low;
+    public double low_24h;
+
     /**
-     * 币的成交量
+     * 24小时成交量，按张数统计
      */
-    public double coin_vol;
+    public long volume_24h;
+
+    /**
+     * 系统时间戳
+     */
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateUtil.ISO_FORMAT)
+    public Date timestamp;
+
 
     @Override
     public boolean equals(Object obj) {
@@ -58,8 +60,7 @@ public class Ticker extends BaseM {
             return true;
         }
         Ticker t = (Ticker) obj;
-        return buy == t.buy && last == t.last
-                && sell == t.sell && high == t.high
-                && vol == t.vol;
+        return best_ask == t.best_ask && last == t.last
+                && best_bid == t.best_bid;
     }
 }

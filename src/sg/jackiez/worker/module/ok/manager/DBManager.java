@@ -141,7 +141,6 @@ public class DBManager {
 	}
 
 	public int saveTrade(FutureVendorV3.FutureTradeInfo item,
-								String leverage,
 								int state) {
 		if (item == null) {
 			return 0;
@@ -153,7 +152,7 @@ public class DBManager {
 		dataItem.put(TradeInfo.TYPE, item.trendType);
 		dataItem.put(TradeInfo.MATCH_PRICE, item.priceType);
 		dataItem.put(TradeInfo.SIZE, item.amount);
-		dataItem.put(TradeInfo.LEVERAGE, leverage);
+		dataItem.put(TradeInfo.LEVERAGE, item.leverage);
 		dataItem.put(TradeInfo.STATE, state);
 		try {
 			return DBUtil.insert(TradeInfo.TABLE_NAME, dataItem, DBUtil.FLAG_INSERT_REPLACE);

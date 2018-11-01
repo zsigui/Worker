@@ -13,7 +13,7 @@ public class NotVerifyHostnameVerifier implements HostnameVerifier {
     private static final String TAG = "NotVerifyHostnameVerifier";
 
     public boolean verify(String hostname, SSLSession session) {
-        SLogUtil.i(TAG, "verify : hostname = " + hostname);
+        SLogUtil.v(TAG, "verify : hostname = " + hostname);
         return true;
     }
 

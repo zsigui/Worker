@@ -13,12 +13,10 @@ import sg.jackiez.worker.module.ok.handler.AccountDataGrabber;
 import sg.jackiez.worker.module.ok.handler.FutureDataGrabber;
 import sg.jackiez.worker.module.ok.handler.vendor.FutureVendorV3;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
+import sg.jackiez.worker.module.ok.manager.PrecursorManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
-import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
-import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
-import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 import sg.jackiez.worker.module.util.UniversalDataSource;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.PIZ;
@@ -233,15 +231,13 @@ public class TestVendorManager {
     public void start() {
         OkConfig.IS_TEST = true;
         SLogUtil.setPrintFile(true);
-        IFutureRestApi futureRestApi = new FutureRestApiV1();
-        FutureRestApiV3 futureRestApiV3 = new FutureRestApiV3();
-        String contractType = OKTypeConfig.CONTRACT_TYPE_QUARTER;
-        mFutureDataGrabber = new FutureDataGrabber(symbol, contractType, futureRestApi);
-        mFutureDataGrabber.initInstrumentId();
-        mAccountDataGrabber = new AccountDataGrabber(mFutureDataGrabber.getInstrumentId(), futureRestApiV3);
+        PrecursorManager precursorManager = PrecursorManager.get();
+        mFutureDataGrabber = new FutureDataGrabber(precursorManager.getInstrumentId());
+        mAccountDataGrabber = new AccountDataGrabber();
         mAccountDataGrabber.startGrabAccountDataThread();
         mFutureDataGrabber.startAll();
-        mFutureVendor = new FutureVendorV3(futureRestApiV3, contractType, OKTypeConfig.LEVER_RATE_20);
+        mFutureVendor = new FutureVendorV3(precursorManager.getLongLeverage(),
+                precursorManager.getShortLeverage());
         mFutureVendor.startTradeThread();
         CallbackManager.get().addAccountStateChangeCallback(mStateChangeCallback);
         CallbackManager.get().addFutureDataChangeCallback(mDataChangeCallback);

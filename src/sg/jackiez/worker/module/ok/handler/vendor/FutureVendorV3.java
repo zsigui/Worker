@@ -28,9 +28,8 @@ public class FutureVendorV3 implements IVendor{
 
     private static final int MAXT_RETRY_TIME = 3;
 
-    private FutureRestApiV3 mRestApi;
-    private String mCurContractType;
-    private String mLeverRate;
+    private int mLongLeverage;
+    private int mShortLeverage;
 
     private final Object mLockObj = new Object();
     private Thread mTradeThread;
@@ -38,14 +37,9 @@ public class FutureVendorV3 implements IVendor{
 
     private ConcurrentLinkedQueue<FutureTradeInfo> mTradeInfoList = new ConcurrentLinkedQueue<>();
 
-    public FutureVendorV3(FutureRestApiV3 restApi) {
-        this(restApi, OKTypeConfig.CONTRACT_TYPE_QUARTER, OKTypeConfig.LEVER_RATE_20);
-    }
-
-    public FutureVendorV3(FutureRestApiV3 restApi, String curContractType, String leverRate) {
-        mRestApi = restApi;
-        mCurContractType = curContractType;
-        mLeverRate = leverRate;
+    public FutureVendorV3(int longLeverage, int shortLeverage) {
+        mLongLeverage = longLeverage;
+        mShortLeverage = shortLeverage;
     }
 
     private void addTradeInfoAndNotify(FutureTradeInfo info) {
@@ -183,10 +177,10 @@ public class FutureVendorV3 implements IVendor{
         int retryTime;
         RespTradeV3 rsp = null;
         retryTime = MAXT_RETRY_TIME;
-        DBManager.get().saveTrade(info, mLeverRate, OKTypeConfig.DB_STATE_INIT);
+        DBManager.get().saveTrade(info, OKTypeConfig.DB_STATE_INIT);
         while (rsp == null && retryTime-- > 0) {
             rsp = doTrade(info.instrumentId, info.price, info.amount, info.trendType,
-                    info.priceType, info.clientOId);
+                    info.priceType, info.clientOId, String.valueOf(info.leverage));
         }
         if (OkConfig.IS_TEST) {
             // 测试，直接当成成功处理
@@ -203,69 +197,69 @@ public class FutureVendorV3 implements IVendor{
     }
 
     private RespTradeV3 doTrade(String instrumentId, double price, double size,
-                         byte trendType, String priceType, String clientOId) {
-        return JsonUtil.jsonToSuccessDataForFuture(mRestApi.doTrade(instrumentId,
+                         byte trendType, String priceType, String clientOId, String leverage) {
+        return JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.doTrade(instrumentId,
                 String.valueOf(trendType), String.valueOf(price),
-                String.valueOf(size), priceType, mLeverRate, clientOId),
+                String.valueOf(size), priceType, leverage, clientOId),
                 new TypeReference<RespTradeV3>() {});
     }
 
     private RespCancelTradeV3 doCancelOrder(String instrumentId, String orderId) {
-        return JsonUtil.jsonToSuccessDataForFuture(mRestApi.doCancelTrade(orderId, instrumentId),
+        return JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.doCancelTrade(orderId, instrumentId),
                 new TypeReference<RespCancelTradeV3>() {});
     }
 
     private RespBatchCancelTradeV3 doCancelMultiOrder(String instrumentId, List<String> orderIds) {
-        return JsonUtil.jsonToSuccessDataForFuture(mRestApi.doBatchCancelTrade(instrumentId, JsonUtil.objToJson(orderIds)),
+        return JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.doBatchCancelTrade(instrumentId, JsonUtil.objToJson(orderIds)),
                 new TypeReference<RespBatchCancelTradeV3>() {});
     }
 
     @Override
     public void buyShort(String instrumentId, double price, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
-                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
+                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
     @Override
     public void buyShortDirectly(String instrumentId, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
-                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
+                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
     @Override
     public void sellShort(String instrumentId, double price, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_SHORT,
-                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
+                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
     @Override
     public void sellShortDirectly(String instrumentId, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
-                OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
+                OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mShortLeverage));
     }
 
     @Override
     public void buyLong(String instrumentId, double price, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
-                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
+                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mLongLeverage));
     }
 
     @Override
     public void buyLongDirectly(String instrumentId, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
-                OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
+                OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mLongLeverage));
     }
 
     @Override
     public void sellLong(String instrumentId, double price, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
-                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
+                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mLongLeverage));
     }
 
     @Override
     public void sellLongDirectly(String instrumentId, double amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
-                OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
+                OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mLongLeverage));
     }
 
     @Override
@@ -287,18 +281,20 @@ public class FutureVendorV3 implements IVendor{
         public byte trendType;
         public String priceType;
         public String clientOId;
+        public int leverage;
 
         // 取消订单记录
         public String orderId;
         boolean isCancelOp;
         public List<String> orderIds;
 
-        FutureTradeInfo(String instrumentId, double price, double amount, byte trendType, String priceType) {
+        FutureTradeInfo(String instrumentId, double price, double amount, byte trendType, String priceType, int leverage) {
             this.instrumentId = instrumentId;
             this.price = price;
             this.amount = amount;
             this.trendType = trendType;
             this.priceType = priceType;
+            this.leverage = leverage;
             this.isCancelOp = false;
         }
 

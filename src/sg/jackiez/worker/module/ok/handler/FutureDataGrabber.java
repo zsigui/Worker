@@ -8,16 +8,11 @@ import java.util.List;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
-import sg.jackiez.worker.module.ok.model.InstrumentInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
-import sg.jackiez.worker.module.ok.model.resp.RespTicker;
-import sg.jackiez.worker.module.ok.network.future.FutureRestApiV1;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
-import sg.jackiez.worker.module.ok.network.future.IFutureRestApi;
 import sg.jackiez.worker.module.ok.utils.CompareUtil;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
-import sg.jackiez.worker.module.ok.utils.ReqUtil;
 import sg.jackiez.worker.utils.DateUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
@@ -28,10 +23,6 @@ public class FutureDataGrabber {
 
 	private static final String TAG = "FutureDataGrabber";
 
-	private IFutureRestApi mRestApi;
-	private FutureRestApiV3 mRestApiV3;
-	private String mSymbol;
-	private String mContractType;
 	private String mInstrumentId;
 
 	private Ticker mTicker;
@@ -57,16 +48,8 @@ public class FutureDataGrabber {
 	private Thread mDepthGrabThread;
 	private Thread mTradeGrabThread;
 
-
-	public FutureDataGrabber() {
-		this(OKTypeConfig.SYMBOL_EOS, OKTypeConfig.CONTRACT_TYPE_QUARTER, new FutureRestApiV1());
-	}
-
-	public FutureDataGrabber(String symbol, String contractType, IFutureRestApi restApi) {
-		mSymbol = symbol;
-		mContractType = contractType;
-		mRestApi = restApi;
-		mRestApiV3 = new FutureRestApiV3();
+	public FutureDataGrabber(String instrumentId) {
+		mInstrumentId = instrumentId;
 	}
 
 	private void sleepIfInTime(String prex, long lastTime, int gapTime) {
@@ -92,51 +75,7 @@ public class FutureDataGrabber {
 		return mTicker;
 	}
 
-	private void judgeInstrumentId() {
-		if (mInstrumentId == null) {
-			initInstrumentId();
-		}
-	}
-
-	public void initInstrumentId() {
-		String resp = ReqUtil.retry(3, () -> mRestApiV3.getInstruments());
-		if (resp == null) {
-			throw new RuntimeException("get no instrument data.");
-		}
-
-		List<InstrumentInfo> instrumentInfos = JsonUtil.jsonToSuccessDataForFuture(resp,
-				new TypeReference<List<InstrumentInfo>>() {
-				});
-		if (instrumentInfos == null || instrumentInfos.isEmpty()) {
-			throw new RuntimeException("translate json data error. src = " + resp);
-		}
-
-		String currency = mSymbol.replace("_", "-").toUpperCase();
-		int i = 0;
-		for (InstrumentInfo info : instrumentInfos) {
-			if (info.instrument_id.startsWith(currency)) {
-				if ((i == 0 && mContractType.equals(OKTypeConfig.CONTRACT_TYPE_THIS_WEEK))
-						|| (i == 1 && mContractType.equals(OKTypeConfig.CONTRACT_TYPE_NEXT_WEEK))
-						|| (i == 2 && mContractType.equals(OKTypeConfig.CONTRACT_TYPE_QUARTER))) {
-					mInstrumentId = info.instrument_id;
-					break;
-				}
-				i++;
-			}
-		}
-
-		SLogUtil.i(TAG, "initInstrumentId : " + mInstrumentId);
-	}
-
-	/**
-	 * 获取合约ID,需要在调用{@link #initInstrumentId()}成功之后
-	 */
-	public String getInstrumentId() {
-		return mInstrumentId;
-	}
-
 	public void startDepthGrabThread() {
-		judgeInstrumentId();
 		if (mDepthGrabThread != null && mDepthGrabThread.isAlive()
 				&& !mDepthGrabThread.isInterrupted()) {
 			return;
@@ -151,7 +90,7 @@ public class FutureDataGrabber {
 			while (mIsDepthGrabRunning) {
 				tickTime = System.currentTimeMillis();
 				try {
-					depthInfoNew = JsonUtil.jsonToSuccessDataForFuture(mRestApi.futureDepth(mSymbol, mContractType),
+					depthInfoNew = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getDepthInfo(mInstrumentId, "100"),
 							new TypeReference<DepthInfo>() {
 							});
 					if (depthInfoNew != null && depthInfoNew.asks != null && depthInfoNew.bids != null
@@ -181,7 +120,6 @@ public class FutureDataGrabber {
 	}
 
 	public void startTickerGrabThread() {
-		judgeInstrumentId();
 		if (mTickerGrabThread != null && mTickerGrabThread.isAlive()
 				&& !mTickerGrabThread.isInterrupted()) {
 			return;
@@ -189,25 +127,25 @@ public class FutureDataGrabber {
 
 		mIsTickerGrabRunning = true;
 		mTickerGrabThread = new DefaultThread(() -> {
-			RespTicker tickerNew, tickerOld = null;
+			Ticker tickerNew, tickerOld = null;
 			long lastTime = System.currentTimeMillis();
 			long nowTime;
 			long tickTime;
 			while (mIsTickerGrabRunning) {
 				tickTime = System.currentTimeMillis();
 				try {
-					tickerNew = JsonUtil.jsonToSuccessDataForFuture(mRestApi.futureTicker(mSymbol, mContractType),
-							new TypeReference<RespTicker>() {
+					tickerNew = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getTickerInfo(mInstrumentId),
+							new TypeReference<Ticker>() {
 							});
-					if (tickerNew != null && tickerNew.ticker != null) {
-						if (tickerOld == null || !CompareUtil.equal(tickerNew.ticker, tickerOld.ticker)) {
-							CallbackManager.get().onTickerDataUpdate(tickerNew.ticker);
+					if (tickerNew != null) {
+						if (tickerOld == null || !CompareUtil.equal(tickerNew, tickerOld)) {
+							CallbackManager.get().onTickerDataUpdate(tickerNew);
 							nowTime = System.currentTimeMillis();
 							SLogUtil.i(TAG, "startTickerGrabThread() 获取到新行情数据, 距上次时间: "
 									+ (nowTime - lastTime) + " ms");
 							lastTime = nowTime;
 							tickerOld = tickerNew;
-							mTicker = tickerNew.ticker;
+							mTicker = tickerNew;
 						}
 					}
 				} catch (Throwable e) {
@@ -222,7 +160,6 @@ public class FutureDataGrabber {
 	}
 
 	public void startTradeGrabThread() {
-		judgeInstrumentId();
 		if (mTradeGrabThread != null && mTradeGrabThread.isAlive()
 				&& !mTradeGrabThread.isInterrupted()) {
 			return;
@@ -237,7 +174,7 @@ public class FutureDataGrabber {
 			while (mIsTradeGrabRunning) {
 				tickTime = System.currentTimeMillis();
 				try {
-					tradeHistory = JsonUtil.jsonToSuccessDataForFuture(mRestApiV3.getTradeHistory(mInstrumentId, "",
+					tradeHistory = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getTradeHistory(mInstrumentId, "",
 							"", ""),
 							new TypeReference<List<TradeHistoryItem>>() {
 							});
@@ -261,7 +198,6 @@ public class FutureDataGrabber {
 	}
 
 	public void startKlineGrabThread() {
-		judgeInstrumentId();
 		if (mKlineGrabThread != null && mKlineGrabThread.isAlive()
 				&& !mKlineGrabThread.isInterrupted()) {
 			return;
@@ -304,7 +240,7 @@ public class FutureDataGrabber {
 		List<KlineInfo> tmp = mStoreKlinesMap.get(ktime);
 		String start = DateUtil.formatISOTime(tmp == null || tmp.isEmpty() ? (curTime - ONE_YEAR_TIME_IN_MILLIS) :
 				tmp.get(tmp.size() - 1).time);
-		List<KlineInfo> _timeKlines = JsonUtil.jsonToKlineList(mRestApiV3.getKlineInfo(
+		List<KlineInfo> _timeKlines = JsonUtil.jsonToKlineList(FutureRestApiV3.getKlineInfo(
 				mInstrumentId, start, DateUtil.formatISOTime(curTime), ktime));
 
 		if (_timeKlines != null && !_timeKlines.isEmpty()) {

@@ -295,10 +295,6 @@ public final class OkConfig {
          */
         String INSTRUMENTS_URL = totalUrl("/api/futures/v3/instruments");
         /**
-         * 获取合约杠杆倍数
-         */
-        String LEVER_RATE_URL = totalUrl("/api/futures/v3/accounts/%s/leverage");
-        /**
          * 获取合约K线数据
          */
         String KLINE_URL = totalUrl("/api/futures/v3/instruments/%s/candles");

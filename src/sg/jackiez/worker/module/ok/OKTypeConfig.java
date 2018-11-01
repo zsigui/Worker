@@ -206,11 +206,11 @@ public class OKTypeConfig {
 	/**
 	 * 逐仓账户
 	 */
-	public static final byte ACCOUNT_TYPE_4_FIX = 0;
+	public static final String ACCOUNT_TYPE_4_FIXED = "fixed";
 	/**
 	 * 全仓账户
 	 */
-	public static final byte ACCOUNT_TYPE_All = 1;
+	public static final String ACCOUNT_TYPE_CROSSED = "crossed";
 
 	// 钱包类型
 	/**

@@ -8,10 +8,11 @@ import java.util.Map;
 
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
-import sg.jackiez.worker.module.ok.model.FutureHold4Fix;
+import sg.jackiez.worker.module.ok.manager.PrecursorManager;
+import sg.jackiez.worker.module.ok.model.FuturePosition;
 import sg.jackiez.worker.module.ok.model.FuturePosition4Fix;
-import sg.jackiez.worker.module.ok.model.account.FutureContract;
 import sg.jackiez.worker.module.ok.model.account.FutureContract4FixV3;
+import sg.jackiez.worker.module.ok.model.account.FutureContractV3;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.utils.SLogUtil;
@@ -27,17 +28,8 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 
 	private boolean mIsRunning = false;
 	private Thread mGrabDataThread;
-	private FutureRestApiV3 mFutureRestApi;
-	private String mInstrumentId;
 
-	public AccountDataGrabber(String instrumentId) {
-		this(instrumentId, new FutureRestApiV3());
-	}
-
-	public AccountDataGrabber(String instrumentId,
-							  FutureRestApiV3 futureRestApi) {
-		mInstrumentId = instrumentId;
-		mFutureRestApi = futureRestApi;
+	public AccountDataGrabber() {
 	}
 
 	private boolean isGrabAccountDataThreadAlive() {
@@ -56,37 +48,12 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 
 		mIsRunning = true;
 		mGrabDataThread = new DefaultThread(() -> {
-			ArrayList<FuturePosition4Fix> holdList;
-			Map<String, FutureContract4FixV3> userInfo;
-
-			int retryTime;
-			long startTime;
 			while (mIsRunning) {
 
-				startTime = System.currentTimeMillis();
-				retryTime = MAX_RETRY_TIME;
-				holdList = null;
-				while (holdList == null && retryTime-- > 0) {
-					holdList = JsonUtil.jsonToSuccessDataForFuture(
-							mFutureRestApi.getAllPositionInfo(),
-							"holding", new TypeReference<ArrayList<FuturePosition4Fix>>() {
-							});
-				}
-
-				retryTime = MAX_RETRY_TIME;
-				userInfo = null;
-				while (userInfo == null && retryTime-- > 0) {
-					userInfo = JsonUtil.jsonToSuccessDataForFuture(mFutureRestApi.getAllPositionInfo(),
-							"info", new TypeReference<HashMap<String, FutureContract4FixV3>>() {
-							});
-				}
-
-				SLogUtil.v(TAG, "startGrabAccountDataThread this running total spend time: "
-						+ (System.currentTimeMillis() - startTime) + " ms. userInfo == null ? "
-						+ (userInfo == null) + ", holdList == null ? " + (holdList == null));
-
-				if (userInfo != null && holdList != null) {
-					AccountManager.get().putAccountInfo(userInfo, holdList);
+				if (PrecursorManager.get().isFixedAccount()) {
+					getFixedData();
+				} else {
+					getCrossedData();
 				}
 
 				synchronized (mLockObj) {
@@ -100,6 +67,76 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 		});
 		mGrabDataThread.setPriority(Thread.MAX_PRIORITY);
 		mGrabDataThread.start();
+	}
+
+	/**
+	 * 获取全仓相关数据
+	 */
+	private void getCrossedData() {
+		long startTime;
+		int retryTime;
+		ArrayList<FuturePosition> holdList;
+		Map<String, FutureContractV3> userInfo;
+		startTime = System.currentTimeMillis();
+		retryTime = MAX_RETRY_TIME;
+		holdList = null;
+		while (holdList == null && retryTime-- > 0) {
+			holdList = JsonUtil.jsonToSuccessDataForFuture(
+					FutureRestApiV3.getAllPositionInfo(),
+					"holding", new TypeReference<ArrayList<FuturePosition>>() {
+					});
+		}
+
+		retryTime = MAX_RETRY_TIME;
+		userInfo = null;
+		while (userInfo == null && retryTime-- > 0) {
+			userInfo = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getAllPositionInfo(),
+					"info", new TypeReference<HashMap<String, FutureContractV3>>() {
+					});
+		}
+
+		SLogUtil.v(TAG, "startGrabAccountDataThread.getCrossedData this running total spend time: "
+				+ (System.currentTimeMillis() - startTime) + " ms. userInfo == null ? "
+				+ (userInfo == null) + ", holdList == null ? " + (holdList == null));
+
+		if (userInfo != null && holdList != null) {
+			AccountManager.get().putCrossedAccountInfo(userInfo, holdList);
+		}
+	}
+
+	/**
+	 * 获取逐仓相关数据
+	 */
+	private void getFixedData() {
+		long startTime;
+		int retryTime;
+		ArrayList<FuturePosition4Fix> holdList;
+		Map<String, FutureContract4FixV3> userInfo;
+		startTime = System.currentTimeMillis();
+		retryTime = MAX_RETRY_TIME;
+		holdList = null;
+		while (holdList == null && retryTime-- > 0) {
+			holdList = JsonUtil.jsonToSuccessDataForFuture(
+					FutureRestApiV3.getAllPositionInfo(),
+					"holding", new TypeReference<ArrayList<FuturePosition4Fix>>() {
+					});
+		}
+
+		retryTime = MAX_RETRY_TIME;
+		userInfo = null;
+		while (userInfo == null && retryTime-- > 0) {
+			userInfo = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getAllPositionInfo(),
+					"info", new TypeReference<HashMap<String, FutureContract4FixV3>>() {
+					});
+		}
+
+		SLogUtil.v(TAG, "startGrabAccountDataThread.getFixedData this running total spend time: "
+				+ (System.currentTimeMillis() - startTime) + " ms. userInfo == null ? "
+				+ (userInfo == null) + ", holdList == null ? " + (holdList == null));
+
+		if (userInfo != null && holdList != null) {
+			AccountManager.get().putFixedAccountInfo(userInfo, holdList);
+		}
 	}
 
 	public void stopGrabAccountDataThread() {
