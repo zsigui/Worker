@@ -14,6 +14,7 @@ import sg.jackiez.worker.module.ok.manager.PrecursorManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
 import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
+import sg.jackiez.worker.module.ok.performance.IPerformance;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
@@ -23,6 +24,7 @@ public class Robot {
     private FutureDataGrabber mFutureDataGrabber;
     private FutureVendorV3 mFutureVendor;
 
+    private IPerformance mPerformance;
     private boolean mIsDataChange;
 
     private AccountStateChangeCallback mStateChangeCallback = new AccountStateChangeCallback() {

@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.manager.PrecursorManager;
+import sg.jackiez.worker.module.ok.model.FutureOrder;
 import sg.jackiez.worker.module.ok.model.FuturePosition;
 import sg.jackiez.worker.module.ok.model.FuturePosition4Fix;
 import sg.jackiez.worker.module.ok.model.account.FutureContract4FixV3;
@@ -137,6 +140,15 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 		if (userInfo != null && holdList != null) {
 			AccountManager.get().putFixedAccountInfo(userInfo, holdList);
 		}
+	}
+
+	public void getOrderList() {
+		List<FutureOrder> orders = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getOrderList(PrecursorManager.get().getInstrumentId(),
+				String.valueOf(OKTypeConfig.STATUS_CANCELED), "1", null, "100"),
+				"order_info",
+				new TypeReference<List<FutureOrder>>() {});
+
+
 	}
 
 	public void stopGrabAccountDataThread() {

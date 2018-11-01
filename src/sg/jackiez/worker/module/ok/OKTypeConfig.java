@@ -66,10 +66,6 @@ public class OKTypeConfig {
 	 * 完全成交
 	 */
 	public static final int STATUS_FULL_TRANSACT = 2;
-	/**
-	 * 撤单处理中
-	 */
-	public static final int STATUS_CANCELING = 3;
 
 	/**
 	 * 未完成订单类型
