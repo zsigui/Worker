@@ -54,7 +54,7 @@ public class FutureRestApiV3 {
                 OkConfig.HEADER_ACCESS_PASSPHRASE, OkConfig.V3_PASSPHRASE,
                 OkConfig.HEADER_ACCESS_TIMESTAMP, timestamp
         );
-        SLogUtil.d(TAG, "doGet: data = " + data + "\nsign = " + sign + "\nheader = " + headers);
+        SLogUtil.d(TAG, "data = " + data + "\nsign = " + sign + "\nheader = " + headers);
         return HttpManager.get().doGet(requestUrl, null, headers);
     }
 
@@ -77,7 +77,7 @@ public class FutureRestApiV3 {
                 OkConfig.HEADER_ACCESS_PASSPHRASE, OkConfig.V3_PASSPHRASE,
                 OkConfig.HEADER_ACCESS_TIMESTAMP, timestamp
         );
-        SLogUtil.d(TAG, "doGet: jsonData = " + jsonData + "\ndata = " + data + "\nsign = " + sign + "\nheader = " + headers);
+        SLogUtil.d(TAG, "jsonData = " + jsonData + "\ndata = " + data + "\nsign = " + sign + "\nheader = " + headers);
         return HttpManager.get().doJsonPost(requestUrl, jsonData, headers);
     }
 
@@ -138,9 +138,7 @@ public class FutureRestApiV3 {
 
     public static String getTradeHistory(String instrumentId, String from, String to, String limit) {
         String realUrl = String.format(OkConfig.FutureV3.TRADE_HISTORY_URL, instrumentId);
-        Map<String, String> params = CollectionUtil.getExtraMap(
-                OkConfig.KEY_INSTRUMENT_ID, instrumentId
-        );
+        Map<String, String> params = new HashMap<>();
         if (!CommonUtil.isEmpty(from)) {
             params.put(OkConfig.KEY_FROM, from);
         }
@@ -156,16 +154,15 @@ public class FutureRestApiV3 {
     public static String getOrderList(String instrumentId, String status, String from, String to, String limit) {
         String realUrl = String.format(OkConfig.FutureV3.ORDER_LIST_URL, instrumentId);
         Map<String, String> params = CollectionUtil.getExtraMap(
-                OkConfig.KEY_STATUS, status,
-                OkConfig.KEY_INSTRUMENT_ID, instrumentId
+                OkConfig.KEY_STATUS, status
         );
-        if (!CommonUtil.isEmpty(to)) {
+        if (!CommonUtil.isEmpty(from)) {
             params.put(OkConfig.KEY_FROM, from);
         }
         if (!CommonUtil.isEmpty(to)) {
             params.put(OkConfig.KEY_TO, to);
         }
-        if (!CommonUtil.isEmpty(to)) {
+        if (!CommonUtil.isEmpty(limit)) {
             params.put(OkConfig.KEY_LIMIT, limit);
         }
         return doGet(realUrl, params);
@@ -174,8 +171,7 @@ public class FutureRestApiV3 {
     public static String getOrderDetail(String orderId, String instrumentId) {
         String realUrl = String.format(OkConfig.FutureV3.ORDER_DETAIL_URL, instrumentId);
         Map<String, String> params = CollectionUtil.getExtraMap(
-                OkConfig.KEY_ORDER_ID, orderId,
-                OkConfig.KEY_INSTRUMENT_ID, instrumentId
+                OkConfig.KEY_ORDER_ID, orderId
         );
         return doGet(realUrl, params);
     }

@@ -1,10 +1,12 @@
 package sg.jackiez.worker.module.ok.model.resp;
 
+import sg.jackiez.worker.module.ok.model.base.BaseM;
+
 /**
  * @Author JackieZ
  * @Date Created on 2018/10/30
  */
-public class RespTradeV3 {
+public class RespTradeV3 extends BaseM {
 
 	public boolean result;
 

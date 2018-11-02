@@ -10,6 +10,7 @@ import java.util.Map;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
+import sg.jackiez.worker.module.ok.manager.DBManager;
 import sg.jackiez.worker.module.ok.manager.PrecursorManager;
 import sg.jackiez.worker.module.ok.model.FutureOrder;
 import sg.jackiez.worker.module.ok.model.FuturePosition;
@@ -34,6 +35,53 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 
 	public AccountDataGrabber() {
 	}
+
+    public List<FutureOrder> getTotalOrderList(String instrumentId) {
+
+        List<FutureOrder> totalList = new ArrayList<>();
+        // 获取完全未成交的订单信息
+        getOrdersByState(instrumentId,
+                OKTypeConfig.STATUS_NOT_TRANSACT, totalList);
+        // 获取部分成交的订单信息
+        getOrdersByState(instrumentId,
+                OKTypeConfig.STATUS_PART_TRANSACT, totalList);
+        // 获取已完全成交的订单信息
+        getOrdersByState(instrumentId,
+                OKTypeConfig.STATUS_FULL_TRANSACT, totalList);
+        // 获取已取消订单信息
+        getOrdersByState(instrumentId,
+                OKTypeConfig.STATUS_CANCELED, totalList);
+
+		SLogUtil.i(TAG, "getTotalOrderList: total order list = " + totalList.size());
+		DBManager.get().updateMultiTradeState(totalList);
+		return totalList;
+    }
+
+    public FutureOrder getOrderIfContainByOrderId(String instrumentId, String orderId, int status) {
+		List<FutureOrder> result = getOrdersByState(instrumentId, status, null);
+		if (result != null) {
+			for (FutureOrder order : result) {
+				if (order.order_id.equals(orderId)) {
+					return order;
+				}
+			}
+		}
+		return null;
+	}
+
+    private List<FutureOrder> getOrdersByState(String instrumentId, int status,
+                                               List<FutureOrder> store) {
+        List<FutureOrder> result = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getOrderList(instrumentId,
+                String.valueOf(status), "0", null, "100"),
+                "order_info",
+                new TypeReference<List<FutureOrder>>() {
+                });
+        if (result != null && store != null) {
+			SLogUtil.i(TAG, "getOrdersByState: status = " + status + ", size = " + result.size());
+            store.addAll(result);
+        }
+        return result;
+    }
 
 	private boolean isGrabAccountDataThreadAlive() {
 		return mGrabDataThread != null && mGrabDataThread.isAlive()
@@ -142,16 +190,7 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 		}
 	}
 
-	public void getOrderList() {
-		List<FutureOrder> orders = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getOrderList(PrecursorManager.get().getInstrumentId(),
-				String.valueOf(OKTypeConfig.STATUS_CANCELED), "1", null, "100"),
-				"order_info",
-				new TypeReference<List<FutureOrder>>() {});
-
-
-	}
-
-	public void stopGrabAccountDataThread() {
+    public void stopGrabAccountDataThread() {
 		if (isGrabAccountDataThreadAlive()) {
 			mIsRunning = false;
 			synchronized (mLockObj) {

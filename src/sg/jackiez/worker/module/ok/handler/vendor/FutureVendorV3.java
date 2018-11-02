@@ -82,7 +82,7 @@ public class FutureVendorV3 implements IVendor{
                 if (info != null) {
                     startTime = System.currentTimeMillis();
                     if (info.isCancelOp) {
-                        if (CommonUtil.isEmpty(info.orderId)) {
+                        if (!CommonUtil.isEmpty(info.orderId)) {
                             handleCancelOrder(info);
                         } else {
                             SLogUtil.i(TAG, "暂不处理多笔订单撤销逻辑");
@@ -129,9 +129,10 @@ public class FutureVendorV3 implements IVendor{
         while (rsp == null && retryTime-- > 0) {
             rsp = doCancelOrder(info.instrumentId, info.orderId);
         }
+        SLogUtil.i(TAG, "取消下单操作结果：" + rsp);
         if (OkConfig.IS_TEST) {
             // 测试，直接当成成功处理
-            CallbackManager.get().onCancelOrderSuccess("123456", "123456");
+            CallbackManager.get().onCancelOrderSuccess(info.orderId, info.instrumentId);
         } else {
             // TODO 简单处理，后续需要重新调整
             if (rsp == null) {
@@ -140,7 +141,7 @@ public class FutureVendorV3 implements IVendor{
                 // 单笔订单处理
                 if (rsp.result) {
                     // 成功
-                    DBManager.get().updateCancelTradeState(info.instrumentId,
+                    DBManager.get().updateTradeState(info.instrumentId,
                             info.orderId, OKTypeConfig.DB_STATE_CANCELLING);
                     CallbackManager.get().onCancelOrderSuccess(info.orderId, info.instrumentId);
                 } else {
@@ -184,9 +185,10 @@ public class FutureVendorV3 implements IVendor{
             rsp = doTrade(info.instrumentId, info.price, info.amount, info.trendType,
                     info.priceType, info.clientOId, String.valueOf(info.leverage));
         }
+        SLogUtil.i(TAG, "下单操作结果：" + rsp);
         if (OkConfig.IS_TEST) {
             // 测试，直接当成成功处理
-            CallbackManager.get().onTradeSuccess("1234123","1234123412", "EOS-USD-181228");
+            CallbackManager.get().onTradeSuccess(info.clientOId, rsp != null ? rsp.order_id : "testOrderId", info.instrumentId);
         } else {
             // TODO 简单处理，后续需要重新调整
             if (rsp == null || !rsp.result) {
@@ -196,21 +198,25 @@ public class FutureVendorV3 implements IVendor{
                     CallbackManager.get().onTradeFail(rsp.error_code, rsp.error_message);
                 }
             } else {
-                DBManager.get().updateTradeState(info.clientOId, rsp.order_id, OKTypeConfig.DB_STATE_TRADING);
+                DBManager.get().updateTradeStateAndOrderId(info.clientOId, rsp.order_id, OKTypeConfig.DB_STATE_TRADING);
                 CallbackManager.get().onTradeSuccess(info.instrumentId, rsp.order_id, info.instrumentId);
             }
         }
     }
 
-    private RespTradeV3 doTrade(String instrumentId, double price, double size,
+    private RespTradeV3 doTrade(String instrumentId, double price, long size,
                          byte trendType, String priceType, String clientOId, String leverage) {
-        return JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.doTrade(instrumentId,
+        SLogUtil.i(TAG, "执行下单操作：instrumentId = " + instrumentId
+         + ", price = " + price + ", size = " + size + ", type = " + trendType
+         + ", match_price = " + priceType + ", leverage = " + leverage + ", clientOId = " + clientOId);
+        return JsonUtil.jsonToSuccessDataForFutureWithErrCode(FutureRestApiV3.doTrade(instrumentId,
                 String.valueOf(trendType), String.valueOf(price),
                 String.valueOf(size), priceType, leverage, clientOId),
                 new TypeReference<RespTradeV3>() {});
     }
 
     private RespCancelTradeV3 doCancelOrder(String instrumentId, String orderId) {
+        SLogUtil.i(TAG, "执行取消下单操作：instrumentId = " + instrumentId + ", orderId = " + orderId);
         return JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.doCancelTrade(orderId, instrumentId),
                 new TypeReference<RespCancelTradeV3>() {});
     }
@@ -221,49 +227,49 @@ public class FutureVendorV3 implements IVendor{
     }
 
     @Override
-    public void buyShort(String instrumentId, double price, double amount) {
+    public void buyShort(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
     @Override
-    public void buyShortDirectly(String instrumentId, double amount) {
+    public void buyShortDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
     @Override
-    public void sellShort(String instrumentId, double price, double amount) {
+    public void sellShort(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
     @Override
-    public void sellShortDirectly(String instrumentId, double amount) {
+    public void sellShortDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mShortLeverage));
     }
 
     @Override
-    public void buyLong(String instrumentId, double price, double amount) {
+    public void buyLong(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mLongLeverage));
     }
 
     @Override
-    public void buyLongDirectly(String instrumentId, double amount) {
+    public void buyLongDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mLongLeverage));
     }
 
     @Override
-    public void sellLong(String instrumentId, double price, double amount) {
+    public void sellLong(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mLongLeverage));
     }
 
     @Override
-    public void sellLongDirectly(String instrumentId, double amount) {
+    public void sellLongDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mLongLeverage));
     }
@@ -283,7 +289,7 @@ public class FutureVendorV3 implements IVendor{
         // 进行交易记录
         public String instrumentId;
         public double price;
-        public double amount;
+        public long amount;
         public byte trendType;
         public String priceType;
         public String clientOId;
@@ -294,7 +300,7 @@ public class FutureVendorV3 implements IVendor{
         boolean isCancelOp;
         public List<String> orderIds;
 
-        FutureTradeInfo(String instrumentId, double price, double amount, byte trendType, String priceType, int leverage) {
+        FutureTradeInfo(String instrumentId, double price, long amount, byte trendType, String priceType, int leverage) {
             this.instrumentId = instrumentId;
             this.price = price;
             this.amount = amount;

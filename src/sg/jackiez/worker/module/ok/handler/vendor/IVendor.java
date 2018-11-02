@@ -4,21 +4,21 @@ import java.util.List;
 
 interface IVendor {
 
-    void buyShort(String instrumentId, double price, double amount);
+    void buyShort(String instrumentId, double price, long amount);
 
-    void buyShortDirectly(String instrumentId, double amount);
+    void buyShortDirectly(String instrumentId, long amount);
 
-    void sellShort(String instrumentId, double price, double amount);
+    void sellShort(String instrumentId, double price, long amount);
 
-    void sellShortDirectly(String instrumentId, double amount);
+    void sellShortDirectly(String instrumentId, long amount);
 
-    void buyLong(String instrumentId, double price, double amount);
+    void buyLong(String instrumentId, double price, long amount);
 
-    void buyLongDirectly(String instrumentId, double amount);
+    void buyLongDirectly(String instrumentId, long amount);
 
-    void sellLong(String instrumentId, double price, double amount);
+    void sellLong(String instrumentId, double price, long amount);
 
-    void sellLongDirectly(String instrumentId, double amount);
+    void sellLongDirectly(String instrumentId, long amount);
 
     void cancelOrder(String instrumentId, String orderId);
 

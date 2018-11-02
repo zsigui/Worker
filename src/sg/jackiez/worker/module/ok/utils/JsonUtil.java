@@ -89,6 +89,34 @@ public class JsonUtil {
         return null;
     }
 
+    public static <T> T jsonToSuccessDataForFutureWithErrCode(String json, TypeReference<T> type) {
+        if (CommonUtil.isEmpty(json)) {
+            SLogUtil.v(TAG, "json is null or empty.");
+            return null;
+        }
+        try {
+            SLogUtil.d(TAG, "to parse data：" + json);
+            JsonNode tree = sObjectMapper.readTree(json);
+            JsonNode errorCode = tree.get("error_code");
+
+            if (errorCode == null || (errorCode instanceof NullNode)
+                    || errorCode.intValue() == 0) {
+                return jsonToObj(json, type);
+            }
+
+            ErrorItem item = OKHelper.get().findErrorItemForFuture(errorCode.intValue());
+            if (item != null) {
+                SLogUtil.d(TAG, item);
+            } else {
+                SLogUtil.d(TAG, "no available code : " + errorCode.intValue());
+            }
+            return null;
+        } catch (Exception e) {
+            SLogUtil.v(TAG, e);
+        }
+        return null;
+    }
+
     public static <T> T jsonToSuccessDataForFuture(String json, TypeReference<T> type) {
         if (CommonUtil.isEmpty(json)) {
             SLogUtil.v(TAG, "json is null or empty.");

@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.handler.DBDataHandler;
 import sg.jackiez.worker.module.ok.handler.vendor.FutureVendorV3;
+import sg.jackiez.worker.module.ok.model.FutureOrder;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
@@ -162,7 +164,7 @@ public class DBManager {
 		return 0;
 	}
 
-	public int updateTradeState(String clientOId, String orderId, int state) {
+	public int updateTradeStateAndOrderId(String clientOId, String orderId, int state) {
 		Map<String, Object> dataItem = new HashMap<>();
 		dataItem.put(TradeInfo.STATE, state);
 		dataItem.put(TradeInfo.ORDER_ID, orderId);
@@ -176,7 +178,7 @@ public class DBManager {
 		return 0;
 	}
 
-	public int updateCancelTradeState(String instrumentId, String orderId, int state) {
+	public int updateTradeState(String instrumentId, String orderId, int state) {
 		Map<String, Object> dataItem = new HashMap<>();
 		dataItem.put(TradeInfo.STATE, state);
 		Map<String, Object> whereMap = new HashMap<>();
@@ -184,6 +186,47 @@ public class DBManager {
 		whereMap.put(TradeInfo.INSTRUMENT_ID, instrumentId);
 		try {
 			return DBUtil.update(TradeInfo.TABLE_NAME, dataItem, whereMap);
+		} catch (SQLException e) {
+			SLogUtil.d(TAG, e);
+		}
+		return 0;
+	}
+
+	public int updateMultiTradeState(List<FutureOrder> orders) {
+		if (orders == null || orders.isEmpty()) {
+			return 0;
+		}
+		ArrayList<Map<String, Object>> valueData = new ArrayList<>(orders.size());
+		ArrayList<Map<String, Object>> whereData = new ArrayList<>(orders.size());
+		HashMap<String, Object> valueMap, whereMap;
+		int state;
+		for (FutureOrder order : orders) {
+			switch (order.status) {
+				case OKTypeConfig.STATUS_CANCELED:
+					state = OKTypeConfig.DB_STATE_CANCELLED;
+					break;
+				case OKTypeConfig.STATUS_NOT_TRANSACT:
+					state = OKTypeConfig.DB_STATE_TRADING;
+					break;
+				case OKTypeConfig.STATUS_PART_TRANSACT:
+					state = OKTypeConfig.DB_STATE_PART_TRADE;
+					break;
+				case OKTypeConfig.STATUS_FULL_TRANSACT:
+					state = OKTypeConfig.DB_STATE_FULL_TRADE;
+					break;
+				default:
+					continue;
+			}
+			valueMap = new HashMap<>();
+			valueMap.put(TradeInfo.STATE, state);
+			whereMap = new HashMap<>();
+			whereMap.put(TradeInfo.ORDER_ID, order.order_id);
+			whereMap.put(TradeInfo.INSTRUMENT_ID, order.instrument_id);
+			valueData.add(valueMap);
+			whereData.add(whereMap);
+		}
+		try {
+			return DBUtil.updateAll(TradeInfo.TABLE_NAME, valueData, whereData);
 		} catch (SQLException e) {
 			SLogUtil.d(TAG, e);
 		}

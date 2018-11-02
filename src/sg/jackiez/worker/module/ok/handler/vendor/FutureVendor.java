@@ -170,7 +170,7 @@
 //        }
 //    }
 //
-//    private RespTrade doTrade(String symbol, double price, double amount,
+//    private RespTrade doTrade(String symbol, double price, long amount,
 //                         byte trendType, String priceType) {
 //        return JsonUtil.jsonToSuccessDataForFuture(mRestApi.futureTrade(symbol,
 //                mCurContractType, price == 0 ? null : String.valueOf(price),
@@ -184,49 +184,49 @@
 //    }
 //
 //    @Override
-//    public void buyShort(String instrumentId, double price, double amount) {
+//    public void buyShort(String instrumentId, double price, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
 //                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
 //    }
 //
 //    @Override
-//    public void buyShortDirectly(String instrumentId, double amount) {
+//    public void buyShortDirectly(String instrumentId, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
 //                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
 //    }
 //
 //    @Override
-//    public void sellShort(String instrumentId, double price, double amount) {
+//    public void sellShort(String instrumentId, double price, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_SHORT,
 //                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
 //    }
 //
 //    @Override
-//    public void sellShortDirectly(String instrumentId, double amount) {
+//    public void sellShortDirectly(String instrumentId, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
 //                OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
 //    }
 //
 //    @Override
-//    public void buyLong(String instrumentId, double price, double amount) {
+//    public void buyLong(String instrumentId, double price, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
 //                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
 //    }
 //
 //    @Override
-//    public void buyLongDirectly(String instrumentId, double amount) {
+//    public void buyLongDirectly(String instrumentId, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
 //                OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
 //    }
 //
 //    @Override
-//    public void sellLong(String instrumentId, double price, double amount) {
+//    public void sellLong(String instrumentId, double price, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
 //                OKTypeConfig.PRICE_TYPE_PARTILY_PRICE));
 //    }
 //
 //    @Override
-//    public void sellLongDirectly(String instrumentId, double amount) {
+//    public void sellLongDirectly(String instrumentId, long amount) {
 //        addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
 //                OKTypeConfig.PRICE_TYPE_MARKET_PRICE));
 //    }
@@ -251,7 +251,7 @@
 //        // 进行交易记录
 //        String symbol;
 //        double price;
-//        double amount;
+//        long amount;
 //        byte trendType;
 //        String priceType;
 //
@@ -259,7 +259,7 @@
 //        String orderId;
 //        boolean isCancelOp;
 //
-//        FutureTradeInfo(String symbol, double price, double amount, byte trendType, String priceType) {
+//        FutureTradeInfo(String symbol, double price, long amount, byte trendType, String priceType) {
 //            this.symbol = symbol;
 //            this.price = price;
 //            this.amount = amount;

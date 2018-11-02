@@ -50,20 +50,33 @@ public class PrecursorManager {
         }
 
         String currency = symbol.replace("_", "-").toUpperCase();
-        int i = 0;
-        for (InstrumentInfo info : instrumentInfos) {
-            if (info.instrument_id.startsWith(currency)) {
-                if ((i == 0 && contractType.equals(OKTypeConfig.CONTRACT_TYPE_THIS_WEEK))
-                        || (i == 1 && contractType.equals(OKTypeConfig.CONTRACT_TYPE_NEXT_WEEK))
-                        || (i == 2 && contractType.equals(OKTypeConfig.CONTRACT_TYPE_QUARTER))) {
-                    mInstrumentId = info.instrument_id;
-                    break;
-                }
-                i++;
-            }
+        int startIndex = 0;
+        final int count = matchToFindInstrumentId(contractType, instrumentInfos, currency, startIndex);
+        if (count == 2) {
+            startIndex = 1;
+            matchToFindInstrumentId(contractType, instrumentInfos, currency, startIndex);
+        } else if (count == 1) {
+            startIndex = 2;
+            matchToFindInstrumentId(contractType, instrumentInfos, currency, startIndex);
         }
 
         SLogUtil.i(TAG, "initInstrumentId : " + mInstrumentId);
+    }
+
+    private int matchToFindInstrumentId(String contractType, List<InstrumentInfo> instrumentInfos,
+                                         String currency, int startIndex) {
+        for (InstrumentInfo info : instrumentInfos) {
+            if (info.instrument_id.startsWith(currency)) {
+                startIndex++;
+                if ((startIndex == 1 && contractType.equals(OKTypeConfig.CONTRACT_TYPE_THIS_WEEK))
+                        || (startIndex == 2 && contractType.equals(OKTypeConfig.CONTRACT_TYPE_NEXT_WEEK))
+                        || (startIndex == 3 && contractType.equals(OKTypeConfig.CONTRACT_TYPE_QUARTER))) {
+                    mInstrumentId = info.instrument_id;
+                    break;
+                }
+            }
+        }
+        return startIndex;
     }
 
     private void initAccountType(String sybmol, String instrumentId) {

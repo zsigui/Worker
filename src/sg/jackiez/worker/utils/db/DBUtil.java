@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -151,6 +152,25 @@ public class DBUtil {
         return affectRowCount;
     }
 
+
+    private static String spliceUpdateSql(String tableName, Map<String, Object> valueMap, Map<String, Object> whereMap) {
+        /**开始拼插入的sql语句**/
+        StringBuilder sql = new StringBuilder();
+        sql.append("UPDATE ");
+        sql.append(tableName);
+        sql.append(" SET ");
+
+        for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+            sql.append(entry.getKey()).append(" = \"").append(entry.getValue()).append("\" ");
+        }
+
+        sql.append("WHERE ");
+        for (Map.Entry<String, Object> entry : whereMap.entrySet()) {
+           sql.append(entry.getKey()).append(" = \"").append(entry.getValue()).append("\" ");
+        }
+        return sql.toString();
+    }
+
     /**
      * 执行更新操作
      *
@@ -199,6 +219,60 @@ public class DBUtil {
             sql.append(whereSql);
         }
         return executeUpdate(sql.toString(), objects.toArray());
+    }
+
+    /**
+     * 执行同表批量更新操作
+     *
+     * @param tableName 表名
+     * @param valueMap 要更改的值列表
+     * @param whereMap 条件列表
+     * @return
+     * @throws SQLException
+     */
+    public static int updateAll(String tableName, List<Map<String, Object>> valueMap,
+                                List<Map<String, Object>> whereMap) throws SQLException {
+        /**影响的行数**/
+        int affectRowCount;
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            /**从数据库连接池中获取数据库连接**/
+            connection = DBConnectionPool.getInstance().getConnection();
+            int count = valueMap.size();
+            ArrayList<String> sqlList = new ArrayList<>(count);
+
+            for (int i = 0; i < count; i++) {
+                sqlList.add(spliceUpdateSql(tableName, valueMap.get(i), whereMap.get(i)));
+            }
+
+            /**执行SQL预编译**/
+            statement = connection.createStatement();
+            /**设置不自动提交，以便于在出现异常的时候数据库回滚**/
+            connection.setAutoCommit(false);
+
+            for (String sql : sqlList) {
+                statement.addBatch(sql);
+            }
+
+            int[] arr = statement.executeBatch();
+            connection.commit();
+            affectRowCount = arr.length;
+            SLogUtil.i(TAG, "succeed insert rows : " + affectRowCount);
+        } catch (Exception e) {
+            if (connection != null) {
+                connection.rollback();
+            }
+            throw e;
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return affectRowCount;
     }
 
     /**
