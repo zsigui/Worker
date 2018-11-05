@@ -57,7 +57,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.v(TAG, e);
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
         }
         return null;
     }
@@ -84,7 +84,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.v(TAG, e);
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
         }
         return null;
     }
@@ -112,7 +112,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.v(TAG, e);
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
         }
         return null;
     }
@@ -131,6 +131,7 @@ public class JsonUtil {
                 return jsonToObj(json, type);
             }
 
+            SLogUtil.i(TAG, "to be parsed error data : " + json);
             ErrorItem item = OKHelper.get().findErrorItemForFuture(errorCode.intValue());
             if (item != null) {
                 SLogUtil.d(TAG, item);
@@ -139,7 +140,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.v(TAG, e);
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
         }
         return null;
     }
@@ -158,6 +159,7 @@ public class JsonUtil {
                 return jsonToObj(tree.get(key).toString(), type);
             }
 
+            SLogUtil.i(TAG, "to be parsed error data : " + json);
             ErrorItem item = OKHelper.get().findErrorItemForFuture(errorCode.intValue());
             if (item != null) {
                 SLogUtil.d(TAG, item);
@@ -166,7 +168,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.v(TAG, e);
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
         }
         return null;
     }
@@ -211,7 +213,7 @@ public class JsonUtil {
                 return klineInfos;
             }
         } catch (IOException e) {
-            SLogUtil.v(TAG, e);
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
         }
         return null;
     }
@@ -265,7 +267,7 @@ public class JsonUtil {
         try {
             return sObjectMapper.readValue(json, type);
         } catch (IOException e) {
-            SLogUtil.v(TAG, e);
+            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
             return null;
         }
     }
