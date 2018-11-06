@@ -82,8 +82,12 @@ public final class OkConfig {
 //    public static final String SECRET_KEY = "074AD4B323E4ECB5190C63648643FA0D";
     public static final String API_KEY = "7a082e8e-cf90-4450-82fd-3063009ae88b";
     public static final String SECRET_KEY = "FD63F9C95FAA082F761797C7B25890E7";
-    public static final String V3_API_KEY = "02058f3f-0241-4ad2-8923-d03ca675c373";
-    public static final String V3_SECRET_KEY = "AC40F2FEA58D65794322726DAD93453A";
+    // 个人
+//    public static final String V3_API_KEY = "02058f3f-0241-4ad2-8923-d03ca675c373";
+//    public static final String V3_SECRET_KEY = "AC40F2FEA58D65794322726DAD93453A";
+    // 公司
+    public static final String V3_API_KEY = "9224d29a-8a42-45e4-89b4-e95c228a575d";
+    public static final String V3_SECRET_KEY = "452BA1F0FDCDE3CEE39E7190B41DC92B";
     public static final String V3_PASSPHRASE = "!@#1234kkkk";
 
     /**
@@ -94,7 +98,7 @@ public final class OkConfig {
     public static String WSS_URL = "wss://real.okex.com:10440/websocket/okexapi";
 
     // 配置是否适用代理
-    public static final boolean IS_USE_PROXY = true;
+    public static final boolean IS_USE_PROXY = false;
     public static final ProxyInfo PROXY_INFO = new ProxyInfo(Proxy.Type.HTTP, "127.0.0.1", 8080);
 
 

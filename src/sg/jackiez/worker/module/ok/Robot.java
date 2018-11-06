@@ -59,6 +59,11 @@ public class Robot {
         }
 
         @Override
+        public void onGetUpdatedKlineInfo(String timeType, List<KlineInfo> updated) {
+
+        }
+
+        @Override
         public void onTickerDataUpdate(Ticker ticker) {
             // 暂时忽略这个的处理
         }

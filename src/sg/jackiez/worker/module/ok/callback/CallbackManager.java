@@ -94,6 +94,14 @@ public class CallbackManager implements
 	}
 
 	@Override
+	public void onGetUpdatedKlineInfo(String timeType, List<KlineInfo> updated) {
+		SLogUtil.v(TAG, "onGetUpdatedKlineInfo");
+		for (FutureDataChangeCallback callback : mFutureDataChangedCallbacks) {
+			callback.onGetUpdatedKlineInfo(timeType, updated);
+		}
+	}
+
+	@Override
 	public void onTickerDataUpdate(Ticker ticker) {
 		SLogUtil.v(TAG, "onTickerDataUpdate");
 		for (FutureDataChangeCallback callback : mFutureDataChangedCallbacks) {

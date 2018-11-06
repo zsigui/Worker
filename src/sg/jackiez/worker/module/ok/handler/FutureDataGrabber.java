@@ -3,6 +3,7 @@ package sg.jackiez.worker.module.ok.handler;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
@@ -37,7 +38,7 @@ public class FutureDataGrabber {
 	private final boolean IS_SORT_FROM_SMALL = false;
 	// 一年时间
 	private static final long ONE_YEAR_TIME_IN_MILLIS = 365L * 24 * 60 * 60 * 1000;
-	private static final int KLINE_LIMIT_SIZE = 2000;
+	private static final int KLINE_LIMIT_SIZE = 1000;
 
 	private boolean mIsTickerGrabRunning = false;
 	private boolean mIsKlineGrabRunning = false;
@@ -242,21 +243,24 @@ public class FutureDataGrabber {
 				tmp.get(IS_SORT_FROM_SMALL ? tmp.size() - 1 : 0).time);
 		List<KlineInfo> _timeKlines = JsonUtil.jsonToKlineList(FutureRestApiV3.getKlineInfo(
 				mInstrumentId, start, DateUtil.formatISOTime(curTime), ktime), IS_SORT_FROM_SMALL);
-
+		List<KlineInfo> updateKlines = new LinkedList<>();
 		if (_timeKlines != null && !_timeKlines.isEmpty()) {
 			SLogUtil.d(TAG, "updateKlineForTime(" + ktime + ") : size = " + _timeKlines.size() + ", value = " + _timeKlines);
 			int updateSize = 0;
 			if (tmp != null) {
 				final KlineInfo lastItem = tmp.get(IS_SORT_FROM_SMALL ? tmp.size() - 1 : 0);
 				final long lastTime = lastItem.time;
+				updateKlines.clear();
 				if (IS_SORT_FROM_SMALL) {
 					for (KlineInfo info : _timeKlines) {
 						if (info.time > lastTime) {
 							tmp.add(info);
+							updateKlines.add(info);
 							updateSize++;
 						} else if (info.time == lastTime && lastItem.volume != info.volume) {
 							tmp.remove(tmp.size() - 1);
 							tmp.add(info);
+							updateKlines.add(info);
 							updateSize++;
 						}
 					}
@@ -266,16 +270,19 @@ public class FutureDataGrabber {
 						info = _timeKlines.get(i);
 						if (info.time > lastTime) {
 							tmp.add(0, info);
+							updateKlines.add(info);
 							updateSize++;
 						} else if (info.time == lastTime && lastItem.volume != info.volume) {
 							tmp.remove(0);
 							tmp.add(0, info);
+							updateKlines.add(info);
 							updateSize++;
 						}
 					}
 				}
 			} else {
 				tmp = _timeKlines;
+				updateKlines.addAll(tmp);
 				updateSize = tmp.size();
 			}
 
@@ -283,6 +290,7 @@ public class FutureDataGrabber {
 			if (updateSize > 0) {
 				// 有单独数据添加
 				mStoreKlinesMap.put(ktime, CollectionUtil.limit(tmp, KLINE_LIMIT_SIZE, false));
+				CallbackManager.get().onGetUpdatedKlineInfo(ktime, updateKlines);
 				return true;
 			}
 		}

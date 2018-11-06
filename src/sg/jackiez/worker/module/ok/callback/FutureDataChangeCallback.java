@@ -14,6 +14,8 @@ public interface FutureDataChangeCallback {
     void onKlineInfoUpdated(String shortTimeType, List<KlineInfo> shortKlineInfos,
                             String longTimeType, List<KlineInfo> longKlineInfos);
 
+    void onGetUpdatedKlineInfo(String timeType, List<KlineInfo> updated);
+
     void onTickerDataUpdate(Ticker ticker);
 
     void onGetTradeHistory(List<TradeHistoryItem> tradeHistory);
