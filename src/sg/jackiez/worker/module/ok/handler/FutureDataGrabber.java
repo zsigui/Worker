@@ -26,7 +26,6 @@ public class FutureDataGrabber {
 	private String mInstrumentId;
 
 	private Ticker mTicker;
-	private HashMap<String, Long> mStoreKlinesLastDataTimeMap = new HashMap<>(2);
 	private HashMap<String, List<KlineInfo>> mStoreKlinesMap = new HashMap<>(2);
 	private DepthInfo mDepthInfo;
 	private List<TradeHistoryItem> mLastTradeHistory;
@@ -35,9 +34,10 @@ public class FutureDataGrabber {
 	private final int TICKER_GAP_TIME = 500;
 	private final int DEPTH_GAP_TIME = 500;
 	private final int TRADE_GAP_TIME = 300;
+	private final boolean IS_SORT_FROM_SMALL = false;
 	// 一年时间
-	private static final long ONE_YEAR_TIME_IN_MILLIS = 365L * 7 * 24 * 60 * 60 * 1000;
-	private static final int KLINE_LIMIT_SIZE = 1000;
+	private static final long ONE_YEAR_TIME_IN_MILLIS = 365L * 24 * 60 * 60 * 1000;
+	private static final int KLINE_LIMIT_SIZE = 2000;
 
 	private boolean mIsTickerGrabRunning = false;
 	private boolean mIsKlineGrabRunning = false;
@@ -239,19 +239,39 @@ public class FutureDataGrabber {
 		long curTime = System.currentTimeMillis();
 		List<KlineInfo> tmp = mStoreKlinesMap.get(ktime);
 		String start = DateUtil.formatISOTime(tmp == null || tmp.isEmpty() ? (curTime - ONE_YEAR_TIME_IN_MILLIS) :
-				tmp.get(tmp.size() - 1).time);
+				tmp.get(IS_SORT_FROM_SMALL ? tmp.size() - 1 : 0).time);
 		List<KlineInfo> _timeKlines = JsonUtil.jsonToKlineList(FutureRestApiV3.getKlineInfo(
-				mInstrumentId, start, DateUtil.formatISOTime(curTime), ktime));
+				mInstrumentId, start, DateUtil.formatISOTime(curTime), ktime), IS_SORT_FROM_SMALL);
 
 		if (_timeKlines != null && !_timeKlines.isEmpty()) {
 			SLogUtil.d(TAG, "updateKlineForTime(" + ktime + ") : size = " + _timeKlines.size() + ", value = " + _timeKlines);
 			int updateSize = 0;
 			if (tmp != null) {
-				long lastTime = mStoreKlinesLastDataTimeMap.getOrDefault(ktime, 0L);
-				for (KlineInfo info : _timeKlines) {
-					if (info.time > lastTime) {
-						tmp.add(info);
-						updateSize++;
+				final KlineInfo lastItem = tmp.get(IS_SORT_FROM_SMALL ? tmp.size() - 1 : 0);
+				final long lastTime = lastItem.time;
+				if (IS_SORT_FROM_SMALL) {
+					for (KlineInfo info : _timeKlines) {
+						if (info.time > lastTime) {
+							tmp.add(info);
+							updateSize++;
+						} else if (info.time == lastTime && lastItem.volume != info.volume) {
+							tmp.remove(tmp.size() - 1);
+							tmp.add(info);
+							updateSize++;
+						}
+					}
+				} else {
+					KlineInfo info;
+					for (int i = _timeKlines.size() - 1; i >= 0; i--) {
+						info = _timeKlines.get(i);
+						if (info.time > lastTime) {
+							tmp.add(0, info);
+							updateSize++;
+						} else if (info.time == lastTime && lastItem.volume != info.volume) {
+							tmp.remove(0);
+							tmp.add(0, info);
+							updateSize++;
+						}
 					}
 				}
 			} else {
@@ -259,10 +279,10 @@ public class FutureDataGrabber {
 				updateSize = tmp.size();
 			}
 
+			SLogUtil.d(TAG, "updateKlineForTime(" + ktime + ") : updateSize = " + updateSize);
 			if (updateSize > 0) {
 				// 有单独数据添加
-				mStoreKlinesLastDataTimeMap.put(ktime, tmp.get(tmp.size() - 1).time);
-				mStoreKlinesMap.put(ktime, CollectionUtil.limit(tmp, KLINE_LIMIT_SIZE, true));
+				mStoreKlinesMap.put(ktime, CollectionUtil.limit(tmp, KLINE_LIMIT_SIZE, false));
 				return true;
 			}
 		}

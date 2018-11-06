@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -28,6 +28,7 @@ public class JsonUtil {
     private static final String TAG = "JsonUtil";
 
     private static ObjectMapper sObjectMapper = new ObjectMapper();
+
     static {
         sObjectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         sObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -57,7 +58,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
         }
         return null;
     }
@@ -84,7 +85,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
         }
         return null;
     }
@@ -112,7 +113,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
         }
         return null;
     }
@@ -140,7 +141,7 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
         }
         return null;
     }
@@ -168,12 +169,12 @@ public class JsonUtil {
             }
             return null;
         } catch (Exception e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
         }
         return null;
     }
 
-    public static List<KlineInfo> jsonToKlineList(String json) {
+    public static List<KlineInfo> jsonToKlineList(String json, boolean isSortFromSmall) {
         if (CommonUtil.isEmpty(json)) {
             SLogUtil.v(TAG, "json is null or empty.");
             return null;
@@ -181,9 +182,9 @@ public class JsonUtil {
         try {
             JsonNode tree = sObjectMapper.readTree(json);
             if (tree.isArray()) {
-                ArrayList<KlineInfo> klineInfos = new ArrayList<>();
+                LinkedList<KlineInfo> klineInfos = new LinkedList<>();
                 KlineInfo item;
-                int last0VloumeIndex = -1;
+                int volumeIndex = -1;
                 for (JsonNode node : tree) {
                     if (node == null || node.size() < 6) {
                         continue;
@@ -200,20 +201,25 @@ public class JsonUtil {
                     }
                     if (item.volume == 0) {
                         // OK的机制，比如当前12:00:03，此时可以拿到12:00:00~12:00:59的数据，但实际拿到的量为0
-                        last0VloumeIndex = klineInfos.size();
+                        if (isSortFromSmall) {
+                            volumeIndex = klineInfos.size() - 1;
+                        } else if (klineInfos.size() == 1) {
+                            volumeIndex = 0;
+                        }
                         SLogUtil.i(TAG, "Filter 0 volume K-Line data : " + json);
                     }
                     klineInfos.add(item);
                 }
 
-                if (last0VloumeIndex != -1 && last0VloumeIndex == klineInfos.size() - 1) {
-                    // 如果是最后一个数据，且量为0，表示还没获取到有效数据，移除掉
-                    klineInfos.remove(last0VloumeIndex);
+                if (volumeIndex != -1 && (!isSortFromSmall || volumeIndex == klineInfos.size() - 1)) {
+                    // 从小到大排序的话，如果是最后一个数据，且量为0，表示还没获取到有效数据，移除掉
+                    // 从大到小排序的话，如果是第一个数据，且量为0，表示还没获取到有效数据，移除掉
+                    klineInfos.remove(volumeIndex);
                 }
                 return klineInfos;
             }
         } catch (IOException e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
         }
         return null;
     }
@@ -240,7 +246,7 @@ public class JsonUtil {
             }
             return leverage;
         } catch (Exception e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
         }
         return null;
     }
@@ -263,11 +269,11 @@ public class JsonUtil {
         }
     }
 
-    public static  <T> T jsonToObj(String json, TypeReference<T> type) {
+    public static <T> T jsonToObj(String json, TypeReference<T> type) {
         try {
             return sObjectMapper.readValue(json, type);
         } catch (IOException e) {
-            SLogUtil.i(TAG,"parse json : " + json + ", error : " +  e);
+            SLogUtil.i(TAG, "parse json : " + json + ", error : " + e);
             return null;
         }
     }

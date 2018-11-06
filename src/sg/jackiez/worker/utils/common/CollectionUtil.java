@@ -2,12 +2,9 @@ package sg.jackiez.worker.utils.common;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-
-import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class CollectionUtil {
 
@@ -76,17 +73,16 @@ public class CollectionUtil {
             return null;
         }
 
-        ListIterator<T> it = listObj.listIterator();
         int size = listObj.size();
         if (fromHead) {
+            ListIterator<T> it = listObj.listIterator();
             while (it.hasNext() && size-- > limitSize) {
                 it.next();
                 it.remove();
             }
         } else {
-            while (it.hasPrevious() && size-- > limitSize) {
-                it.previous();
-                it.remove();
+            while (size-- > limitSize) {
+                listObj.remove(size);
             }
         }
         return listObj;
