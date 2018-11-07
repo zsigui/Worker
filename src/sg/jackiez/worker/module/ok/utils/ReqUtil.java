@@ -16,6 +16,19 @@ public class ReqUtil {
 		return resp;
 	}
 
+	public static Boolean blockJudge(int elapseTime, int maxWaitTime, Action<Boolean> action) {
+		long startTime = System.currentTimeMillis();
+		boolean has = false;
+		while (!has && (maxWaitTime == -1 || System.currentTimeMillis() - startTime < maxWaitTime)) {
+			has = action.handle();
+			try {
+				Thread.sleep(elapseTime);
+			} catch (InterruptedException ignored) {
+			}
+		}
+		return has;
+	}
+
 	public interface Action<T> {
 		T handle();
 	}
