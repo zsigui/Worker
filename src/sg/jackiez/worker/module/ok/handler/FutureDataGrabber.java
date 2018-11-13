@@ -175,8 +175,8 @@ public class FutureDataGrabber {
 			while (mIsTradeGrabRunning) {
 				tickTime = System.currentTimeMillis();
 				try {
-					tradeHistory = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getTradeHistory(mInstrumentId, "",
-							"", ""),
+					tradeHistory = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getTradeHistory(mInstrumentId,
+							"1", "", "100"),
 							new TypeReference<List<TradeHistoryItem>>() {
 							});
 					if (tradeHistory != null && !tradeHistory.isEmpty()) {
