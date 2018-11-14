@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sg.jackiez.worker.callback.SimpleCallback;
+import sg.jackiez.worker.module.ok.OKError;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
@@ -19,6 +21,7 @@ import sg.jackiez.worker.module.ok.model.account.FutureContract4FixV3;
 import sg.jackiez.worker.module.ok.model.account.FutureContractV3;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
+import sg.jackiez.worker.utils.ExecutorUtil;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.thread.DefaultThread;
 
@@ -27,6 +30,7 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 	private static final String TAG = "AccountDataGrabber";
 
 	private static final int MAX_RETRY_TIME = 3;
+	private static final int DEFAULT_FETCH_GAP_TIME = 5_000;
 
 	private final Object mLockObj = new Object();
 
@@ -36,29 +40,46 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 	public AccountDataGrabber() {
 	}
 
-    public List<FutureOrder> getTotalOrderList(String instrumentId) {
+    public List<FutureOrder> getTotalOrderListSync(String instrumentId) {
 
         List<FutureOrder> totalList = new ArrayList<>();
         // 获取完全未成交的订单信息
-        getOrdersByState(instrumentId,
+        getOrdersByStateSync(instrumentId,
                 OKTypeConfig.STATUS_NOT_TRANSACT, totalList);
         // 获取部分成交的订单信息
-        getOrdersByState(instrumentId,
+        getOrdersByStateSync(instrumentId,
                 OKTypeConfig.STATUS_PART_TRANSACT, totalList);
         // 获取已完全成交的订单信息
-        getOrdersByState(instrumentId,
+        getOrdersByStateSync(instrumentId,
                 OKTypeConfig.STATUS_FULL_TRANSACT, totalList);
         // 获取已取消订单信息
-        getOrdersByState(instrumentId,
+        getOrdersByStateSync(instrumentId,
                 OKTypeConfig.STATUS_CANCELED, totalList);
 
-		SLogUtil.i(TAG, "getTotalOrderList: total order list = " + totalList.size());
+		SLogUtil.i(TAG, "getTotalOrderListSync: total order list = " + totalList.size());
 		DBManager.get().updateMultiTradeState(totalList);
 		return totalList;
     }
 
-    public FutureOrder getOrderIfContainByOrderId(String instrumentId, String orderId, int status) {
-		List<FutureOrder> result = getOrdersByState(instrumentId, status, null);
+	public void getTotalOrderList(String instrumentId, SimpleCallback<List<FutureOrder>> callback) {
+		if (callback == null) {
+			return;
+		}
+
+		ExecutorUtil.getCachedExecutor().submit(() -> {
+			List<FutureOrder> orderList = getTotalOrderListSync(instrumentId);
+			if (orderList == null) {
+				callback.onFail(OKError.E_NULL, OKError.STR_E_NULL);
+			} else if (orderList.isEmpty()) {
+				callback.onFail(OKError.E_EMPTY, OKError.STR_E_EMPTY);
+			} else {
+				callback.onSuccess(orderList);
+			}
+		});
+	}
+
+    public FutureOrder getOrderIfContainByOrderIdSync(String instrumentId, String orderId, int status) {
+		List<FutureOrder> result = getOrdersByStateSync(instrumentId, status, null);
 		if (result != null) {
 			for (FutureOrder order : result) {
 				if (order.order_id.equals(orderId)) {
@@ -69,19 +90,53 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 		return null;
 	}
 
-    private List<FutureOrder> getOrdersByState(String instrumentId, int status,
-                                               List<FutureOrder> store) {
+	public void getOrderIfContainByOrderId(String instrumentId, String orderId, int status,
+												  SimpleCallback<FutureOrder> callback) {
+		if (callback == null) {
+			return;
+		}
+
+		ExecutorUtil.getCachedExecutor().submit(() -> {
+			FutureOrder order = getOrderIfContainByOrderIdSync(instrumentId, orderId, status);
+			if (order == null) {
+				callback.onFail(OKError.E_NULL, OKError.STR_E_NULL);
+			} else {
+				callback.onSuccess(order);
+			}
+		});
+	}
+
+    public List<FutureOrder> getOrdersByStateSync(String instrumentId, int status,
+												  List<FutureOrder> store) {
         List<FutureOrder> result = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getOrderList(instrumentId,
-                String.valueOf(status), "0", null, "100"),
+                String.valueOf(status), "1", null, "100"),
                 "order_info",
                 new TypeReference<List<FutureOrder>>() {
                 });
         if (result != null && store != null) {
-			SLogUtil.i(TAG, "getOrdersByState: status = " + status + ", size = " + result.size());
+			SLogUtil.i(TAG, "getOrdersByStateSync: status = " + status + ", size = " + result.size());
             store.addAll(result);
         }
         return result;
     }
+
+    public void getOrdersByState(String instrumentId, int status, List<FutureOrder> store,
+								 SimpleCallback<List<FutureOrder>> callback) {
+		if (callback == null) {
+			return;
+		}
+
+		ExecutorUtil.getCachedExecutor().submit(() -> {
+			List<FutureOrder> orderList = getOrdersByStateSync(instrumentId, status, store);
+			if (orderList == null) {
+				callback.onFail(OKError.E_NULL, OKError.STR_E_NULL);
+			} else if (orderList.isEmpty()) {
+				callback.onFail(OKError.E_EMPTY, OKError.STR_E_EMPTY);
+			} else {
+				callback.onSuccess(orderList);
+			}
+		});
+	}
 
 	private boolean isGrabAccountDataThreadAlive() {
 		return mGrabDataThread != null && mGrabDataThread.isAlive()
@@ -109,7 +164,7 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 
 				synchronized (mLockObj) {
 					try {
-						mLockObj.wait(30_000);
+						mLockObj.wait(DEFAULT_FETCH_GAP_TIME);
 					} catch (InterruptedException e) {
 						SLogUtil.v(e);
 					}
@@ -141,7 +196,7 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 		retryTime = MAX_RETRY_TIME;
 		userInfo = null;
 		while (userInfo == null && retryTime-- > 0) {
-			userInfo = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getAllPositionInfo(),
+			userInfo = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getUserInfo(),
 					"info", new TypeReference<HashMap<String, FutureContractV3>>() {
 					});
 		}
@@ -176,7 +231,7 @@ public class AccountDataGrabber implements AccountStateChangeCallback {
 		retryTime = MAX_RETRY_TIME;
 		userInfo = null;
 		while (userInfo == null && retryTime-- > 0) {
-			userInfo = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getAllPositionInfo(),
+			userInfo = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getUserInfo(),
 					"info", new TypeReference<HashMap<String, FutureContract4FixV3>>() {
 					});
 		}

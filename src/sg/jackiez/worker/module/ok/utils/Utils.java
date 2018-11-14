@@ -1,13 +1,5 @@
 package sg.jackiez.worker.module.ok.utils;
 
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-
-import sg.jackiez.worker.module.ok.OkConfig;
-import sg.jackiez.worker.utils.chiper.HmacSHA256;
-import sg.jackiez.worker.utils.common.CollectionUtil;
-
 /**
  * @Author JackieZ
  * @Date Created on 2018/10/3
@@ -19,8 +11,9 @@ public class Utils {
 	 */
 	public static int calculatePageAmount(double amount,
 	                                      double price,
-	                                      double contractValue) {
-		return (int) (amount * price / contractValue);
+	                                      double contractValue,
+										  double feeRate, int leverage) {
+		return (int) (amount * price * (1 - feeRate * leverage) / contractValue);
 	}
 
 	/**
@@ -94,4 +87,5 @@ public class Utils {
 	public static double getCountByIncrement(double val, double trade_increment) {
 		return (int)(val / trade_increment) * trade_increment;
 	}
+
 }

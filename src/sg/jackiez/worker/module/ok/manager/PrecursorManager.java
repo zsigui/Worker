@@ -91,6 +91,7 @@ public class PrecursorManager {
         }
         SLogUtil.i(TAG, "initAccountType : " + leverage);
         mLeverage = leverage;
+        AccountManager.get().setFixedAccount(isFixedAccount());
     }
 
     public String getInstrumentId() {
