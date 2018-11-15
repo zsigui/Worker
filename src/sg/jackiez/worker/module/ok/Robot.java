@@ -1,6 +1,5 @@
 package sg.jackiez.worker.module.ok;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
@@ -30,9 +29,7 @@ public class Robot {
     private AccountStateChangeCallback mStateChangeCallback = new AccountStateChangeCallback() {
         @Override
         public void onAccountInfoUpdated() {
-            if (mIsDataChange) {
-//                handleKlineForSignal(mFutureDataGrabber.getKlineInfoMap().get(OKTypeConfig.KLINE_TYPE_1_MIN));
-            }
+
         }
 
         @Override
@@ -44,18 +41,12 @@ public class Robot {
     private FutureDataChangeCallback mDataChangeCallback = new FutureDataChangeCallback() {
         @Override
         public void onDepthUpdated(DepthInfo depthInfo) {
-            KlineInfo klineInfo = new KlineInfo();
-            klineInfo.time = System.currentTimeMillis();
-            klineInfo.close = (depthInfo.asks.get(depthInfo.asks.size() - 1).get(0) +
-                    + depthInfo.bids.get(0).get(0)) / 2;
-            List<KlineInfo> klineInfos = new ArrayList<>(mFutureDataGrabber.getKlineInfoMap().get(OKTypeConfig.KLINE_TYPE_1_MIN));
-            klineInfos.add(klineInfo);
-//            handleKlineForSignal(klineInfos);
+
         }
 
         @Override
         public void onKlineInfoUpdated(String shortTimeType, List<KlineInfo> shortKlineInfos, String longTimeType, List<KlineInfo> longKlineInfos) {
-//            handleKlineForSignal(shortKlineInfos);
+
         }
 
         @Override
@@ -70,14 +61,14 @@ public class Robot {
 
         @Override
         public void onGetTradeHistory(List<TradeHistoryItem> tradeHistory) {
-
+            mPerformance.handleBar(tradeHistory.get(tradeHistory.size() - 1));
         }
     };
 
     private VendorResultCallback mVendorResultCallback = new VendorResultCallback() {
         @Override
         public void onTradeSuccess(String clientOId, String orderId, String instrumentId) {
-
+            mPerformance.afterTrade();
         }
 
         @Override
@@ -101,6 +92,7 @@ public class Robot {
         SLogUtil.setPrintFile(true);
         PrecursorManager precursorManager = PrecursorManager.get();
         precursorManager.init(OKTypeConfig.SYMBOL_EOS, OKTypeConfig.CONTRACT_TYPE_QUARTER);
+        mPerformance.init();
         mFutureDataGrabber = new FutureDataGrabber(precursorManager.getInstrumentId());
         mAccountDataGrabber = new AccountDataGrabber();
         mFutureVendor = new VendorDataHandler(precursorManager.getLongLeverage(),

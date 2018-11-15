@@ -61,3 +61,24 @@ CREATE TABLE `trade_history`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ----------------------------
+-- Table structure for trade_info
+-- ----------------------------
+DROP TABLE IF EXISTS `trade_info`;
+CREATE TABLE `trade_info`  (
+  `client_oid` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `instrument_id` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `order_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `type` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `price` double(20, 8) NOT NULL,
+  `size` bigint(20) NOT NULL,
+  `match_price` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `leverage` int(4) NOT NULL,
+  `state` int(4) NOT NULL,
+  `create_time` bigint(20) NOT NULL,
+  PRIMARY KEY (`price`) USING BTREE,
+  UNIQUE INDEX `index_client_oid`(`client_oid`) USING BTREE COMMENT '自定义订单号'
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;

@@ -1,16 +1,16 @@
 package sg.jackiez.worker.module.ok.performance;
 
-import java.util.List;
-
-import sg.jackiez.worker.module.ok.model.DepthInfo;
+import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 
 public interface IPerformance {
 
     void init();
 
+    void handleBar(TradeHistoryItem newestTradeItem);
+
     void beforeTrade();
 
-    void handleBar(List<DepthInfo> depthData);
+    void doTrade();
 
     void afterTrade();
 }
