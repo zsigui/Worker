@@ -11,7 +11,7 @@ import sg.jackiez.worker.module.ok.callback.FutureDataChangeCallback;
 import sg.jackiez.worker.module.ok.callback.VendorResultCallback;
 import sg.jackiez.worker.module.ok.handler.AccountDataGrabber;
 import sg.jackiez.worker.module.ok.handler.FutureDataGrabber;
-import sg.jackiez.worker.module.ok.handler.vendor.FutureVendorV3;
+import sg.jackiez.worker.module.ok.handler.vendor.VendorDataHandler;
 import sg.jackiez.worker.module.ok.manager.AccountManager;
 import sg.jackiez.worker.module.ok.manager.PrecursorManager;
 import sg.jackiez.worker.module.ok.model.DepthInfo;
@@ -33,7 +33,7 @@ public class TestVendorManager {
 
     private AccountDataGrabber mAccountDataGrabber;
     private FutureDataGrabber mFutureDataGrabber;
-    private FutureVendorV3 mFutureVendor;
+    private VendorDataHandler mFutureVendor;
     private TestAccount mTestAccount = new TestAccount();
     private boolean mIsDataChange;
 
@@ -241,7 +241,7 @@ public class TestVendorManager {
         mAccountDataGrabber = new AccountDataGrabber();
         mAccountDataGrabber.startGrabAccountDataThread();
         mFutureDataGrabber.startAll();
-        mFutureVendor = new FutureVendorV3(precursorManager.getLongLeverage(),
+        mFutureVendor = new VendorDataHandler(precursorManager.getLongLeverage(),
                 precursorManager.getShortLeverage());
         mFutureVendor.startTradeThread();
         CallbackManager.get().addAccountStateChangeCallback(mStateChangeCallback);

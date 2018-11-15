@@ -9,8 +9,8 @@ import java.util.Map;
 
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.handler.DBDataHandler;
-import sg.jackiez.worker.module.ok.handler.vendor.FutureVendorV3;
 import sg.jackiez.worker.module.ok.model.FutureOrder;
+import sg.jackiez.worker.module.ok.model.FutureTradeInfo;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
@@ -62,6 +62,7 @@ public class DBManager {
 		String MATCH_PRICE = "match_price";
 		String LEVERAGE = "leverage";
 		String STATE = "state";
+		String CREATE_TIME = "create_time";
 	}
 
 	private DBDataHandler mHandler = new DBDataHandler();
@@ -142,7 +143,7 @@ public class DBManager {
 		return saveKlineData(Kline15MinDeatil.TABLE_NAME, klineInfoList);
 	}
 
-	public int saveTrade(FutureVendorV3.FutureTradeInfo item,
+	public int saveTrade(FutureTradeInfo item,
 								int state) {
 		if (item == null) {
 			return 0;
@@ -156,6 +157,7 @@ public class DBManager {
 		dataItem.put(TradeInfo.SIZE, item.amount);
 		dataItem.put(TradeInfo.LEVERAGE, item.leverage);
 		dataItem.put(TradeInfo.STATE, state);
+		dataItem.put(TradeInfo.CREATE_TIME, System.currentTimeMillis());
 		try {
 			return DBUtil.insert(TradeInfo.TABLE_NAME, dataItem, DBUtil.FLAG_INSERT_REPLACE);
 		} catch (SQLException e) {

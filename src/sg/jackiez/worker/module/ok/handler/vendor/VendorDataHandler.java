@@ -9,8 +9,7 @@ import sg.jackiez.worker.module.ok.OKError;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.OkConfig;
 import sg.jackiez.worker.module.ok.callback.CallbackManager;
-import sg.jackiez.worker.module.ok.manager.DBManager;
-import sg.jackiez.worker.module.ok.model.base.BaseM;
+import sg.jackiez.worker.module.ok.model.FutureTradeInfo;
 import sg.jackiez.worker.module.ok.model.resp.RespBatchCancelTradeV3;
 import sg.jackiez.worker.module.ok.model.resp.RespCancelTradeV3;
 import sg.jackiez.worker.module.ok.model.resp.RespTradeV3;
@@ -23,22 +22,20 @@ import sg.jackiez.worker.utils.thread.DefaultThread;
 /**
  * 用于进行期货交易及现有资产管理的处理类
  */
-public class FutureVendorV3 implements IVendor{
+public class VendorDataHandler {
 
     private static final String TAG = "FutureVendor";
-
-    private static final int MAXT_RETRY_TIME = 3;
-
     private int mLongLeverage;
     private int mShortLeverage;
 
     private final Object mLockObj = new Object();
+    private Vendor mVendor = new Vendor();
     private Thread mTradeThread;
     private boolean mIsTradeThreadRunning;
 
     private ConcurrentLinkedQueue<FutureTradeInfo> mTradeInfoList = new ConcurrentLinkedQueue<>();
 
-    public FutureVendorV3(int longLeverage, int shortLeverage) {
+    public VendorDataHandler(int longLeverage, int shortLeverage) {
         mLongLeverage = longLeverage;
         mShortLeverage = shortLeverage;
     }
@@ -123,12 +120,7 @@ public class FutureVendorV3 implements IVendor{
     }
 
     private void handleCancelOrder(FutureTradeInfo info) {
-        int retryTime;
-        RespCancelTradeV3 rsp = null;
-        retryTime = MAXT_RETRY_TIME;
-        while (rsp == null && retryTime-- > 0) {
-            rsp = doCancelOrder(info.instrumentId, info.orderId);
-        }
+        RespCancelTradeV3 rsp = mVendor.doCancelOrderSync(info.instrumentId, info.orderId);
         SLogUtil.i(TAG, "取消下单操作结果：" + rsp);
         if (OkConfig.IS_TEST) {
             // 测试，直接当成成功处理
@@ -141,8 +133,6 @@ public class FutureVendorV3 implements IVendor{
                 // 单笔订单处理
                 if (rsp.result) {
                     // 成功
-                    DBManager.get().updateTradeState(info.instrumentId,
-                            info.orderId, OKTypeConfig.DB_STATE_CANCELLING);
                     CallbackManager.get().onCancelOrderSuccess(info.orderId, info.instrumentId);
                 } else {
                     CallbackManager.get().onCancelOrderFail(OKError.E_REQ_FAIL, OKError.STR_E_REQ_FAIL);
@@ -177,14 +167,7 @@ public class FutureVendorV3 implements IVendor{
 //    }
 
     private void handleTrade(FutureTradeInfo info) {
-        int retryTime;
-        RespTradeV3 rsp = null;
-        retryTime = MAXT_RETRY_TIME;
-        DBManager.get().saveTrade(info, OKTypeConfig.DB_STATE_INIT);
-        while (rsp == null && retryTime-- > 0) {
-            rsp = doTrade(info.instrumentId, info.price, info.amount, info.trendType,
-                    info.priceType, info.clientOId, String.valueOf(info.leverage));
-        }
+        RespTradeV3 rsp = mVendor.doTradeSync(info);
         SLogUtil.i(TAG, "下单操作结果：" + rsp);
         if (OkConfig.IS_TEST) {
             // 测试，直接当成成功处理
@@ -198,7 +181,6 @@ public class FutureVendorV3 implements IVendor{
                     CallbackManager.get().onTradeFail(rsp.error_code, rsp.error_message);
                 }
             } else {
-                DBManager.get().updateTradeStateAndOrderId(info.clientOId, rsp.order_id, OKTypeConfig.DB_STATE_TRADING);
                 CallbackManager.get().onTradeSuccess(info.instrumentId, rsp.order_id, info.instrumentId);
             }
         }
@@ -215,112 +197,56 @@ public class FutureVendorV3 implements IVendor{
                 new TypeReference<RespTradeV3>() {});
     }
 
-    private RespCancelTradeV3 doCancelOrder(String instrumentId, String orderId) {
-        SLogUtil.i(TAG, "执行取消下单操作：instrumentId = " + instrumentId + ", orderId = " + orderId);
-        return JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.doCancelTrade(orderId, instrumentId),
-                new TypeReference<RespCancelTradeV3>() {});
-    }
-
     private RespBatchCancelTradeV3 doCancelMultiOrder(String instrumentId, List<String> orderIds) {
         return JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.doBatchCancelTrade(instrumentId, JsonUtil.objToJson(orderIds)),
                 new TypeReference<RespBatchCancelTradeV3>() {});
     }
 
-    @Override
     public void buyShort(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
-    @Override
     public void buyShortDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
-    @Override
     public void sellShort(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_SHORT,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mShortLeverage));
     }
 
-    @Override
     public void sellShortDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mShortLeverage));
     }
 
-    @Override
     public void buyLong(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mLongLeverage));
     }
 
-    @Override
     public void buyLongDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_BUY_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mLongLeverage));
     }
 
-    @Override
     public void sellLong(String instrumentId, double price, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, price, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_PARTILY_PRICE, mLongLeverage));
     }
 
-    @Override
     public void sellLongDirectly(String instrumentId, long amount) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, 0, amount, OKTypeConfig.TREND_TYPE_SELL_LONG,
                 OKTypeConfig.PRICE_TYPE_MARKET_PRICE, mLongLeverage));
     }
 
-    @Override
     public void cancelOrder(String instrumentId, String orderId) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, orderId));
     }
 
-    @Override
     public void cancelOrders(String instrumentId, List<String> orderIds) {
         addTradeInfoAndNotify(new FutureTradeInfo(instrumentId, orderIds));
-    }
-
-    public static class FutureTradeInfo extends BaseM {
-
-        // 进行交易记录
-        public String instrumentId;
-        public double price;
-        public long amount;
-        public byte trendType;
-        public String priceType;
-        public String clientOId;
-        public int leverage;
-
-        // 取消订单记录
-        public String orderId;
-        boolean isCancelOp;
-        public List<String> orderIds;
-
-        FutureTradeInfo(String instrumentId, double price, long amount, byte trendType, String priceType, int leverage) {
-            this.instrumentId = instrumentId;
-            this.price = price;
-            this.amount = amount;
-            this.trendType = trendType;
-            this.priceType = priceType;
-            this.leverage = leverage;
-            this.isCancelOp = false;
-        }
-
-        FutureTradeInfo(String instrumentId, String orderId) {
-            this.instrumentId = instrumentId;
-            this.orderId = orderId;
-            this.isCancelOp = true;
-        }
-
-        FutureTradeInfo(String instrumentId, List<String> orderIds) {
-            this.instrumentId = instrumentId;
-            this.orderIds = orderIds;
-            this.isCancelOp = true;
-        }
-
     }
 }
