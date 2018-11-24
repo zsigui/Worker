@@ -1,5 +1,6 @@
 package sg.jackiez.worker.module.ok;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
@@ -62,6 +63,16 @@ public class Robot {
         @Override
         public void onGetTradeHistory(List<TradeHistoryItem> tradeHistory) {
             mPerformance.handleBar(tradeHistory.get(tradeHistory.size() - 1));
+            double totalPrice = 0;
+            for (TradeHistoryItem item : tradeHistory) {
+                totalPrice += item.price;
+            }
+            double curAvgPrice = totalPrice / tradeHistory.size();
+            KlineInfo klineInfo = new KlineInfo();
+            klineInfo.close = curAvgPrice;
+            List<KlineInfo> klineInfos = new ArrayList<>();
+            klineInfos.add(klineInfo);
+            klineInfos.addAll(mFutureDataGrabber.getKlineInfoMap().get(OKTypeConfig.KLINE_TYPE_1_MIN));
         }
     };
 
