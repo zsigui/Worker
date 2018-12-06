@@ -7,6 +7,7 @@ import java.util.List;
 import sg.jackiez.worker.module.ok.OKTypeConfig;
 import sg.jackiez.worker.module.ok.model.InstrumentInfo;
 import sg.jackiez.worker.module.ok.model.Leverage;
+import sg.jackiez.worker.module.ok.model.ServerTime;
 import sg.jackiez.worker.module.ok.network.future.FutureRestApiV3;
 import sg.jackiez.worker.module.ok.utils.JsonUtil;
 import sg.jackiez.worker.module.ok.utils.ReqUtil;
@@ -32,8 +33,19 @@ public class PrecursorManager {
     }
 
     public void init(String symbol, String contractType) {
+        initServerDiffTime();
         initInstrumentId(symbol, contractType);
         initAccountType(symbol, getInstrumentId());
+    }
+
+    private void initServerDiffTime() {
+        ServerTime serverTime = JsonUtil.jsonToSuccessDataForFuture(FutureRestApiV3.getTimeStamp(),
+                new TypeReference<ServerTime>() {});
+        if (serverTime != null) {
+            FutureRestApiV3.setServerDiffTime(
+                    (serverTime.iso.getTime() + 8 * 60 * 60 * 1000 - System.currentTimeMillis()) / 2
+            );
+        }
     }
 
     public void initInstrumentId(String symbol, String contractType) {

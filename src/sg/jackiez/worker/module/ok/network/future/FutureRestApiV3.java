@@ -24,7 +24,13 @@ public class FutureRestApiV3 {
 
     private static final String TAG = "FutureRestApiV3";
 
+    private static long sServerDiffTime = 0;
+
     private FutureRestApiV3() {
+    }
+
+    public static void setServerDiffTime(long diffTime) {
+        sServerDiffTime = diffTime;
     }
 
     private static String preSignData(String timestamp, String method, String requestPath, String body) {
@@ -43,7 +49,7 @@ public class FutureRestApiV3 {
         if (!CommonUtil.isEmpty(paramStr)) {
             requestUrl = HttpUtil.spliceUrlAndParam(requestUrl, paramStr);
         }
-        String timestamp = DateUtil.formatISOTime(System.currentTimeMillis());
+        String timestamp = DateUtil.formatISOTime(System.currentTimeMillis() + sServerDiffTime);
         String data = preSignData(timestamp, "GET",
                 requestUrl.replace(OkConfig.REST_HOST, ""), null);
         String sign = Base64.getEncoder().encodeToString(
@@ -66,7 +72,7 @@ public class FutureRestApiV3 {
             requestUrl = HttpUtil.spliceUrlAndParam(requestUrl, paramStr);
         }
 
-        String timestamp = DateUtil.formatISOTime(System.currentTimeMillis());
+        String timestamp = DateUtil.formatISOTime(System.currentTimeMillis() + sServerDiffTime);
         String data = preSignData(timestamp, "POST",
                 requestUrl.replace(OkConfig.REST_HOST, ""), jsonData);
         String sign = Base64.getEncoder().encodeToString(
