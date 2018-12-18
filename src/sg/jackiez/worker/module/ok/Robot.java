@@ -1,6 +1,5 @@
 package sg.jackiez.worker.module.ok;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import sg.jackiez.worker.module.ok.callback.AccountStateChangeCallback;
@@ -16,13 +15,17 @@ import sg.jackiez.worker.module.ok.model.Ticker;
 import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
 import sg.jackiez.worker.module.ok.performance.IPerformance;
 import sg.jackiez.worker.utils.SLogUtil;
+import sg.jackiez.worker.utils.algorithm.CustomSharp;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class Robot {
 
+    public static final String TAG = "RobotTrade";
+
     private AccountDataGrabber mAccountDataGrabber;
     private FutureDataGrabber mFutureDataGrabber;
     private VendorDataHandler mFutureVendor;
+    private CustomSharp mSharp;
 
     private IPerformance mPerformance;
     private boolean mIsDataChange;
@@ -62,17 +65,29 @@ public class Robot {
 
         @Override
         public void onGetTradeHistory(List<TradeHistoryItem> tradeHistory) {
-            mPerformance.handleBar(tradeHistory.get(tradeHistory.size() - 1));
-            double totalPrice = 0;
-            for (TradeHistoryItem item : tradeHistory) {
-                totalPrice += item.price;
+            if (tradeHistory == null || tradeHistory.isEmpty()) {
+                return;
             }
-            double curAvgPrice = totalPrice / tradeHistory.size();
-            KlineInfo klineInfo = new KlineInfo();
-            klineInfo.close = curAvgPrice;
-            List<KlineInfo> klineInfos = new ArrayList<>();
-            klineInfos.add(klineInfo);
-            klineInfos.addAll(mFutureDataGrabber.getKlineInfoMap().get(OKTypeConfig.KLINE_TYPE_1_MIN));
+
+            TradeHistoryItem newestTrade = tradeHistory.get(tradeHistory.size() - 1);
+            mPerformance.handleBar(newestTrade);
+
+            final int direction = mSharp.judgeEosDirection(
+                    mFutureDataGrabber.getKlineInfoMap().get(OKTypeConfig.KLINE_TYPE_1_MIN),
+                    newestTrade.price);
+
+            switch (direction) {
+                case CustomSharp.DIRECTION_UP:
+                    SLogUtil.e(TAG, "============================================");
+                    SLogUtil.e(TAG, "当前看涨，现价：" + newestTrade.price);
+                    SLogUtil.e(TAG, "============================================");
+                    break;
+                case CustomSharp.DIRECTION_DOWN:
+                    SLogUtil.e(TAG, "============================================");
+                    SLogUtil.e(TAG, "当前看跌，现价：" + newestTrade.price);
+                    SLogUtil.e(TAG, "============================================");
+                    break;
+            }
         }
     };
 

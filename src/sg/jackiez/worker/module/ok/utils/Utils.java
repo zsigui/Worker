@@ -1,5 +1,10 @@
 package sg.jackiez.worker.module.ok.utils;
 
+import java.util.List;
+
+import sg.jackiez.worker.module.ok.model.TradeHistoryItem;
+import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
+
 /**
  * @Author JackieZ
  * @Date Created on 2018/10/3
@@ -86,6 +91,61 @@ public class Utils {
 	 */
 	public static double getCountByIncrement(double val, double trade_increment) {
 		return (int)(val / trade_increment) * trade_increment;
+	}
+
+	/**
+	 * 找到最近N条数据内的最高价
+	 */
+	public static double findMaxPriceInN(List<KlineInfo> klineInfos, int n) {
+		if (klineInfos == null || klineInfos.isEmpty()) {
+			return 0;
+		}
+
+		double max = 0;
+		KlineInfo tmp;
+		for (int i = (klineInfos.size() > n ? n : klineInfos.size() - 1); i >= 0; i--) {
+			tmp = klineInfos.get(i);
+			if (tmp != null && tmp.lowest > max) {
+				max = tmp.lowest;
+			}
+		}
+
+		return max;
+	}
+
+	/**
+	 * 找到最近N条数据内的最低价
+	 */
+	public static double findMinPriceInN(List<KlineInfo> klineInfos, int n) {
+		if (klineInfos == null || klineInfos.isEmpty()) {
+			return 0;
+		}
+
+		double min = 0;
+		KlineInfo tmp;
+		for (int i = (klineInfos.size() > n ? n : klineInfos.size() - 1); i >= 0; i--) {
+			tmp = klineInfos.get(i);
+			if (tmp != null && tmp.highest > min) {
+				min = tmp.highest;
+			}
+		}
+
+		return min;
+	}
+
+	public static double calculateAvg(List<TradeHistoryItem> items) {
+		if (items == null || items.isEmpty()) {
+			return 0;
+		}
+
+		double total = 0;
+
+		for (TradeHistoryItem item : items) {
+			if (item != null) {
+				total += item.price;
+			}
+		}
+		return total / items.size();
 	}
 
 }
