@@ -66,7 +66,7 @@ public class CustomSharp {
             // 现在在上涨
             direction = DIRECTION_UP;
         }
-        SLogUtil.d("test", "vol = " + vol + ", totalVol = " + totalVol + ", newestPrice = $" + newestPrice
+        SLogUtil.i("CustomSharp", "vol = " + vol + ", totalVol = " + totalVol + ", newestPrice = $" + newestPrice
         + ", klineInfo.close = $" + klineInfo.close + ", downCount = " + downCount + ", upCount = " + upCount);
         return direction;
     }

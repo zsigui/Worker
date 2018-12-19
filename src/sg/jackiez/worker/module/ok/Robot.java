@@ -145,10 +145,14 @@ public class Robot {
 
 
             if (mLastPayDirection == CustomSharp.DIRECTION_AVG) {
-                // 平均数，这个时候执行下单
-                mLastPayDirection = direction;
-                mLastPayMoney = curPrice;
-                mLastPayRecordTime = curTime;
+                if (direction == CustomSharp.DIRECTION_DOWN
+                        || direction == CustomSharp.DIRECTION_UP) {
+                    // 平均数，这个时候执行下单
+                    mLastPayDirection = direction;
+                    mLastPayMoney = curPrice;
+                    mLastPayRecordTime = curTime;
+                    SLogUtil.i(TAG, "当前下单金额：" + mLastPayMoney + ", 下单方向：" + getDirectionStr(mLastPayDirection));
+                }
             } else {
                 if (mLastPayDirection != direction && mMiddleMaxProfitRate > 30
                         && profitAndLossRate * 3 > mMiddleMaxProfitRate) {
@@ -242,10 +246,10 @@ public class Robot {
                                              double curPrice) {
         if (orderDirection == CustomSharp.DIRECTION_UP) {
             // 上涨阶段，所以只有当 当前价 < 下单价，才算是亏损
-            return (float) ((curPrice / orderPrice - 1) * 100);
+            return (float) ((curPrice / orderPrice - 1) * 100 * 20);
         } else if (orderDirection == CustomSharp.DIRECTION_DOWN) {
             // 下跌阶段，所以只有当 当前价 > 下单价，才算是亏损
-            return (float) ((1 - curPrice / orderPrice) * 100);
+            return (float) ((1 - curPrice / orderPrice) * 100 * 20);
         }
         return 0f;
     }
