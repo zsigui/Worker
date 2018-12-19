@@ -2,6 +2,7 @@ package sg.jackiez.worker.utils.algorithm;
 
 import java.util.List;
 
+import sg.jackiez.worker.utils.SLogUtil;
 import sg.jackiez.worker.utils.algorithm.bean.KlineInfo;
 
 public class CustomSharp {
@@ -65,7 +66,8 @@ public class CustomSharp {
             // 现在在上涨
             direction = DIRECTION_UP;
         }
-
+        SLogUtil.d("test", "vol = " + vol + ", totalVol = " + totalVol + ", newestPrice = $" + newestPrice
+        + ", klineInfo.close = $" + klineInfo.close + ", downCount = " + downCount + ", upCount = " + upCount);
         return direction;
     }
 
