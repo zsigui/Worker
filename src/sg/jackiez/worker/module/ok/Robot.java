@@ -40,7 +40,7 @@ public class Robot {
 
 
     // 用于统计一段时间结果
-    private float mAccumulatedBigLossRateCount = 0; // 累积统计次数
+    private int mAccumulatedBigLossRateCount = 0; // 累积统计次数
     private int mAccumulatedCount = 0; // 累积统计次数
     private float mAccumulateProfitAndLossRate = 0; // 累积盈亏率
 
@@ -114,27 +114,33 @@ public class Robot {
                 mMiddleMaxProfitRate = profitAndLossRate;
             }
 
-            if (profitAndLossRate < -30) {
-                // 亏损超过30%了，这个时候就当卖出处理。
-                buildPayRate(curPrice, curTime, profitAndLossRate);
-                clearOrderRecord(curTime);
-            } else if (profitAndLossRate > 100) {
-                // 盈利超过100%了，卖出
-                buildPayRate(curPrice, curTime, profitAndLossRate);
-                clearOrderRecord(curTime);
-            }
-
 
             final int direction = mSharp.judgeEosDirection(
                     mFutureDataGrabber.getKlineInfoMap().get(OKTypeConfig.KLINE_TYPE_1_MIN),
                     curPrice);
 
-            SLogUtil.d(TAG, "onGetTradeHistory() 当前金额：$" + curPrice + "，判断下单方向：" + getDirectionStr(direction));
+            if (profitAndLossRate < -10) {
+                // 亏损超过10%了，这个时候就当卖出处理。
+                buildPayRate(curPrice, curTime, profitAndLossRate);
+                clearOrderRecord(curTime);
+            } else if (profitAndLossRate > 100
+                    || (mMiddleMaxProfitRate > 10 && mMiddleMaxProfitRate < 30 && profitAndLossRate + 5 < mMiddleMaxProfitRate)
+                    || (mMiddleMaxProfitRate > 30 && mMiddleMaxProfitRate < 50 && profitAndLossRate + 10 < mMiddleMaxProfitRate)
+                    || (mMiddleMaxProfitRate > 50 && mMiddleMaxProfitRate < 100 && profitAndLossRate + 15 < mMiddleMaxProfitRate)) {
+                // 盈利超过100%了,卖出
+                buildPayRate(curPrice, curTime, profitAndLossRate);
+                clearOrderRecord(curTime);
+            }
+
+
+            SLogUtil.d(TAG, String.format("当前金额：$%f, 判断下单方向: %s, 当前计算的盈亏率：%.2f%%",
+                    curPrice, getDirectionStr(direction), profitAndLossRate));
 
             if (curTime - mLastPayRecordTime < PAY_GAP_TIME) {
                 // 间隔时间内，不做处理
 
-                if (mLastPayDirection != CustomSharp.DIRECTION_AVG && direction != mLastPayDirection) {
+                if (mLastPayDirection != CustomSharp.DIRECTION_AVG
+                        && direction != CustomSharp.DIRECTION_AVG && mLastPayDirection != direction) {
                     // 当前有价格变动的需求
                     SLogUtil.i(TAG, String.format("限制时间内发生与上次判断可下单方向相反，当前盈亏率：%.2f%%",
                             calculateProfitAndLossRate(mLastPayDirection, mLastPayMoney, curPrice)));
@@ -151,10 +157,12 @@ public class Robot {
                     mLastPayDirection = direction;
                     mLastPayMoney = curPrice;
                     mLastPayRecordTime = curTime;
+                    mMiddleEndPointMoney = curPrice;
                     SLogUtil.i(TAG, "当前下单金额：" + mLastPayMoney + ", 下单方向：" + getDirectionStr(mLastPayDirection));
                 }
             } else {
-                if (mLastPayDirection != direction && mMiddleMaxProfitRate > 30
+                if (direction != CustomSharp.DIRECTION_AVG && mLastPayDirection != direction
+                        && mMiddleMaxProfitRate > 30
                         && profitAndLossRate * 3 > mMiddleMaxProfitRate) {
                     // 出现了方向上的回撤，且在盈利30%以上的情况下，回撤超过了33%，提前卖出
                     buildPayRate(curPrice, curTime, profitAndLossRate);
@@ -185,16 +193,6 @@ public class Robot {
         SLogUtil.i(TAG, "已执行次数：" + mAccumulatedCount + ", 总盈亏率：" + mAccumulateProfitAndLossRate + "%");
         SLogUtil.i(TAG, "======*******************************=======");
         SLogUtil.i(TAG, "");
-        if (mAccumulateProfitAndLossRate <= -60) {
-            // 总亏损达到了60%
-            mAccumulatedCount = 0;
-            mAccumulateProfitAndLossRate = 0;
-            mAccumulatedBigLossRateCount++;
-            SLogUtil.e(TAG, "");
-            SLogUtil.e(TAG, "总亏损已达: " + mAccumulateProfitAndLossRate
-                    + ", 目前第" + mAccumulatedBigLossRateCount + "次");
-            SLogUtil.e(TAG, "");
-        }
     }
 
     private void printPayRate(PayRate payRate) {
@@ -229,7 +227,8 @@ public class Robot {
         mMiddleEndPointMoney = 0;
         mMiddleMaxProfitRate = 0;
         // 为了保证清除后一定时间内不再触发下单逻辑
-        mLastPayRecordTime = curTime;
+//        mLastPayRecordTime = curTime;
+        mLastPayRecordTime = 0;
     }
 
     private String getDirectionStr(int direction) {
